@@ -1,5 +1,4 @@
-[
-  {
+[{
     "id": 1,
     "pergunta": "O 'Formstrip' é logo de qual marca de roupas esportivas?",
     "categoria": "Esporte",
@@ -329,7 +328,7 @@
   },
   {
     "id": 34,
-    "pergunta": "O Tetris foi criado por quem??",
+    "pergunta": "O Tetris foi criado por quem?",
     "categoria": "Entretenimento: Video Games",
     "tipo": "multiple",
     "dificuldade": "médio",
@@ -1590,7 +1589,7 @@
   },
   {
     "id": 162,
-    "pergunta": "Quantos anos durou a Guerra dos Cem Anos??",
+    "pergunta": "Quantos anos durou a Guerra dos Cem Anos?",
     "categoria": "História",
     "tipo": "multiple",
     "dificuldade": "médio",
@@ -1889,7 +1888,7 @@
   },
   {
     "id": 193,
-    "pergunta": "Em que ano foi lançada a música \"Money for Nothing\" do Dire Straits??",
+    "pergunta": "Em que ano foi lançada a música \"Money for Nothing\" do Dire Straits?",
     "categoria": "Entretenimento: Música",
     "tipo": "multiple",
     "dificuldade": "difícil",
