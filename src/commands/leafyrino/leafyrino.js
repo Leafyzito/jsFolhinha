@@ -1,7 +1,19 @@
 const path = require("path");
+
+async function getLastUpdateDate() {
+  const response = await fb.got(
+    "https://leafyrino.leafyzito.dev/api/last-updated",
+  );
+  return response.date;
+}
+
 const leafyrinoCommand = async () => {
+  const lastUpdateDate = await getLastUpdateDate();
+  const lastUpdateDateFormatted = new Date(lastUpdateDate).toLocaleDateString(
+    "pt-BR",
+  );
   return {
-    reply: "🔗 https://leafyrino.leafyzito.dev",
+    reply: `🔗 https://leafyrino.leafyzito.dev ● Última atualização: ${lastUpdateDateFormatted}`,
   };
 };
 
