@@ -162,7 +162,7 @@ topSongsCommand.whisperable = true;
 topSongsCommand.description = `Mostre as 5 músicas mais ouvidas de alguém, de acordo com o Last.fm ou Stats.fm
 
 Pode especificar um período de tempo usando as seguintes flags:
--semana/week" - para limitar os resultados para a última semana
+-semana/week - para limitar os resultados para a última semana
 -mes/month - para limitar os resultados para o último mês
 -ano/year - para limitar os resultados para o último ano
 
