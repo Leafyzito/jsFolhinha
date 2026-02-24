@@ -2,8 +2,23 @@ const { Api } = require("@statsfm/statsfm.js");
 const statsfm = new Api();
 
 const path = require("path");
-async function getLastfmTop5(lastfmUser) {
-  const api_url = `https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${lastfmUser}&limit=5&api_key=${process.env.LASTFM_API_KEY}&format=json`;
+async function getLastfmTop5(lastfmUser, periodFlag) {
+  let periodParam = null;
+  if (periodFlag && periodFlag.startsWith("-")) {
+    periodFlag = periodFlag.replace("-", "").toLowerCase();
+    if (periodFlag == "semana" || periodFlag == "week") {
+      periodParam = `&period=7day`;
+    } else if (
+      periodFlag == "mes" ||
+      periodFlag == "mês" ||
+      periodFlag == "month"
+    ) {
+      periodParam = `&period=1month`;
+    } else if (periodFlag == "ano" || periodFlag == "year") {
+      periodParam = `&period=12month`;
+    }
+  }
+  const api_url = `https://ws.audioscrobbler.com/2.0/?method=user.gettoptracks&user=${lastfmUser}&limit=5&api_key=${process.env.LASTFM_API_KEY}${periodParam ? periodParam : ""}&format=json`;
 
   const data = await fb.got(api_url, { retry: { limit: 3 } });
   if (!data) {
@@ -32,8 +47,33 @@ async function getLastfmTop5(lastfmUser) {
   return top5Songs;
 }
 
-async function getStatsfmTop5(statsfmUser) {
-  const res = await statsfm.users.topTracks(statsfmUser, { limit: 5 });
+async function getStatsfmTop5(statsfmUser, periodFlag) {
+  const options = { limit: 5 };
+  if (periodFlag && periodFlag.startsWith("-")) {
+    periodFlag = periodFlag.replace("-", "").toLowerCase();
+    if (periodFlag === "semana" || periodFlag === "week") {
+      const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      options.after = now - oneWeekMs;
+      options.before = now;
+    } else if (
+      periodFlag === "mes" ||
+      periodFlag === "mês" ||
+      periodFlag === "month"
+    ) {
+      const oneMonthMs = 30 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      options.after = now - oneMonthMs;
+      options.before = now;
+    } else if (periodFlag === "ano" || periodFlag === "year") {
+      const oneYearMs = 365 * 24 * 60 * 60 * 1000;
+      const now = Date.now();
+      options.after = now - oneYearMs;
+      options.before = now;
+    }
+  }
+
+  const res = await statsfm.users.topTracks(statsfmUser, options);
 
   if (!res) {
     return null;
@@ -49,8 +89,12 @@ async function getStatsfmTop5(statsfmUser) {
 }
 
 const topSongsCommand = async (message) => {
+  const rawSongTarget = message.args[1]?.replace(/^@/, "");
   const songTarget =
-    message.args[1]?.replace(/^@/, "") || message.senderUsername;
+    rawSongTarget && !rawSongTarget.startsWith("-")
+      ? rawSongTarget
+      : message.senderUsername;
+  const periodFlag = message.args.find((arg) => arg.startsWith("-"));
 
   const songTargetId =
     songTarget.toLowerCase() != message.senderUsername
@@ -73,9 +117,9 @@ const topSongsCommand = async (message) => {
 
   let top5Tracks;
   if (isStatsFm) {
-    top5Tracks = await getStatsfmTop5(fmUser);
+    top5Tracks = await getStatsfmTop5(fmUser, periodFlag);
   } else {
-    top5Tracks = await getLastfmTop5(fmUser);
+    top5Tracks = await getLastfmTop5(fmUser, periodFlag);
   }
   if (top5Tracks === null) {
     return {
@@ -116,6 +160,11 @@ topSongsCommand.cooldown = 5000;
 topSongsCommand.cooldownType = "channel";
 topSongsCommand.whisperable = true;
 topSongsCommand.description = `Mostre as 5 músicas mais ouvidas de alguém, de acordo com o Last.fm ou Stats.fm
+
+Pode especificar um período de tempo usando as seguintes flags:
+-semana/week" - para limitar os resultados para a última semana
+-mes/month - para limitar os resultados para o último mês
+-ano/year - para limitar os resultados para o último ano
 
 Para ver mais sobre como configurar a sua conta, acesse https://folhinhabot.com/comandos/song`;
 topSongsCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
