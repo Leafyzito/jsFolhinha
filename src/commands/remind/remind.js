@@ -528,39 +528,77 @@ const remindCommand = async (message) => {
     remindMessage = "(sem mensagem)";
   }
 
-  // Get target user ID
-  const targetUserId = (await fb.api.helix.getUserByUsername(targetUser))?.id;
-  if (!targetUserId) {
+  // Parse comma-separated recipients (format: user1,user2 — no spaces)
+  const rawTargets = targetUser
+    .split(",")
+    .map((u) => u.replace(/^@/, "").trim().toLowerCase())
+    .filter(Boolean);
+
+  const MAX_RECIPIENTS = 5;
+  if (rawTargets.length > MAX_RECIPIENTS) {
     return {
-      reply: `Esse usuário não existe`,
+      reply: `Máximo de ${MAX_RECIPIENTS} usuários por comando. Use o formato: user1,user2 (sem espaços).`,
     };
   }
 
-  // Check user optout and reminder blocks
-  const userCheck = await canUserReceiveReminders(
-    targetUserId,
-    message.senderUserID
-  );
-  if (!userCheck.canReceive) {
-    if (userCheck.reason === "optout") {
-      return {
-        reply: `Esse usuário optou por não ser alvo de comandos remind 🚫`,
-      };
-    } else if (userCheck.reason === "blocked") {
-      return {
-        reply: `Você foi bloqueado por esse usuário para usar comandos remind 🚫`,
-      };
+  const created = [];
+  const failures = [];
+  const seenUserIds = new Set();
+
+  for (const raw of rawTargets) {
+    const normalizedName = ["me", message.senderUsername].includes(raw)
+      ? message.senderUsername
+      : raw;
+    const targetUserId = (await fb.api.helix.getUserByUsername(normalizedName))
+      ?.id;
+    if (!targetUserId) {
+      failures.push({ user: raw, reason: "não existe" });
+      continue;
     }
+    if (seenUserIds.has(targetUserId)) continue;
+    seenUserIds.add(targetUserId);
+
+    const userCheck = await canUserReceiveReminders(
+      targetUserId,
+      message.senderUserID
+    );
+    if (!userCheck.canReceive) {
+      if (userCheck.reason === "optout") {
+        failures.push({ user: raw, reason: "optout" });
+      } else if (userCheck.reason === "blocked") {
+        failures.push({ user: raw, reason: "blocked" });
+      }
+      continue;
+    }
+
+    const newRemindId = await newRemind(
+      message,
+      targetUserId,
+      normalizedName,
+      remindMessage,
+      remindAt
+    );
+    created.push({ targetUser: normalizedName, targetUserId, newRemindId });
   }
 
-  // Create the reminder
-  const newRemindId = await newRemind(
-    message,
-    targetUserId,
-    targetUser,
-    remindMessage,
-    remindAt
-  );
+  if (created.length === 0) {
+    const failLines = failures
+      .map((f) => {
+        if (f.reason === "não existe") return `${f.user} não existe`;
+        if (f.reason === "optout")
+          return `${f.user} optou por não ser alvo de comandos remind`;
+        if (f.reason === "blocked")
+          return `Você foi bloqueado por ${f.user} para usar comandos remind`;
+        return "";
+      })
+      .filter(Boolean);
+    return {
+      reply:
+        failLines.length > 0
+          ? failLines.join(". ") + " 🚫"
+          : "Nenhum lembrete criado.",
+    };
+  }
 
   const emote = await fb.emotes.getEmoteFromList(
     message.channelName,
@@ -568,22 +606,46 @@ const remindCommand = async (message) => {
     "📝"
   );
 
-  // Format the response message
-  let replyMessage = `Vou lembrar ${
-    targetUser !== message.senderUsername ? `@${targetUser}` : "você"
-  } disso `;
-
-  if (remindAt) {
-    // Timed reminder
-    replyMessage += `em ${formatTimeParts(totalSeconds)} `;
-  } else {
-    // Regular reminder
-    replyMessage += "assim que falar no chat ";
+  for (const { targetUserId } of created) {
+    clearNotifiedCacheForUser(targetUserId);
   }
 
-  replyMessage += `${emote} (ID ${newRemindId})`;
+  let replyMessage;
+  if (created.length === 1) {
+    const { targetUser: u, newRemindId } = created[0];
+    replyMessage = `Vou lembrar ${
+      u !== message.senderUsername ? `@${u}` : "você"
+    } disso `;
+    if (remindAt) {
+      replyMessage += `em ${formatTimeParts(totalSeconds)} `;
+    } else {
+      replyMessage += "assim que falar no chat ";
+    }
+    replyMessage += `${emote} (ID ${newRemindId})`;
+  } else {
+    const names = created.map(({ targetUser: u }) =>
+      u !== message.senderUsername ? `@${u}` : "você"
+    );
+    replyMessage = `Vou lembrar ${names.join(" e ")} disso `;
+    if (remindAt) {
+      replyMessage += `em ${formatTimeParts(totalSeconds)} `;
+    } else {
+      replyMessage += "assim que falarem no chat ";
+    }
+    replyMessage += `${emote} (IDs ${created.map((c) => c.newRemindId).join(", ")})`;
+  }
 
-  clearNotifiedCacheForUser(targetUserId);
+  if (failures.length > 0) {
+    const failLines = failures
+      .map((f) => {
+        if (f.reason === "não existe") return `${f.user} não existe`;
+        if (f.reason === "optout") return `${f.user} optou por não receber`;
+        if (f.reason === "blocked") return `${f.user} bloqueou você`;
+        return "";
+      })
+      .filter(Boolean);
+    replyMessage += ". " + failLines.join(". ");
+  }
 
   return {
     reply: replyMessage,
@@ -609,6 +671,8 @@ Este comando funciona independentemente do chat em que esteja
 • Exemplo: !remind me Faz aquilo lá - O bot irá lembrar de "Fazer aquilo lá" a pessoa que executou o comando assim que voltar a falar em qualquer chat
 
 • Exemplo: !remind @leafyzito Faz aquilo lá - O bot irá lembrar @leafyzito de "Fazer aquilo lá" assim que @leafyzito falar no chat
+
+• Vários usuários: !remind user1,user2 mensagem - Cria o mesmo lembrete para todos (formato sem espaços: user1,user2). Máximo 5 por comando.
 
 Pode também deixar lembretes cronometrados:
 • Exemplo: !remind me in 10m Faz aquilo lá - O bot irá lembrar quem executou o comando de "Fazer aquilo lá" 10 minutos depois
