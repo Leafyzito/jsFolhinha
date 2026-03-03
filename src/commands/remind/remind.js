@@ -4,7 +4,13 @@ const {
   clearNotifiedCacheForUser,
 } = require("../../handlers/listener/reminder");
 
-async function newRemind(message, targetId, remindMessage, remindAt) {
+async function newRemind(
+  message,
+  targetId,
+  targetUser,
+  remindMessage,
+  remindAt
+) {
   const newRemindId = (await fb.db.count("remind", {}, true)) + 1;
   const remindInfo = {
     _id: newRemindId,
@@ -18,6 +24,22 @@ async function newRemind(message, targetId, remindMessage, remindAt) {
   };
 
   await fb.db.insert("remind", remindInfo);
+
+  if (remindAt) {
+    const job = createScheduledReminderJob(
+      remindAt,
+      newRemindId,
+      message,
+      targetUser,
+      targetId,
+      remindMessage
+    );
+    if (!fb.reminderJobs) {
+      fb.reminderJobs = {};
+    }
+    fb.reminderJobs[newRemindId] = job;
+  }
+
   return newRemindId;
 }
 
@@ -535,6 +557,7 @@ const remindCommand = async (message) => {
   const newRemindId = await newRemind(
     message,
     targetUserId,
+    targetUser,
     remindMessage,
     remindAt
   );
@@ -559,24 +582,6 @@ const remindCommand = async (message) => {
   }
 
   replyMessage += `${emote} (ID ${newRemindId})`;
-
-  // If it's a scheduled reminder, create the job
-  if (remindAt) {
-    const job = createScheduledReminderJob(
-      remindAt,
-      newRemindId,
-      message,
-      targetUser,
-      targetUserId,
-      remindMessage
-    );
-
-    // Store the job
-    if (!fb.reminderJobs) {
-      fb.reminderJobs = {};
-    }
-    fb.reminderJobs[newRemindId] = job;
-  }
 
   clearNotifiedCacheForUser(targetUserId);
 
