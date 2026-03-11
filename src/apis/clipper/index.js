@@ -35,7 +35,7 @@ class TwitchClipperAPI {
       const res = await fb.got(`${this.baseUrl}/preview/${channelName}`);
 
       if (res === null) {
-        fb.discord.logError(`Twitch Clipper API returned null for preview`);
+        // fb.discord.logError(`Twitch Clipper API returned null for preview`);
         return null;
       }
 
