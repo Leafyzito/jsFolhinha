@@ -1,20 +1,11 @@
 const path = require("path");
-const { gptClient } = require("./gpt");
+const { callGemini } = require("./gpt");
 
-async function askGptSerio(message, prompt) {
-  const completion = await gptClient.chat.completions.create({
-    model: "gpt-3.5-turbo-0125",
-    messages: [
-      {
-        role: "system",
-        content:
-          "Sem personalidade. Apenas factos, dados, insights e críticas construtivas. Respostas curtas, concisas e densas. Se uma pergunta for contra os Termos de Serviço do Twitch, recuse-se a responder. NUNCA USE MARKDOWN NA SUA RESPOSTA. ISTO É MUITO IMPORTANTE.",
-      },
-      { role: "user", content: prompt },
-    ],
-  });
+const SERIO_SYSTEM_INSTRUCTION =
+  "Sem personalidade. Apenas factos, dados, insights e críticas construtivas. Respostas curtas, concisas e densas. Se uma pergunta for contra os Termos de Serviço do Twitch, recuse-se a responder. NUNCA USE MARKDOWN NA SUA RESPOSTA. ISTO É MUITO IMPORTANTE.";
 
-  return completion.choices[0].message.content;
+async function askGeminiSerio(message, prompt) {
+  return callGemini(SERIO_SYSTEM_INSTRUCTION, prompt);
 }
 
 const gptSerioCommand = async (message) => {
@@ -27,7 +18,7 @@ const gptSerioCommand = async (message) => {
   }
 
   try {
-    const gptRes = await askGptSerio(message, prompt);
+    const gptRes = await askGeminiSerio(message, prompt);
 
     if (gptRes.length > 490) {
       const longResponse = await fb.utils.manageLongResponse(gptRes);
@@ -53,12 +44,14 @@ gptSerioCommand.aliases = [
   "gptsério",
   "chatgptserio",
   "chatgptsério",
+  "geminisério",
+  "geminiserio",
 ];
-gptSerioCommand.shortDescription = "Faça uma pergunta para o ChatGPT sério";
+gptSerioCommand.shortDescription = "Faça uma pergunta para o Gemini sério";
 gptSerioCommand.cooldown = 15000;
 gptSerioCommand.cooldownType = "channel";
 gptSerioCommand.whisperable = true;
-gptSerioCommand.description = `Envie uma mensagem para o GPT com uma personalidade mais séria e sem teor humorístico`;
+gptSerioCommand.description = `Envie uma mensagem para o Gemini com uma personalidade mais séria e sem teor humorístico`;
 gptSerioCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;
