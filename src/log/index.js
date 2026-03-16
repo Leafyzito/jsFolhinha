@@ -23,7 +23,7 @@ class Logger {
     if (timeSinceLastMessage < 2000) {
       // 2 seconds cooldown
       await new Promise((resolve) =>
-        setTimeout(resolve, 2000 - timeSinceLastMessage),
+        setTimeout(resolve, 2000 - timeSinceLastMessage)
       );
     }
 
@@ -37,7 +37,7 @@ class Logger {
     content,
     retryMethod,
     retryCount = 0,
-    lastResortWhisperTarget = null,
+    lastResortWhisperTarget = null
   ) {
     // console.log('handleSendError: ', err);
 
@@ -53,7 +53,7 @@ class Logger {
       if (lastResortWhisperTarget) {
         console.log("Max retries reached, whispering response to user");
         fb.discord.log(
-          `* Dropped message in #${channel}, whispering response to ${lastResortWhisperTarget}: ${content}`,
+          `* Dropped message in #${channel}, whispering response to ${lastResortWhisperTarget}: ${content}`
         );
         fb.api.helix.whisper(lastResortWhisperTarget, content);
         return;
@@ -98,11 +98,16 @@ class Logger {
     };
 
     console.log(
-      `#${message.channelName}/${message.senderUsername} - ${message.command.commandName}`,
+      `#${message.channelName}/${message.senderUsername} - ${message.command.commandName}`
     );
     fb.discord.logCommand(message, response, sentVia);
     if (!message.command.flags?.includes("dev") && process.env.ENV == "prod") {
-      await fb.db.insert("commandlog", insertDoc);
+      fb.db.insert("commandlog", insertDoc).catch((err) => {
+        fb.discord.importantLog(
+          `Failed to insert commandlog: ${message.command.commandName} (#${message.channelName}/${message.senderUsername}): ${err.message}`
+        );
+        console.error("commandlog insert error:", err);
+      });
     }
   }
 
@@ -124,8 +129,8 @@ class Logger {
             (channel, content, retryCount, senderUsername) =>
               this.send(channel, content, retryCount, senderUsername),
             retryCount,
-            message.senderUserID,
-          ),
+            message.senderUserID
+          )
         );
     }
     // Log asynchronously (non-blocking) after sending response
@@ -149,8 +154,8 @@ class Logger {
           (channel, content, retryCount, senderUsername) =>
             this.send(channel, content, retryCount, senderUsername),
           retryCount,
-          message.senderUserID,
-        ),
+          message.senderUserID
+        )
       );
 
     // Log asynchronously (non-blocking) after sending response
@@ -173,15 +178,15 @@ class Logger {
           (channel, content, retryCount, senderUsername) =>
             this.send(channel, content, retryCount, senderUsername),
           retryCount,
-          message.senderUserID,
-        ),
+          message.senderUserID
+        )
       );
 
     // Log asynchronously (non-blocking) after sending response
     this.createCommandLog(message, "/me " + response, res.sentVia).catch(
       (err) => {
         console.error("Failed to create command log:", err);
-      },
+      }
     );
   }
 
@@ -207,8 +212,8 @@ class Logger {
           (channel, content, retryCount, senderUsername) =>
             this.send(channel, content, retryCount, senderUsername),
           retryCount,
-          senderUsername,
-        ),
+          senderUsername
+        )
       );
 
     fb.discord.logSend(channel, content, res.sentVia);
@@ -228,8 +233,8 @@ class Logger {
           (channel, content, retryCount, senderUsername) =>
             this.send(channel, content, retryCount, senderUsername),
           retryCount,
-          message.senderUserID,
-        ),
+          message.senderUserID
+        )
       );
 
     fb.discord.logSend(message.channelName, response, res.sentVia);
@@ -247,8 +252,8 @@ class Logger {
           content,
           this.whisper.bind(this),
           retryCount,
-          null,
-        ),
+          null
+        )
       );
 
     fb.discord.logWhisper(targetUserId, content);
