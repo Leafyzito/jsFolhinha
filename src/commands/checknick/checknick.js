@@ -1,6 +1,6 @@
 const path = require("path");
 async function checkNick(nick) {
-  const api_url = `https://api.fuchsty.com/twitch/checkname?username=${nick}`;
+  const api_url = `https://api.fuchsty.de/twitch/checkname?username=${nick}`;
   const response = await fb.got(api_url);
 
   if (!response) {

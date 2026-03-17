@@ -1,6 +1,6 @@
 const path = require("path");
 async function getChatters(channel) {
-  const api_url = "https://api.fuchsty.com/twitch/chatters/" + channel;
+  const api_url = "https://api.fuchsty.de/twitch/chatters/" + channel;
   const response = await fb.got(api_url);
 
   if (!response) {
