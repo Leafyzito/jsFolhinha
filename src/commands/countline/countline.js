@@ -5,11 +5,11 @@ const countlineCommand = async (message) => {
     const clTarget =
       message.args[1]?.replace(/^@/, "") || message.senderUsername;
 
-    if (clTarget.toLowerCase() === "folhinhabot") {
-      return {
-        reply: `Para de tentar me contar Stare`,
-      };
-    }
+    // if (clTarget.toLowerCase() === "folhinhabot") {
+    //   return {
+    //     reply: `Para de tentar me contar Stare`,
+    //   };
+    // }
 
     if (["top", "rank", "ranking"].includes(clTarget.toLowerCase())) {
       // Get top 5 chatters from ClickHouse
