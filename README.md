@@ -68,32 +68,39 @@ docker compose down
 
 ## API
 
-The bot includes a built-in HTTP api server for monitoring and uptime tracking:
+The bot includes a built-in HTTP API server for monitoring and uptime tracking.
 
-### Endpoint
+### Endpoints
 
-- **`/`** - Detailed status with uptime information
+- **`/`** — Status payload with uptime and channel counts
+- **`/commands`** — List of registered commands and metadata
+- **`/plus`** — Dev, admin, Plus, and supporter users from the database (for internal / ops use)
 
 ### Configuration
 
-The api server runs on port 3000 by default. You can customize this by setting the `STATUS_PORT` environment variable:
+The API server listens on port **3323** by default (see [`docker-compose.yml`](docker-compose.yml)). Override with `STATUS_PORT`:
 
 ```bash
 STATUS_PORT=8080
 ```
 
-### Example Response
+### Example response (`GET /`)
 
 ```json
 {
   "status": "running",
   "uptime": 3600,
-  "uptimeFormatted": "1h 0m 0s",
+  "uptimeHumanized": "1h 0m 0s",
   "startTime": 1703123456,
   "connectedChannels": 1,
-  "channelsToJoin": 1
+  "stats": {
+    "totalCommandsUsed": 42,
+    "totalChannels": 1
+  }
 }
 ```
+
+Exact fields may change as the handler evolves; see [`src/utils/api-server.js`](src/utils/api-server.js).
 
 ## Code Quality
 

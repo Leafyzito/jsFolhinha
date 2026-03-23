@@ -247,7 +247,7 @@ const cookieCommand = async (message) => {
 
       if (!randomUser) {
         return {
-          reply: `Não existe ninguém para oferecer? @${process.env.DEV_USERNAME}`,
+          reply: `Não existe ninguém para oferecer? @${process.env.DEV_NICK}`,
         };
       }
 
@@ -256,7 +256,7 @@ const cookieCommand = async (message) => {
       );
       if (!giftTargetUserInfo) {
         return {
-          reply: `Erro ao escolher um usuário aleatório para presentear. Tente novamente. (@${process.env.DEV_USERNAME})`,
+          reply: `Erro ao escolher um usuário aleatório para presentear. Tente novamente. (@${process.env.DEV_NICK})`,
         };
       }
 
@@ -349,9 +349,13 @@ const cookieCommand = async (message) => {
   if (["top", "ranking", "rank", "leaderboard", "lb"].includes(targetCommand)) {
     // MARKER: top gift
     if (["gift", "gifts", "oferta", "gifted"].includes(message.args[2])) {
-      const topUsers = await fb.db.get("cookie", {
-        userId: { $ne: "925782584" },
-      }, true);
+      const topUsers = await fb.db.get(
+        "cookie",
+        {
+          userId: { $ne: "925782584" },
+        },
+        true
+      );
       topUsers.sort((a, b) => b.gifted - a.gifted);
 
       // only top 5
@@ -390,9 +394,13 @@ const cookieCommand = async (message) => {
 
     // MARKER: top slot
     if (["aposta", "apostas", "slot", "slots"].includes(message.args[2])) {
-      const topUsers = await fb.db.get("cookie", {
-        userId: { $ne: "925782584" },
-      }, true);
+      const topUsers = await fb.db.get(
+        "cookie",
+        {
+          userId: { $ne: "925782584" },
+        },
+        true
+      );
       topUsers.sort((a, b) => b.sloted - a.sloted);
 
       // only top 5
@@ -430,9 +438,13 @@ const cookieCommand = async (message) => {
     }
 
     // MARKER: top cookies
-    const topUsers = await fb.db.get("cookie", {
-      userId: { $ne: "925782584" },
-    }, true);
+    const topUsers = await fb.db.get(
+      "cookie",
+      {
+        userId: { $ne: "925782584" },
+      },
+      true
+    );
     topUsers.sort((a, b) => b.total - a.total);
 
     // only top 5
@@ -617,7 +629,7 @@ const cookieCommand = async (message) => {
 
       if (!randomUser) {
         return {
-          reply: `Não existe ninguém com cookies? @${process.env.DEV_USERNAME}`,
+          reply: `Não existe ninguém com cookies? @${process.env.DEV_NICK}`,
         };
       }
 
@@ -626,7 +638,7 @@ const cookieCommand = async (message) => {
       );
       if (!stealTargetUserInfo) {
         return {
-          reply: `Erro ao escolher um usuário aleatório para roubar. Tente novamente. (@${process.env.DEV_USERNAME}`,
+          reply: `Erro ao escolher um usuário aleatório para roubar. Tente novamente. (@${process.env.DEV_NICK}`,
         };
       }
 

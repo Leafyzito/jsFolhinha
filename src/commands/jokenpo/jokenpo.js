@@ -63,7 +63,7 @@ const jokenpoCommand = async (message) => {
         content: ["pedra", "papel", "tesoura"],
       },
     ],
-    30_000,
+    30_000
   );
 
   // Process responses
@@ -78,7 +78,7 @@ const jokenpoCommand = async (message) => {
 
   // Remove players from pending list
   pendingPlayers = pendingPlayers.filter(
-    (player) => player !== message.senderUserID && player !== targetUserId,
+    (player) => player !== message.senderUserID && player !== targetUserId
   );
 
   if (Object.keys(answers).length !== 2) {
@@ -91,7 +91,7 @@ const jokenpoCommand = async (message) => {
     const emote = await fb.emotes.getEmoteFromList(
       message.channelName,
       ["pfff", "pffff", "pfft", "porvalo", "mock", "pointandlaugh", "wajaja"],
-      "🤭",
+      "🤭"
     );
 
     if (Object.keys(answers).length === 1 && playerWhoDidntAnswer) {
@@ -122,7 +122,7 @@ const jokenpoCommand = async (message) => {
 
   if (!gameRules[user1Choice]) {
     return {
-      reply: `Algo deu errado eu acho, tente novamente. Se o erro persistir, entre em contato com o @${process.env.DEV_USERNAME}`,
+      reply: `Algo deu errado eu acho, tente novamente. Se o erro persistir, entre em contato com o @${process.env.DEV_NICK}`,
     };
   }
 
