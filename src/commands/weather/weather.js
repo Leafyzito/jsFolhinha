@@ -38,7 +38,10 @@ function formatWindDirection(windDirection) {
 async function getWeather(location) {
   const api_url = `https://nominatim.openstreetmap.org/search?q=${location}&format=json&limit=1&addressdetails=1&accept-language=pt-PT`;
 
-  const data = await fb.got(api_url, { retry: { limit: 3 } });
+  const data = await fb.got(api_url, {
+    retry: { limit: 3 },
+    forcedUserAgent: true,
+  });
   if (!data || data.length === 0) {
     return null;
   }
