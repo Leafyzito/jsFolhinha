@@ -1,15 +1,22 @@
 const path = require("path");
 
 // Solution from Supinic - https://github.com/Supinic/supibot/blob/master/commands/howlongtobeat/index.ts
-// let HLTB_TOKEN = "hltb-token-cache";
+
+const HLTB_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
 async function fetchToken() {
   const now = Date.now();
   const response = await fb.got(
-    `https://howlongtobeat.com/api/finder/init?t=${now}`,
+    `https://howlongtobeat.com/api/find/init?t=${now}`,
     {
-      headers: { Referer: "https://howlongtobeat.com/" },
-    },
+      headers: {
+        Origin: "https://howlongtobeat.com",
+        Referer: "https://howlongtobeat.com/",
+        Accept: "application/json",
+        "User-Agent": HLTB_USER_AGENT,
+      },
+    }
   );
 
   if (!response) {
@@ -17,26 +24,35 @@ async function fetchToken() {
   }
 
   const token = response.token;
+  const hpKey = response.hpKey;
+  const hpVal = response.hpVal;
   // HLTB_TOKEN = token;
 
-  return token;
+  if (!hpKey || hpVal == null) {
+    return null;
+  }
+
+  return { token, hpKey, hpVal };
 }
 
 async function hltbSearch(query) {
-  const token = await fetchToken();
+  const { token, hpKey, hpVal } = await fetchToken();
   // console.log(token);
   if (!token) {
     throw new Error("Token not fetched");
   }
 
-  const response = await fb.got(`https://howlongtobeat.com/api/finder`, {
+  const response = await fb.got(`https://howlongtobeat.com/api/find`, {
     method: "POST",
     headers: {
+      Origin: "https://howlongtobeat.com",
       Referer: "https://howlongtobeat.com/",
-      "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36",
       "Content-Type": "application/json",
-      "X-Auth-Token": token,
+      "x-auth-token": token,
+      "x-hp-key": hpKey,
+      "x-hp-val": String(hpVal),
+      Accept: "application/json",
+      "User-Agent": HLTB_USER_AGENT,
     },
     json: {
       searchType: "games",
@@ -58,6 +74,7 @@ async function hltbSearch(query) {
         sort: 0,
       },
       size: 1,
+      [hpKey]: hpVal,
     },
   });
 
