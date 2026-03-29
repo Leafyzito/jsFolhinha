@@ -109,7 +109,7 @@ async function validateLetterboxdUserExists(lbxUser) {
 const letterboxdCommand = async (message) => {
   const lbTarget = message.args[1]?.replace(/^@/, "") || null;
 
-  if (lbTarget.toLowerCase() === "set") {
+  if (lbTarget && lbTarget.toLowerCase() === "set") {
     const userToSet = message.args[2]?.replace(/^@/, "").toLowerCase() || null;
     if (!userToSet) {
       return {
