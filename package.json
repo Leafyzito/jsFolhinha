@@ -34,6 +34,7 @@
     "node-schedule": "^2.1.1",
     "node-shazam": "^1.2.7",
     "redis": "^5.10.0",
+    "rss-parser": "^3.13.0",
     "strip-ansi": "^7.1.2",
     "uwuifier": "^4.2.2"
   },
