@@ -84,13 +84,9 @@ async function getLatestDiaryFromRss(lbxUser) {
   const year = item[LBdict.filmYear] || null;
   const link = item.link || null;
   const ratingStars = formatRatingStars(item[LBdict.memberRating]);
-  const wd = item[LBdict.watchedDate];
-  let timeAgo = null;
-  if (wd && /^\d{4}-\d{2}-\d{2}$/.test(wd)) {
-    timeAgo = fb.utils.relativeTime(wd, true, true);
-  } else if (item.isoDate) {
-    timeAgo = fb.utils.relativeTime(item.isoDate, true, true);
-  }
+  const timeAgo = item.isoDate
+    ? fb.utils.relativeTime(item.isoDate, true, true)
+    : null;
 
   return { title, year, link, ratingStars, timeAgo };
 }
