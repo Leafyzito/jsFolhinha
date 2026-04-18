@@ -5,7 +5,7 @@ const DEFAULT_LOG_AMOUNT = 50;
 
 const CHAT_SUMMARY_SYSTEM = `Sê breve e claro.
 Resume o conteúdo essencial do chat. Ignora spam e respostas automáticas de bots a comandos.
-Trata palavras ou tokens desconhecidos como possíveis emotes. Não uses markdown.`;
+Trata palavras desconhecidas como possíveis emotes, mas não os menciones. Não uses markdown.`;
 
 const buildUserContent = (channelName, linesText) =>
   `Resuma as mensagens seguintes do chat #${channelName} (Twitch).\n\n${linesText}`;
