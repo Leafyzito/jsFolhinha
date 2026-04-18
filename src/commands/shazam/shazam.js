@@ -29,6 +29,17 @@ async function makeClip(channelName) {
   }
 }
 
+/** Returns clip URL for Shazam, or null if clip creation failed. */
+async function resolveTwitchLiveClipUrl(channelLogin) {
+  console.log(`Detected Twitch channel: ${channelLogin}, creating clip...`);
+  const clip = await makeClip(channelLogin);
+  if (!clip || !clip.makeClipUrl) {
+    console.log(`Não deu pra criar clip com o makeClip`);
+    return null;
+  }
+  return clip.makeClipUrl;
+}
+
 async function shazamIt(url) {
   try {
     // If it's not a direct file URL, download and upload to feridinha first
@@ -72,41 +83,65 @@ async function shazamIt(url) {
   }
 }
 
+const clipCreationFailedReply = {
+  reply: `Não consegui criar um clip para identificar a música, tente novamente. Se o problema persistir, avise o dev`,
+};
+
 const shazamCommand = async (message) => {
   if (message.args.length < 2) {
     return {
-      reply: `Use o formato: ${message.prefix}shazam <link>. Se estiver com dúvidas sobre o comando, acesse https://folhinhabot.com/comandos/shazam 😁`,
+      reply: `Use o formato: ${message.prefix}shazam <link ou usuário da Twitch>. Se estiver com dúvidas sobre o comando, acesse https://folhinhabot.com/comandos/shazam 😁`,
     };
   }
 
-  let urlToShazam = message.args[1];
+  const rawInput = message.args[1];
 
-  // Validate if it's a URL
   const urlPattern =
     /^(https?:\/\/)?(www\.)?([\da-z.-]+)\.([a-z.]{2,})([/\w .-?=&]*)*\/?$/;
-  if (!urlPattern.test(urlToShazam)) {
-    return {
-      reply: `Por favor, forneça um link válido. Use o formato: ${message.prefix}shazam <link>. Se estiver com dúvidas sobre o comando, acesse https://folhinhabot.com/comandos/shazam 😁`,
-    };
-  }
 
-  // Check if it's a Twitch channel URL or a clip URL
-  const twitchChannelMatch = urlToShazam.match(/twitch\.tv\/([^/?]+)(?:\?|$)/);
-  const twitchClipMatch = urlToShazam.match(/twitch\.tv\/[^/]+\/clip\//);
+  let urlToShazam;
 
-  if (twitchChannelMatch && !twitchClipMatch) {
-    const channelName = twitchChannelMatch[1];
-    console.log(`Detected Twitch channel: ${channelName}, creating clip...`);
+  if (urlPattern.test(rawInput)) {
+    urlToShazam = rawInput;
 
-    // Create clip
-    const clip = await makeClip(channelName);
-    if (!clip) {
-      console.log(`Não deu pra criar clip com o makeClip`);
+    const twitchChannelMatch = rawInput.match(/twitch\.tv\/([^/?]+)(?:\?|$)/);
+    const twitchClipMatch = rawInput.match(/twitch\.tv\/[^/]+\/clip\//);
+
+    if (twitchChannelMatch && !twitchClipMatch) {
+      const channelName = twitchChannelMatch[1];
+      const clipUrl = await resolveTwitchLiveClipUrl(channelName);
+      if (!clipUrl) {
+        return clipCreationFailedReply;
+      }
+      urlToShazam = clipUrl;
+    }
+  } else {
+    const candidate = rawInput.replace(/^@/, "").trim();
+    if (!candidate) {
       return {
-        reply: `Não consegui criar um clip para identificar a música, tente novamente. Se o problema persistir, avise o dev`,
+        reply: `Por favor, forneça um link ou um usuário da Twitch. Use o formato: ${message.prefix}shazam <link ou usuário>. Se estiver com dúvidas sobre o comando, acesse https://folhinhabot.com/comandos/shazam 😁`,
       };
     }
-    urlToShazam = clip.makeClipUrl;
+
+    const user = await fb.api.helix.getUserByUsername(candidate);
+    if (!user) {
+      return {
+        reply: `Não encontrei esse usuário`,
+      };
+    }
+
+    const stream = await fb.api.helix.getStream(user.login);
+    if (!stream) {
+      return {
+        reply: `O canal ${user.displayName || user.login} não está em live`,
+      };
+    }
+
+    const clipUrl = await resolveTwitchLiveClipUrl(user.login);
+    if (!clipUrl) {
+      return clipCreationFailedReply;
+    }
+    urlToShazam = clipUrl;
   }
 
   const result = await shazamIt(urlToShazam);
@@ -144,9 +179,9 @@ shazamCommand.description = `Este comando pode estar um pouco instável. Qualque
 
 Identifica músicas de algum link fornecido ou de uma live da Twitch:
 • Exemplo: !shazam https://x.com/billieeilishtrs/status/1839682299673096667 - O bot vai fazer o download do vídeo e depois identificar a música
-
 • Exemplo: !shazam https://f.feridinha.com/okjxM.mp4 - O bot vai identificar a música do vídeo fornecido
-• Exemplo: !shazam www.twitch.tv/xql - O bot vai criar um clip e depois identificar a música do clip`;
+• Exemplo: !shazam www.twitch.tv/xql - O bot vai criar um clip e depois identificar a música do clip
+• Exemplo: !shazam xqc - Se o canal estiver em live, o bot cria um clip e identifica a música`;
 shazamCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {
