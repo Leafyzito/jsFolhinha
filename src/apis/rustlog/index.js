@@ -73,6 +73,52 @@ class RustlogApi {
 
     return response;
   }
+
+  async getRecentLines(channelId, limit = 50) {
+    const now = new Date();
+    const year = now.getUTCFullYear();
+    const month = String(now.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(now.getUTCDate()).padStart(2, "0");
+
+    const url = `${this.baseUrl}/channelid/${channelId}/${year}/${month}/${day}`;
+    const raw = await fb.got(url, {
+      responseType: "text",
+      searchParams: {
+        reverse: "1",
+        limit: String(limit),
+      },
+    });
+
+    if (raw == null) {
+      return { ok: false, reason: "fetch_failed" };
+    }
+
+    const LINE_REGEX = /\[(.*?)\] #(.*?) (.*?): (.*)/;
+    const rows = raw
+      .split(/\r?\n/)
+      .map((line) => {
+        const match = line.match(LINE_REGEX);
+        if (!match) {
+          return null;
+        }
+        const [, timestamp, , user, msg] = match;
+        return {
+          timestamp,
+          user,
+          message: msg,
+        };
+      })
+      .filter(Boolean);
+
+    if (rows.length === 0) {
+      return { ok: false, reason: "empty_log" };
+    }
+
+    rows.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    const text = rows.map((r) => `${r.user}: ${r.message}`).join("\n");
+    return { ok: true, text };
+  }
 }
 
 module.exports = RustlogApi;
