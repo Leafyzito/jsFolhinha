@@ -50,7 +50,7 @@ const chatSummaryCommand = async (message) => {
 };
 
 chatSummaryCommand.commandName = "chatsummary";
-chatSummaryCommand.aliases = ["chatsummary", "csum"];
+chatSummaryCommand.aliases = ["chatsummary", "csum", "resumo"];
 chatSummaryCommand.shortDescription = "Resuma as últimas mensagens do chat";
 chatSummaryCommand.cooldown = 15_000;
 chatSummaryCommand.cooldownType = "channel";
