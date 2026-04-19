@@ -25,7 +25,7 @@ const proximoCommand = async (message) => {
   const reminder = results[0];
   const reminderSender = await fb.api.helix.getUserByID(reminder.senderId);
   let reply = `ID ${reminder._id} ● Lembrete de @${
-    reminderSender?.login || "Usuário deletado"
+    reminderSender?.displayName || reminderSender?.login || "Usuário deletado"
   } há ${fb.utils.relativeTime(reminder.remindTime, true)}: ${
     reminder.remindMessage
   }`;
