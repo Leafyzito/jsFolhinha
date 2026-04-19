@@ -160,7 +160,7 @@ const shazamCommand = async (message) => {
   if (result.track) {
     const track = result.track;
     return {
-      reply: `🎵 Música identificada: ${track.title} - ${track.subtitle} (${track.url})`,
+      reply: `🎵 Música identificada: ${track.title} - ${track.subtitle} ● ${track.url}`,
     };
   }
 
