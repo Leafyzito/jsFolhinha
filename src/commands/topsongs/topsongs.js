@@ -145,7 +145,7 @@ const topSongsCommand = async (message) => {
 
   const top5String = top5Tracks
     .map(
-      (track) => `${track.songArtist} - ${track.songName} (${track.playCount})`,
+      (track) => `${track.songName} - ${track.songArtist} (${track.playCount})`,
     )
     .join(", ");
   return {

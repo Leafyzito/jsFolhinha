@@ -272,7 +272,7 @@ const songCommand = async (message) => {
     return {
       reply: `${
         songTarget != message.senderUsername ? songTarget : "Você"
-      } está ouvindo ${songInfo.songArtist} - ${songInfo.songName} ${
+      } está ouvindo ${songInfo.songName} - ${songInfo.songArtist} ${
         songInfo.albumName != "" ? `(Álbum: ${songInfo.albumName})` : ""
       } ${emote}`,
     };
@@ -281,7 +281,7 @@ const songCommand = async (message) => {
     return {
       reply: `${
         songTarget != message.senderUsername ? songTarget : "Você"
-      } ouviu por último ${songInfo.songArtist} - ${songInfo.songName} ${
+      } ouviu por último ${songInfo.songName} - ${songInfo.songArtist} ${
         songInfo.albumName != "" ? `(Álbum: ${songInfo.albumName})` : ""
       } há ${timeAgo}`,
     };
