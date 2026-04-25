@@ -11,15 +11,17 @@ const buildUserContent = (channelName, linesText) =>
   `Resuma as mensagens seguintes do chat #${channelName} (Twitch).\n\n${linesText}`;
 
 const chatSummaryCommand = async (message) => {
+  let logAmount = DEFAULT_LOG_AMOUNT;
   if (message.args.length > 1) {
-    return {
-      reply: `${message.displayName}, este comando só resume o chat deste canal. Use ${message.prefix}chatsummary (ou ${message.prefix}csum) sem argumentos.`,
-    };
+    const parsed = parseInt(message.args[1]);
+    if (!isNaN(parsed)) {
+      logAmount = parsed;
+    }
   }
 
   const logsResult = await fb.api.rustlog.getRecentLines(
     message.channelID,
-    DEFAULT_LOG_AMOUNT
+    logAmount
   );
 
   if (!logsResult.ok) {
