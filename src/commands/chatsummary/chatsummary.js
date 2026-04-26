@@ -19,6 +19,13 @@ const chatSummaryCommand = async (message) => {
     }
   }
 
+  if (logAmount > 200) {
+    logAmount = 200;
+  }
+  if (logAmount < 1) {
+    logAmount = DEFAULT_LOG_AMOUNT;
+  }
+
   const logsResult = await fb.api.rustlog.getRecentLines(
     message.channelID,
     logAmount
