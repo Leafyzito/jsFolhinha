@@ -1,5 +1,14 @@
 async function rejoinDisconnectedChannels() {
-  const connectedChannels = [...fb.twitch.anonClient.currentChannels];
+  const normalizeLogin = (s) =>
+    (s ?? "")
+      .toString()
+      .trim()
+      .replace(/^#/, "")
+      .toLowerCase();
+
+  const connectedChannels = new Set(
+    [...fb.twitch.anonClient.currentChannels].map(normalizeLogin)
+  );
 
   // fetch channels to join from config table
   const channelsToJoin = await fb.db.get("config", {});
@@ -10,8 +19,13 @@ async function rejoinDisconnectedChannels() {
   );
 
   for (const channel of channelsToJoin) {
-    if (!connectedChannels.includes(channel.channel)) {
-      fb.twitch.join([channel.channel]);
+    const channelLogin = normalizeLogin(channel.channel);
+    if (!connectedChannels.has(channelLogin)) {
+      // verify user exists in twitch
+      const user = await fb.api.helix.getUserByUsername(channelLogin);
+      if (!user) continue;
+
+      fb.twitch.anonClient.join(channelLogin);
     }
   }
 }
