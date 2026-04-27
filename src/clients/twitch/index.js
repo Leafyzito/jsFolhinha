@@ -143,17 +143,22 @@ class TwitchClient {
       return false;
     }
 
-    // add to channelsToJoin and attempt to join
-    this.anonClient.channelsToJoin.push(...channels);
+    // update channelsToJoin
+    const existing = new Set(
+      this.anonClient.channelsToJoin.map((c) => c.toLowerCase())
+    );
+    const toAdd = channels.filter((c) => !existing.has(c.toLowerCase()));
+    if (toAdd.length > 0) {
+      this.anonClient.channelsToJoin.push(...toAdd);
+    }
     await this.joinMultiple(channels);
 
     // Subscribe to EventSub events for new channels
     if (fb.twitch && fb.twitch.eventSub) {
       for (const channelLogin of channels) {
         try {
-          const channelInfo = await fb.api.helix.getUserByUsername(
-            channelLogin
-          );
+          const channelInfo =
+            await fb.api.helix.getUserByUsername(channelLogin);
           if (channelInfo && channelInfo.id) {
             await fb.twitch.eventSub.subscribeToChannel(channelInfo.id);
             await fb.twitch.eventSub.checkInitialStatus(channelInfo.id);
