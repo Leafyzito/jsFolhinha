@@ -3,7 +3,13 @@ const userCommand = async (message) => {
   const userTarget =
     message.args[1]?.replace(/^@/, "").toLowerCase() || message.senderUsername;
 
-  const userInfo = await fb.api.ivr.getUser(userTarget);
+  let userInfo;
+  if (userTarget.toLowerCase().startsWith("id:")) {
+    const userId = userTarget.slice(3).trim();
+    userInfo = await fb.api.ivr.getUserById(userId);
+  } else {
+    userInfo = await fb.api.ivr.getUser(userTarget);
+  }
   if (!userInfo) {
     return {
       reply: `Esse usuário não existe`,

@@ -44,6 +44,47 @@ class IvrApi {
     };
   }
 
+  async getUserById(userid) {
+    const data = await fb.got(`${this.baseUrl}/user?id=${userid}`);
+
+    if (!Array.isArray(data) || data.length === 0) {
+      return null;
+    }
+
+    const user = data[0] || {};
+    const displayName = user.displayName;
+    const userId = user.id;
+    const chatColor = user.chatColor ? user.chatColor : "Nenhuma";
+    const badge = user.badges?.[0]?.title || "Nenhuma";
+    const chatterCount = user.chatterCount;
+    const createdAt = new Date(user.createdAt)
+      .toLocaleDateString("pt-BR")
+      .replaceAll("/", "-");
+    const createdHowLongAgo = fb.utils.relativeTime(user.createdAt, true, true);
+    const followers = user.followers;
+    const isLive = !!user.stream;
+    const lastStream = user.lastBroadcast?.startedAt
+      ? fb.utils.relativeTime(user.lastBroadcast.startedAt, true, true)
+      : null;
+    const isBanned = user.banned;
+    const banReason = user.banReason || null;
+
+    return {
+      displayName,
+      userId,
+      chatColor,
+      badge,
+      chatterCount,
+      createdAt,
+      createdHowLongAgo,
+      followers,
+      isLive,
+      lastStream,
+      isBanned,
+      banReason,
+    };
+  }
+
   async getLive(username) {
     const data = await fb.got(`${this.baseUrl}/user?login=${username}`);
 
