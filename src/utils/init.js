@@ -158,7 +158,7 @@ async function getChannelsToJoin() {
   }
 
   try {
-    const configs = await fb.db.get("config", {});
+    const configs = await fb.db.get("config", { state: "active" });
     const channelIdsToJoin = Array.isArray(configs)
       ? configs.map((channel) => channel.channelId)
       : [];
@@ -170,9 +170,8 @@ async function getChannelsToJoin() {
     }
 
     // Get channel names from user IDs using the helix API
-    const channelsToJoin = await fb.api.helix.getManyUsersByUserIDs(
-      channelIdsToJoin
-    );
+    const channelsToJoin =
+      await fb.api.helix.getManyUsersByUserIDs(channelIdsToJoin);
 
     return channelsToJoin || [];
   } catch (error) {
