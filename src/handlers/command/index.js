@@ -20,6 +20,20 @@ async function checkCommandExecution(command, message) {
   return true;
 }
 
+async function checkCustomCommandExecution(customCommand, message) {
+  // Custom commands are not whisperable (MVP)
+  if (message.isWhisper) {
+    return false;
+  }
+
+  // Reuse existing validator for:
+  // - cooldown handling
+  // - bans / paused / offlineOnly / etc
+  const cooldownMs =
+    typeof customCommand.cooldownMs === "number" ? customCommand.cooldownMs : 5000;
+  return await validateCommandExecution(cooldownMs, "channel", message);
+}
+
 async function commandHandler(message) {
   if (message.senderUsername == process.env.BOT_USERNAME) {
     return;
@@ -31,33 +45,70 @@ async function commandHandler(message) {
 
   const command = message.args[0].slice(message.prefix.length).toLowerCase();
 
-  if (!(command in commandsList)) {
-    return;
-  }
-
-  Object.defineProperty(message, "command", {
-    value: commandsList[command],
-    writable: true,
-    configurable: true,
-    enumerable: true,
-  });
-  if (!(await checkCommandExecution(command, message))) {
-    return;
-  }
-
-  fb.totalCommandsUsed++;
   let commandResult;
-  try {
-    commandResult = await commandsList[command](message);
-  } catch (err) {
-    fb.discord.logError(
-      `Error in command in #${message.channelName}/${message.senderUsername} - ${command}: ${err}`
-    );
-    fb.log.logAndReply(
-      message,
-      `⚠️ Ocorreu um erro ao executar o comando, tente novamente`
-    );
-    return;
+
+  // Built-ins first (skip DB fetch in hot path)
+  if (command in commandsList) {
+    Object.defineProperty(message, "command", {
+      value: { ...commandsList[command], custom: false },
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
+    if (!(await checkCommandExecution(command, message))) {
+      return;
+    }
+
+    fb.totalCommandsUsed++;
+    try {
+      commandResult = await commandsList[command](message);
+    } catch (err) {
+      fb.discord.logError(
+        `Error in command in #${message.channelName}/${message.senderUsername} - ${command}: ${err}`
+      );
+      fb.log.logAndReply(
+        message,
+        `⚠️ Ocorreu um erro ao executar o comando, tente novamente`
+      );
+      return;
+    }
+  } else {
+    // Custom command fallback
+    const custom = await fb.db.get("customcommands", {
+      channelId: message.channelID,
+      name: command,
+    });
+
+    if (!custom) {
+      return;
+    }
+
+    // Attach a minimal command object so validator + logs work
+    Object.defineProperty(message, "command", {
+      value: {
+        commandName: command,
+        aliases: [command],
+        cooldown: typeof custom.cooldownMs === "number" ? custom.cooldownMs : 5000,
+        cooldownType: "channel",
+        whisperable: false,
+        description: "Custom command",
+        custom: true,
+        // No permissions: custom commands are public by default
+      },
+      writable: true,
+      configurable: true,
+      enumerable: true,
+    });
+
+    if (!(await checkCustomCommandExecution(custom, message))) {
+      return;
+    }
+
+    fb.totalCommandsUsed++;
+    commandResult = {
+      reply: typeof custom.response === "string" ? custom.response : "",
+      replyType: "reply",
+    };
   }
 
   if (!commandResult || !commandResult.reply) {
