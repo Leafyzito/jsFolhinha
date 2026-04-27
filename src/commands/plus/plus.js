@@ -2,7 +2,7 @@ const path = require("path");
 const plusCommand = async () => {
   return {
     reply:
-      "Veja mais informações sobre o Folhinha Plus aqui: https://folhinhabot.com/plus",
+      "⭐ Veja mais informações sobre o Folhinha Plus aqui: https://folhinhabot.com/plus",
   };
 };
 
