@@ -66,15 +66,17 @@ const addcmdCommand = async (message) => {
 };
 
 addcmdCommand.commandName = "addcmd";
-addcmdCommand.aliases = ["addcmd"];
+addcmdCommand.aliases = ["addcmd", "addcommand"];
 addcmdCommand.shortDescription = "Cria um comando customizado no canal";
-addcmdCommand.cooldown = 5000;
+addcmdCommand.cooldown = 1000;
 addcmdCommand.cooldownType = "channel";
 addcmdCommand.permissions = ["mod", "admin"];
 addcmdCommand.whisperable = false;
 addcmdCommand.description = `Cria um comando customizado no canal atual
 
-• Exemplo: !addcmd discord Meu discord é: discord.gg/xxxx`;
+• Opcional: -cooldown:N define o cooldown em segundos (1-3600). 5 segundos é o padrão.
+• Exemplo: !addcmd discord Meu discord é: discord.gg/xxxx
+• Exemplo com cooldown: !addcmd discord -cooldown:30 Meu discord é: discord.gg/xxxx`;
 addcmdCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;
