@@ -13,7 +13,7 @@ const delcmdCommand = async (message) => {
   const name = message.args?.[1]?.toLowerCase();
   if (!isValidName(name)) {
     return {
-      reply: `Use o formato: ${message.prefix}delcmd <nome> (nome: a-z, 0-9, _)`,
+      reply: `Use o formato: ${message.prefix}delcmd <nome>`,
     };
   }
 

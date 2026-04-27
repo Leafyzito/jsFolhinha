@@ -34,7 +34,7 @@ const editcmdCommand = async (message) => {
 
   if (!isValidName(name) || !response) {
     return {
-      reply: `Use o formato: ${message.prefix}editcmd <nome> <nova resposta...> (nome: a-z, 0-9, _)`,
+      reply: `Use o formato: ${message.prefix}editcmd <nome> <nova resposta...>`,
     };
   }
 
