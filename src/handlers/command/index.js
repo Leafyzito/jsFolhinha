@@ -1,5 +1,8 @@
 const { validateCommandExecution } = require("../../commands/commandValidator");
 const { commandsList } = require("../../commands/commandsList");
+const {
+  expandCustomCommandResponse,
+} = require("../../utils/expand-custom-command-response");
 
 async function checkCommandExecution(command, message) {
   if (
@@ -30,7 +33,9 @@ async function checkCustomCommandExecution(customCommand, message) {
   // - cooldown handling
   // - bans / paused / offlineOnly / etc
   const cooldownMs =
-    typeof customCommand.cooldownMs === "number" ? customCommand.cooldownMs : 5000;
+    typeof customCommand.cooldownMs === "number"
+      ? customCommand.cooldownMs
+      : 5000;
   return await validateCommandExecution(cooldownMs, "channel", message);
 }
 
@@ -88,7 +93,8 @@ async function commandHandler(message) {
       value: {
         commandName: command,
         aliases: [command],
-        cooldown: typeof custom.cooldownMs === "number" ? custom.cooldownMs : 5000,
+        cooldown:
+          typeof custom.cooldownMs === "number" ? custom.cooldownMs : 5000,
         cooldownType: "channel",
         whisperable: false,
         description: "Custom command",
@@ -105,8 +111,10 @@ async function commandHandler(message) {
     }
 
     fb.totalCommandsUsed++;
+    const rawResponse =
+      typeof custom.response === "string" ? custom.response : "";
     commandResult = {
-      reply: typeof custom.response === "string" ? custom.response : "",
+      reply: expandCustomCommandResponse(rawResponse, message),
       replyType: "reply",
     };
   }
