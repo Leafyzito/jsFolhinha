@@ -102,6 +102,7 @@ const updateUserListener = async (message) => {
       lsChannel: message.channelName,
       lsMessage: message.messageText,
       lsDate: Math.floor(Date.now() / 1000),
+      firstSeen: Math.floor(Date.now() / 1000),
       optoutLs: false,
       optoutStalk: false,
       optoutRemind: false,
