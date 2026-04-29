@@ -138,64 +138,34 @@ class MongoUtils {
   }
 
   async update(collectionName, query, update) {
-    // Get current document from cache or DB
-    let currentDoc = await this.get(collectionName, query);
-    if (!currentDoc) {
-      // if not in cache, fetch from DB
-      await this.ensureConnection();
-      const collection = this.db.collection(collectionName);
-      currentDoc = await collection.findOne(query);
-    }
-
-    // Update DB first to get the actual updated document
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
 
-    // Apply the update to DB
     await collection.updateOne(query, update);
 
-    // Fetch the updated document from DB to ensure cache has correct data
     const updatedDoc = await collection.findOne(query);
 
     if (updatedDoc) {
-      // Update cache with the actual updated document from DB
       await this.setCache(collectionName, updatedDoc._id, updatedDoc);
       return updatedDoc;
     }
 
-    return currentDoc;
+    return null;
   }
 
   async updateMany(collectionName, query, update) {
-    // Get current documents from cache or DB
-    let currentDocs = await this.get(collectionName, query);
-
-    // Handle case where get returns single item or null
-    if (!currentDocs) {
-      currentDocs = [];
-    } else if (!Array.isArray(currentDocs)) {
-      currentDocs = [currentDocs];
-    }
-
-    // Update DB first to get the actual updated documents
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
 
-    // Apply the update to DB
     await collection.updateMany(query, update);
 
-    // Fetch the updated documents from DB to ensure cache has correct data
     const updatedDocs = await collection.find(query).toArray();
 
-    if (updatedDocs.length > 0) {
-      // Update cache with the actual updated documents from DB
-      for (const doc of updatedDocs) {
-        await this.setCache(collectionName, doc._id, doc);
-      }
-      return updatedDocs;
+    for (const doc of updatedDocs) {
+      await this.setCache(collectionName, doc._id, doc);
     }
 
-    return currentDocs;
+    return updatedDocs;
   }
 
   async delete(collectionName, query) {
