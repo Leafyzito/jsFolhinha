@@ -58,6 +58,73 @@ async function loadUserCookieStats(targetId) {
   return userCookieStats;
 }
 
+async function buildCookieLeaderboardReply(
+  message,
+  sortField,
+  intro,
+  youAreSuffix,
+  trailingEmoji
+) {
+  const pipeline = [
+    { $match: { userId: { $ne: process.env.BOT_USERID } } },
+    {
+      $setWindowFields: {
+        sortBy: { [sortField]: -1 },
+        output: { leaderboardRank: { $documentNumber: {} } },
+      },
+    },
+    {
+      $facet: {
+        top5: [
+          { $match: { leaderboardRank: { $lte: 5 } } },
+          { $sort: { leaderboardRank: 1 } },
+        ],
+        sender: [
+          { $match: { userId: message.senderUserID } },
+          { $limit: 1 },
+          {
+            $project: {
+              leaderboardRank: 1,
+              userId: 1,
+              [sortField]: 1,
+            },
+          },
+        ],
+      },
+    },
+  ];
+
+  const [facetResult] = await fb.db.aggregate("cookie", pipeline);
+  const top5 = facetResult?.top5 ?? [];
+  const senderRows = facetResult?.sender ?? [];
+
+  if (top5.length === 0) {
+    return {
+      reply: `Algo deu errado. Tente novamente ou contate o dev`,
+    };
+  }
+
+  let reply = intro;
+  for (let i = 0; i < top5.length; i++) {
+    const user = top5[i];
+    const username = (await fb.api.helix.getUserByID(user.userId))?.displayName;
+    reply += `${i + 1}º ${username}: (${user[sortField]})`;
+    if (i !== top5.length - 1) {
+      reply += ", ";
+    }
+  }
+
+  const inTop5 = top5.some((u) => u.userId === message.senderUserID);
+  const senderRow = senderRows[0];
+  if (!inTop5 && senderRow && senderRow.leaderboardRank != null) {
+    reply += `. Você está em ${senderRow.leaderboardRank}º com ${
+      senderRow[sortField]
+    } ${youAreSuffix}`;
+  }
+
+  return { reply: `${reply} ${trailingEmoji}` };
+}
+
 const cookieCommand = async (message) => {
   if (message.args.length < 2) {
     return {
@@ -349,136 +416,34 @@ const cookieCommand = async (message) => {
   if (["top", "ranking", "rank", "leaderboard", "lb"].includes(targetCommand)) {
     // MARKER: top gift
     if (["gift", "gifts", "oferta", "gifted"].includes(message.args[2])) {
-      const topUsers = await fb.db.get(
-        "cookie",
-        {
-          userId: { $ne: "925782584" },
-        },
-        true
+      return await buildCookieLeaderboardReply(
+        message,
+        "gifted",
+        `Top 5 mais cookies oferecidos: `,
+        "cookies oferecidos",
+        "🎁"
       );
-      topUsers.sort((a, b) => b.gifted - a.gifted);
-
-      // only top 5
-      const top5 = topUsers.slice(0, 5);
-      let reply = `Top 5 mais cookies oferecidos: `;
-      for (let i = 0; i < top5.length; i++) {
-        const user = top5[i];
-        const username = (await fb.api.helix.getUserByID(user.userId))
-          ?.displayName;
-        reply += `${i + 1}º ${username}: (${user.gifted})`;
-        if (i !== top5.length - 1) {
-          reply += ", ";
-        }
-      }
-
-      let userPlacing;
-      for (let i = 0; i < top5.length; i++) {
-        if (top5[i].userId === message.senderUserID) {
-          userPlacing = i + 1;
-          break;
-        }
-      }
-
-      if (!userPlacing) {
-        reply += `. Você está em ${
-          topUsers.findIndex((user) => user.userId === message.senderUserID) + 1
-        }º com ${
-          topUsers.find((user) => user.userId === message.senderUserID).gifted
-        } cookies oferecidos`;
-      }
-
-      return {
-        reply: `${reply} 🎁`,
-      };
     }
 
     // MARKER: top slot
     if (["aposta", "apostas", "slot", "slots"].includes(message.args[2])) {
-      const topUsers = await fb.db.get(
-        "cookie",
-        {
-          userId: { $ne: "925782584" },
-        },
-        true
+      return await buildCookieLeaderboardReply(
+        message,
+        "sloted",
+        `Top 5 cookies apostados: `,
+        "cookies apostados",
+        "🍪"
       );
-      topUsers.sort((a, b) => b.sloted - a.sloted);
-
-      // only top 5
-      const top5 = topUsers.slice(0, 5);
-      let reply = `Top 5 cookies apostados: `;
-      for (let i = 0; i < top5.length; i++) {
-        const user = top5[i];
-        const username = (await fb.api.helix.getUserByID(user.userId))
-          ?.displayName;
-        reply += `${i + 1}º ${username}: (${user.sloted})`;
-        if (i !== top5.length - 1) {
-          reply += ", ";
-        }
-      }
-
-      let userPlacing;
-      for (let i = 0; i < top5.length; i++) {
-        if (top5[i].userId === message.senderUserID) {
-          userPlacing = i + 1;
-          break;
-        }
-      }
-
-      if (!userPlacing) {
-        reply += `. Você está em ${
-          topUsers.findIndex((user) => user.userId === message.senderUserID) + 1
-        }º com ${
-          topUsers.find((user) => user.userId === message.senderUserID).sloted
-        } cookies apostados`;
-      }
-
-      return {
-        reply: `${reply} 🍪`,
-      };
     }
 
     // MARKER: top cookies
-    const topUsers = await fb.db.get(
-      "cookie",
-      {
-        userId: { $ne: "925782584" },
-      },
-      true
+    return await buildCookieLeaderboardReply(
+      message,
+      "total",
+      `Top 5 quantidade de cookies: `,
+      "cookies",
+      "🍪"
     );
-    topUsers.sort((a, b) => b.total - a.total);
-
-    // only top 5
-    const top5 = topUsers.slice(0, 5);
-    let reply = `Top 5 quantidade de cookies: `;
-    for (let i = 0; i < top5.length; i++) {
-      const user = top5[i];
-      const username = (await fb.api.helix.getUserByID(user.userId))
-        ?.displayName;
-      reply += `${i + 1}º ${username}: (${user.total})`;
-      if (i !== top5.length - 1) {
-        reply += ", ";
-      }
-    }
-
-    let userPlacing;
-    for (let i = 0; i < top5.length; i++) {
-      if (top5[i].userId === message.senderUserID) {
-        userPlacing = i + 1;
-        break;
-      }
-    }
-
-    if (!userPlacing) {
-      reply += `. Você está em ${
-        topUsers.findIndex((user) => user.userId === message.senderUserID) + 1
-      }º com ${
-        topUsers.find((user) => user.userId === message.senderUserID).total
-      } cookies`;
-    }
-
-    return {
-      reply: `${reply} 🍪`,
-    };
   }
 
   // MARKER: slot

@@ -136,34 +136,35 @@ const dungeonCommand = async (message) => {
         rankOption = "xp";
       }
 
-      let ranking = await fb.db.get("dungeon", {}, true);
-      if (!Array.isArray(ranking)) {
-        ranking = [ranking];
+      let sortField;
+      if (["level", "lvl"].includes(rankOption)) {
+        sortField = "level";
+      } else if (["win", "wins"].includes(rankOption)) {
+        sortField = "wins";
+      } else if (["loss", "losses"].includes(rankOption)) {
+        sortField = "losses";
+      } else {
+        sortField = "xp";
       }
 
-      ranking.sort((a, b) => {
-        if (rankOption === "xp") {
-          return b.xp - a.xp;
-        } else if (["level", "lvl"].includes(rankOption)) {
-          rankOption = "level";
-          return b.level - a.level;
-        } else if (["win", "wins"].includes(rankOption)) {
-          rankOption = "wins";
-          return b.wins - a.wins;
-        } else if (["loss", "losses"].includes(rankOption)) {
-          rankOption = "losses";
-          return b.losses - a.losses;
-        }
-      });
+      const top5 = await fb.db.aggregate("dungeon", [
+        { $sort: { [sortField]: -1 } },
+        { $limit: 5 },
+      ]);
 
-      const top5 = ranking.slice(0, 5);
-      let reply = `Top 5 ${rankOption}: `;
+      if (!top5.length) {
+        return {
+          reply: "Algo deu errado. Tente novamente ou contate o dev",
+        };
+      }
+
+      let reply = `Top 5 ${sortField}: `;
       for (let i = 0; i < top5.length; i++) {
         const username =
           (await fb.api.helix.getUserByID(top5[i].userId))?.displayName ||
           `id: ${top5[i].userId}`;
         reply += `${i + 1}º ${username}: (${Math.round(
-          top5[i][rankOption]
+          top5[i][sortField]
         ).toLocaleString("fr-FR")})`;
 
         if (i !== top5.length - 1) {
@@ -178,9 +179,8 @@ const dungeonCommand = async (message) => {
 
   // MARKER: main dungeon logic
   const userDungeonStats = await loadUserDungeonStats(message);
-  const [canDungeon, remainingTime] = await checkDungeonCooldown(
-    userDungeonStats
-  );
+  const [canDungeon, remainingTime] =
+    await checkDungeonCooldown(userDungeonStats);
   if (!canDungeon) {
     return {
       reply: `Você se sente cansado... Só vai se sentir capaz de explorar novamente em ${remainingTime} ⏰`,
