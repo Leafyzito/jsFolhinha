@@ -57,12 +57,18 @@ const updateUserListener = async (message) => {
     userid: message.senderUserID,
   });
 
-  if (knownUser && knownUser.currAlias === message.senderUsername) {
+  if (
+    knownUser &&
+    knownUser.currAlias.toLowerCase() === message.senderUsername.toLowerCase()
+  ) {
     // User is known and username hasn't changed, just update last seen
     return await updateLastSeen(message);
   }
 
-  if (knownUser && knownUser.currAlias !== message.senderUsername) {
+  if (
+    knownUser &&
+    knownUser.currAlias.toLowerCase() !== message.senderUsername.toLowerCase()
+  ) {
     // Username has changed, update aliases and handle channel config updates if applicable
     fb.discord.log(
       `* Updating user aliases: #${message.channelName}/${knownUser.currAlias} -> ${message.senderUsername}`
