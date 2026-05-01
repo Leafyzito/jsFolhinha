@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "botconfigs",
+  "description": "Generic bot-wide settings keyed by category. NOT written by this repo - it is read-only legacy data populated externally (e.g. by the suggestions board).",
+  "bsonType": "object",
+  "required": ["_id", "category", "settings"],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "category": {
+      "bsonType": "string",
+      "description": "Logical group of settings, e.g. 'suggestions'"
+    },
+    "settings": {
+      "bsonType": "object",
+      "description": "Free-form settings payload, varies per category",
+      "properties": {
+        "labelColors": {
+          "bsonType": "array",
+          "description": "(category=suggestions) Available label colors",
+          "items": {
+            "bsonType": "object",
+            "required": ["name", "color"],
+            "properties": {
+              "name": { "bsonType": "string" },
+              "color": {
+                "bsonType": "string",
+                "description": "Hex color without leading '#'"
+              }
+            }
+          }
+        },
+        "labels": {
+          "bsonType": "array",
+          "description": "(category=suggestions) Defined labels and their color",
+          "items": {
+            "bsonType": "object",
+            "required": ["name", "color"],
+            "properties": {
+              "name": { "bsonType": "string" },
+              "color": {
+                "bsonType": "string",
+                "description": "Name of an entry in labelColors, or empty string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

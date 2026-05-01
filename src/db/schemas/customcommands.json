@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "customcommands",
+  "description": "User-defined commands per channel. Created via !addcmd, edited via !editcmd, removed via !delcmd.",
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "channelId",
+    "name",
+    "response",
+    "cooldownMs",
+    "createdByUserId",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "channelId": {
+      "bsonType": "string",
+      "description": "Twitch user id of the channel this command belongs to"
+    },
+    "name": {
+      "bsonType": "string",
+      "description": "Command name (without prefix)"
+    },
+    "response": {
+      "bsonType": "string",
+      "description": "Reply template. Supports {user} and {1}..{N} positional argument tokens"
+    },
+    "cooldownMs": {
+      "bsonType": ["int", "long"],
+      "description": "Per-channel cooldown in milliseconds"
+    },
+    "createdByUserId": {
+      "bsonType": "string",
+      "description": "Twitch user id of whoever created the command"
+    },
+    "createdAt": { "bsonType": "date" },
+    "updatedAt": { "bsonType": "date" }
+  }
+}

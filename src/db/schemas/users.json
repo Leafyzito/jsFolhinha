@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "users",
+  "description": "Per-user state across the whole bot: aliases, lastseen, optouts, blocks, supporter status. Created on first sighting in src/handlers/listener/update-user.js.",
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "userid",
+    "aliases",
+    "currAlias",
+    "customAliases",
+    "lsChannel",
+    "lsMessage",
+    "lsDate",
+    "optoutLs",
+    "optoutStalk",
+    "optoutRemind",
+    "optoutOwnChannel",
+    "blocks"
+  ],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "userid": {
+      "bsonType": "string",
+      "description": "Twitch user id (immutable; primary lookup key)"
+    },
+    "aliases": {
+      "bsonType": "array",
+      "description": "Every login this user has ever had (appended on rename)",
+      "items": { "bsonType": "string" }
+    },
+    "currAlias": {
+      "bsonType": "string",
+      "description": "Current Twitch login (kept in sync via user-update event)"
+    },
+    "customAliases": {
+      "bsonType": "array",
+      "description": "Manually added aliases (e.g. via !nick)",
+      "items": { "bsonType": "string" }
+    },
+    "lsChannel": {
+      "bsonType": "string",
+      "description": "Channel where the user was last seen"
+    },
+    "lsMessage": {
+      "bsonType": "string",
+      "description": "Last message the user sent"
+    },
+    "lsDate": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds of last message"
+    },
+    "firstSeen": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds of first message (added on newer docs)"
+    },
+    "optoutLs": {
+      "bsonType": "bool",
+      "description": "When true, !lastseen <user> refuses to reveal this user"
+    },
+    "optoutStalk": {
+      "bsonType": "bool",
+      "description": "When true, !stalk refuses to reveal this user"
+    },
+    "optoutRemind": {
+      "bsonType": "bool",
+      "description": "When true, this user cannot be a reminder recipient"
+    },
+    "optoutOwnChannel": {
+      "bsonType": "bool",
+      "description": "When true, !lastseen/!stalk hide that this user is the broadcaster"
+    },
+    "blocks": {
+      "bsonType": "object",
+      "description": "Per-feature block lists controlled by the user",
+      "properties": {
+        "remind": {
+          "bsonType": "array",
+          "description": "Twitch user ids the user has blocked from sending them reminders",
+          "items": { "bsonType": "string" }
+        }
+      }
+    },
+    "isPlus": {
+      "bsonType": "bool",
+      "description": "Set by !setplus on supporters of R$10+"
+    },
+    "isSupporter": {
+      "bsonType": "bool",
+      "description": "Set by !setplus alongside isPlus"
+    },
+    "lastSupportDate": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds of most recent supporter status assignment"
+    },
+    "totalDonated": {
+      "bsonType": ["int", "long", "double", "string"],
+      "description": "Cumulative donated amount as recorded by !setplus"
+    },
+    "msgCount": {
+      "bsonType": "object",
+      "description": "Legacy per-channel message counters carried over from the Python bot. Not written by this repo.",
+      "properties": {
+        "total": { "bsonType": ["int", "long"] }
+      },
+      "additionalProperties": { "bsonType": ["int", "long"] }
+    }
+  }
+}

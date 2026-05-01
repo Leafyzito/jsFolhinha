@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "afk",
+  "description": "Per-channel/user AFK status. One document per (channel, user) pair.",
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "channel",
+    "user",
+    "is_afk",
+    "afk_message",
+    "afk_since",
+    "afk_return",
+    "afk_type",
+    "rafk_counter"
+  ],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "channel": {
+      "bsonType": "string",
+      "description": "Channel login (lowercase username)"
+    },
+    "user": {
+      "bsonType": "string",
+      "description": "Sender login (lowercase username)"
+    },
+    "userid": {
+      "bsonType": "string",
+      "description": "Sender Twitch user id (legacy field, present on some older docs)"
+    },
+    "is_afk": {
+      "bsonType": "bool",
+      "description": "True while the user is currently AFK in this channel"
+    },
+    "afk": {
+      "bsonType": ["null"],
+      "description": "Legacy placeholder field, always null on new docs"
+    },
+    "afk_message": {
+      "bsonType": ["string", "null"],
+      "description": "Optional message left when going AFK (truncated to 400 chars)"
+    },
+    "afk_since": {
+      "bsonType": ["double", "long", "int"],
+      "description": "Unix seconds when the user went AFK"
+    },
+    "afk_return": {
+      "bsonType": ["double", "long", "int"],
+      "description": "Unix seconds when the user came back from AFK"
+    },
+    "afk_type": {
+      "bsonType": ["string", "null"],
+      "description": "Alias used to go AFK (afk, ler, dormir, gym, ...)"
+    },
+    "rafk_counter": {
+      "bsonType": ["int", "long"],
+      "description": "Number of consecutive !rafk uses since last return"
+    }
+  }
+}

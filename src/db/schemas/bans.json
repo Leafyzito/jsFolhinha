@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "bans",
+  "description": "Per-user list of commands the user is banned from using.",
+  "bsonType": "object",
+  "required": ["_id", "userId", "bannedCommands"],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "userId": {
+      "bsonType": "string",
+      "description": "Twitch user id of the banned user"
+    },
+    "bannedCommands": {
+      "bsonType": "array",
+      "description": "Names of commands the user is forbidden from invoking",
+      "items": { "bsonType": "string" }
+    }
+  }
+}

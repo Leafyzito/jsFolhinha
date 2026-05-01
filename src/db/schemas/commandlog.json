@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "commandlog",
+  "description": "Append-only log of every (non-dev) command invocation. Written from src/log/index.js when ENV=prod. Stored as a MongoDB time-series collection (system.buckets.commandlog backs it).",
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "messageid",
+    "sentDate",
+    "channel",
+    "user",
+    "userId",
+    "command",
+    "content"
+  ],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "messageid": {
+      "bsonType": "string",
+      "description": "Twitch IRC message id (UUID)"
+    },
+    "sentDate": {
+      "bsonType": "date",
+      "description": "When the message hit the server"
+    },
+    "channel": { "bsonType": "string", "description": "Channel login" },
+    "channelId": {
+      "bsonType": ["string", "null"],
+      "description": "Channel Twitch user id (null for whispers)"
+    },
+    "user": { "bsonType": "string", "description": "Sender login" },
+    "userId": { "bsonType": "string", "description": "Sender Twitch user id" },
+    "command": {
+      "bsonType": "string",
+      "description": "Resolved command name (canonical, not the alias used)"
+    },
+    "custom": {
+      "bsonType": "bool",
+      "description": "True when the invocation matched a customcommands entry"
+    },
+    "content": {
+      "bsonType": "string",
+      "description": "Full raw message text"
+    },
+    "response": {
+      "bsonType": ["string", "null"],
+      "description": "What the bot replied (null when there was no reply)"
+    },
+    "notes": {
+      "bsonType": ["string", "null"],
+      "description": "Extra annotations attached to the message by handlers"
+    }
+  }
+}

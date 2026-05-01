@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "remind",
+  "description": "Reminders sent between users. New ids are assigned in src/commands/remind/remind.js as (count(remind) + 1), so _id is a plain integer rather than an ObjectId.",
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "senderId",
+    "receiverId",
+    "remindMessage",
+    "remindTime",
+    "beenRead"
+  ],
+  "properties": {
+    "_id": {
+      "bsonType": ["int", "long"],
+      "description": "Auto-incremented numeric id"
+    },
+    "senderId": {
+      "bsonType": "string",
+      "description": "Twitch user id of the sender"
+    },
+    "receiverId": {
+      "bsonType": "string",
+      "description": "Twitch user id of the recipient"
+    },
+    "fromChannelId": {
+      "bsonType": ["string", "null"],
+      "description": "Channel where the reminder was created (null for legacy/whisper-created)"
+    },
+    "remindMessage": { "bsonType": "string" },
+    "remindTime": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds when the reminder was created"
+    },
+    "remindAt": {
+      "bsonType": ["int", "long", "double", "null"],
+      "description": "Unix seconds the reminder is scheduled to fire (null = next-time-they-talk)"
+    },
+    "beenRead": {
+      "bsonType": "bool",
+      "description": "Flipped to true once delivered to the recipient"
+    }
+  }
+}

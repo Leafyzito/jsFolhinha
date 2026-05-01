@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "pet",
+  "description": "One pet per channel. Tracks the channel's virtual pet's state, hunger, attention, etc.",
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "channel",
+    "channelId",
+    "pet_emoji",
+    "pet_name",
+    "is_alive",
+    "alive_since",
+    "warns",
+    "time_of_death",
+    "total_plays",
+    "total_pats",
+    "last_interaction",
+    "last_play",
+    "last_pat"
+  ],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "channel": { "bsonType": "string", "description": "Channel login" },
+    "channelId": {
+      "bsonType": "string",
+      "description": "Channel Twitch user id"
+    },
+    "pet_emoji": {
+      "bsonType": "string",
+      "description": "Emoji representing the pet"
+    },
+    "pet_name": { "bsonType": "string" },
+    "is_alive": { "bsonType": "bool" },
+    "alive_since": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds the pet was (re)created"
+    },
+    "is_fed": {
+      "bsonType": "bool",
+      "description": "Set by hunger/attention scheduler"
+    },
+    "is_bored": {
+      "bsonType": "bool",
+      "description": "Set when pet wants to play"
+    },
+    "wants_pats": {
+      "bsonType": "bool",
+      "description": "Set when pet wants to be patted"
+    },
+    "warns": {
+      "bsonType": ["int", "long"],
+      "description": "Neglect warnings accumulated; pet dies after enough"
+    },
+    "time_of_death": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds the pet last died (0 when never)"
+    },
+    "carinho_cooldown": {
+      "bsonType": ["int", "long"],
+      "description": "Per-channel cooldown for !carinho in seconds"
+    },
+    "brincar_cooldown": {
+      "bsonType": ["int", "long"],
+      "description": "Per-channel cooldown for !brincar in seconds"
+    },
+    "total_plays": { "bsonType": ["int", "long"] },
+    "total_pats": { "bsonType": ["int", "long"] },
+    "last_play": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds of last !brincar"
+    },
+    "last_pat": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds of last !carinho"
+    },
+    "last_interaction": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds of last !brincar OR !carinho"
+    },
+    "trusted_mods": {
+      "bsonType": "array",
+      "description": "Logins of mods trusted to manage the pet",
+      "items": { "bsonType": "string" }
+    }
+  }
+}

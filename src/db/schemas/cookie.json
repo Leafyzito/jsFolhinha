@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "cookie",
+  "description": "Per-user state for the cookie minigame.",
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "userId",
+    "user",
+    "total",
+    "gifted",
+    "beenGifted",
+    "opened",
+    "sloted",
+    "eaten",
+    "claimedToday",
+    "giftedToday",
+    "usedSlot",
+    "stolenToday",
+    "gotStolen",
+    "gotStolenBy",
+    "totalStolen",
+    "totalGotStolen"
+  ],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "userId": { "bsonType": "string", "description": "Twitch user id" },
+    "user": { "bsonType": "string", "description": "Twitch login" },
+    "total": {
+      "bsonType": ["int", "long"],
+      "description": "Cookies currently held"
+    },
+    "gifted": {
+      "bsonType": ["int", "long"],
+      "description": "Total cookies the user has gifted to others"
+    },
+    "beenGifted": {
+      "bsonType": ["int", "long"],
+      "description": "Total cookies others have gifted to this user"
+    },
+    "opened": {
+      "bsonType": ["int", "long"],
+      "description": "Lifetime cookies claimed via !cookie"
+    },
+    "sloted": {
+      "bsonType": ["int", "long"],
+      "description": "Lifetime cookies wagered/spent on the slot machine"
+    },
+    "eaten": {
+      "bsonType": ["int", "long"],
+      "description": "Lifetime cookies eaten"
+    },
+    "claimedToday": {
+      "bsonType": "bool",
+      "description": "Whether the daily !cookie has been claimed (reset daily)"
+    },
+    "giftedToday": {
+      "bsonType": "bool",
+      "description": "Whether the user has used their daily gift (reset daily)"
+    },
+    "usedSlot": {
+      "bsonType": "bool",
+      "description": "Whether the daily !slot has been used (reset daily)"
+    },
+    "stolenToday": {
+      "bsonType": "bool",
+      "description": "Whether the user has stolen today (reset daily)"
+    },
+    "gotStolen": {
+      "bsonType": ["int", "long"],
+      "description": "Cookies stolen from this user in the current period"
+    },
+    "gotStolenBy": {
+      "bsonType": ["string", "null"],
+      "description": "Login of the most recent thief, null otherwise"
+    },
+    "totalStolen": {
+      "bsonType": ["int", "long"],
+      "description": "Lifetime cookies this user has stolen from others"
+    },
+    "totalGotStolen": {
+      "bsonType": ["int", "long"],
+      "description": "Lifetime cookies stolen from this user"
+    }
+  }
+}

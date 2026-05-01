@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "pendingjoin",
+  "description": "Channel join requests. INSERTED by the folhinhabot.com website; this repo only reads pending rows and updates their status. The fetch task in src/tasks/fetch-pending-joins.js handles each one.",
+  "bsonType": "object",
+  "required": ["_id", "created_at", "from", "status"],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "userid": {
+      "bsonType": "string",
+      "description": "Legacy field present on older docs - Twitch user id of the requester"
+    },
+    "channelid": {
+      "bsonType": "string",
+      "description": "Twitch user id of the channel to join (current field consumed by fetch-pending-joins)"
+    },
+    "inviterid": {
+      "bsonType": "string",
+      "description": "Twitch user id of whoever invited the bot"
+    },
+    "created_at": {
+      "bsonType": ["date", "string"],
+      "description": "When the request was created on the website"
+    },
+    "from": {
+      "bsonType": "string",
+      "description": "Origin of the request, e.g. 'website'"
+    },
+    "status": {
+      "bsonType": "string",
+      "enum": ["pending", "joined", "duplicate", "user not found"],
+      "description": "Lifecycle state set by the bot after processing"
+    }
+  }
+}

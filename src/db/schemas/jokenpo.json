@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "jokenpo",
+  "description": "Per-user win/loss/tie counters for the jokenpo (rock-paper-scissors) game. LEGACY: the current jokenpo command in this repo does not write to this collection - existing rows are historical data only.",
+  "bsonType": "object",
+  "required": ["_id", "userId", "username", "wins", "losses", "ties"],
+  "properties": {
+    "_id": { "bsonType": "objectId" },
+    "userId": { "bsonType": "string", "description": "Twitch user id" },
+    "username": {
+      "bsonType": "string",
+      "description": "Twitch login at the time of last update"
+    },
+    "wins": { "bsonType": ["int", "long"] },
+    "losses": { "bsonType": ["int", "long"] },
+    "ties": { "bsonType": ["int", "long"] }
+  }
+}

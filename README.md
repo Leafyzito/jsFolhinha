@@ -12,7 +12,9 @@ cd jsFolhinha
 git submodule update --init --recursive
 ```
 
-2. Copy `.env.example` to `.env` and fill in your credentials
+1. Copy `.env.example` to `.env` and fill in your credentials
+
+For MongoDB setup (collections, indexes, first-time config), env vars, and optional services, see `**[docs/setup.md](docs/setup.md)**` in the `[docs/](docs/)` folder.
 
 ### Development Mode
 
@@ -24,7 +26,7 @@ For development and testing without all services:
 npm install
 ```
 
-2. Run the application:
+1. Run the application:
 
 ```bash
 npm run dev
@@ -35,9 +37,7 @@ npm run dev
 For running the complete application with all services (including [Cobalt](https://github.com/imputnet/cobalt/) and [Twitch Clipper](https://github.com/leafyzito/twitch-clipper)):
 
 1. Make sure you have Docker and Docker Compose installed
-
 2. Ensure the environment variable ENV is set to 'prod' in docker-compose.yml (or 'dev' for testing)
-
 3. Start the application:
 
 ```bash
@@ -57,13 +57,14 @@ docker compose down
   - `apis/` - API integrations
   - `clients/` - Client connections
   - `commands/` - Bot commands and handlers
-  - `db/` - Database operations
+  - `db/` - Database operations (`[schemas/](src/db/schemas/)` has JSON Schema per collection)
   - `extras/` - Extra files/functions
   - `handlers/` - Event handlers and middleware
   - `log/` - Logging functionality
   - `tasks/` - Scheduled tasks and background jobs
   - `utils/` - Utility functions and helpers
-- `scripts/` - Additional scripts and tools
+- `scripts/` - Additional scripts and tools (e.g. `init-mongo.js`, `backup-db.js`)
+- `docs/` - Developer documentation
 - `apps/twitchClipper/` - [Go-based Twitch clipping functionality](https://github.com/leafyzito/twitch-clipper/)
 
 ## API
@@ -72,13 +73,13 @@ The bot includes a built-in HTTP API server for monitoring and uptime tracking.
 
 ### Endpoints
 
-- **`/`** — Status payload with uptime and channel counts
-- **`/commands`** — List of registered commands and metadata
-- **`/plus`** — Dev, admin, Plus, and supporter users from the database (for internal / ops use)
+- `**/**` — Status payload with uptime and channel counts
+- `**/commands**` — List of registered commands and metadata
+- `**/plus**` — Dev, admin, Plus, and supporter users from the database (for internal / ops use)
 
 ### Configuration
 
-The API server listens on port **3323** by default (see [`docker-compose.yml`](docker-compose.yml)). Override with `STATUS_PORT`:
+The API server listens on port **3323** by default (see `[docker-compose.yml](docker-compose.yml)`). Override with `STATUS_PORT`:
 
 ```bash
 STATUS_PORT=8080
@@ -100,7 +101,7 @@ STATUS_PORT=8080
 }
 ```
 
-Exact fields may change as the handler evolves; see [`src/utils/api-server.js`](src/utils/api-server.js).
+Exact fields may change as the handler evolves; see `[src/utils/api-server.js](src/utils/api-server.js)`.
 
 ## Code Quality
 
@@ -121,3 +122,4 @@ Feel free to contribute to the project by opening issues or submitting pull requ
 
 1. Run `npm run lint` to check for code quality issues
 2. Run `npm run lint:fix` to automatically fix any auto-fixable issues
+
