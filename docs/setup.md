@@ -5,12 +5,12 @@ Short guide for cloning this repo and running the bot against your own MongoDB a
 ## Prerequisites
 
 - **Node.js** (matching what you use for production is safest).
-- **MongoDB** — local (`mongodb://localhost:27017`), Docker, or [Atlas](https://www.mongodb.com/atlas). The app connects using `MONGO_URI` and uses the database name **`folhinha`** (see [`src/db/index.js`](../src/db/index.js)).
-- A **Twitch** bot account and tokens as documented in [`.env.example`](../.env.example).
+- **MongoDB** — local (`mongodb://localhost:27017`), Docker, or [Atlas](https://www.mongodb.com/atlas). The app connects using `MONGO_URI` and uses the database name **`folhinha`** (see [`src/db/index.js`](https://github.com/leafyzito/jsFolhinha/blob/main/src/db/index.js)).
+- A **Twitch** bot account and tokens as documented in [`.env.example`](https://github.com/leafyzito/jsFolhinha/blob/main/.env.example).
 
 Optional:
 
-- **Redis** — set both `REDIS_HOST` and `REDIS_PORT` in `.env` to enable caching; if you omit them, the bot uses an in-memory cache (see [`src/db/index.js`](../src/db/index.js)).
+- **Redis** — set both `REDIS_HOST` and `REDIS_PORT` in `.env` to enable caching; if you omit them, the bot uses an in-memory cache (see [`src/db/index.js`](https://github.com/leafyzito/jsFolhinha/blob/main/src/db/index.js)).
 - **ClickHouse**, **Discord**, etc. — only if you are working on features that need them; many code paths fall back or no-op when env vars are missing.
 
 ## 1. Clone and install
@@ -45,7 +45,7 @@ From the repo root:
 npm run init:mongo
 ```
 
-This runs [`scripts/init-mongo.js`](../scripts/init-mongo.js). It:
+This runs [`scripts/init-mongo.js`](https://github.com/leafyzito/jsFolhinha/blob/main/scripts/init-mongo.js). It:
 
 - Creates the expected **collections** (if they do not exist).
 - Creates **`commandlog` as a time-series** collection with `timeField: "sentDate"` and `granularity: "seconds"` (falls back to a normal collection on older servers; MongoDB 6.3+ recommended for time-series without `metaField`).
@@ -54,7 +54,7 @@ This runs [`scripts/init-mongo.js`](../scripts/init-mongo.js). It:
 
 Safe to re-run: it skips existing collections, duplicate indexes, and an existing config for that `channelId`.
 
-**Collection shapes** (reference only, not enforced at runtime) live in [`src/db/schemas/`](../src/db/schemas/).
+**Collection shapes** (reference only, not enforced at runtime) live in [`src/db/schemas/`](https://github.com/leafyzito/jsFolhinha/tree/main/src/db/schemas).
 
 ## 4. Run the bot
 
@@ -62,7 +62,7 @@ Safe to re-run: it skips existing collections, duplicate indexes, and an existin
 npm run dev
 ```
 
-For production-style runs: see the root [README](../README.md) (`npm run start`, Docker Compose).
+For production-style runs: see the root [README](https://github.com/leafyzito/jsFolhinha/blob/main/README.md) (`npm run start`, Docker Compose).
 
 ---
 

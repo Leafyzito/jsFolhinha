@@ -4,10 +4,10 @@ This folder documents the shape of every MongoDB collection used by the bot.
 
 The bot uses the raw [`mongodb`](https://www.npmjs.com/package/mongodb) driver
 (no Mongoose / no ODM), so these schemas are purely documentation today —
-nothing in [`../index.js`](../index.js) reads them.
+nothing in [`src/db/index.js`](https://github.com/leafyzito/jsFolhinha/blob/main/src/db/index.js) reads them.
 
 For setting up MongoDB and environment variables when building the project locally, see
-[`docs/setup.md`](../../../docs/setup.md) at the repo root.
+[`docs/setup.md`](https://github.com/leafyzito/jsFolhinha/blob/main/docs/setup.md) at the repo root.
 
 ## Format
 

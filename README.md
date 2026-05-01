@@ -12,9 +12,9 @@ cd jsFolhinha
 git submodule update --init --recursive
 ```
 
-1. Copy `.env.example` to `.env` and fill in your credentials
+2. Copy `.env.example` to `.env` and fill in your credentials
 
-For MongoDB setup (collections, indexes, first-time config), env vars, and optional services, see `**[docs/setup.md](docs/setup.md)**` in the `[docs/](docs/)` folder.
+For MongoDB setup (collections, indexes, first-time config), env vars, and optional services, see **[docs/setup.md](https://github.com/leafyzito/jsFolhinha/blob/main/docs/setup.md)** in the **[docs](https://github.com/leafyzito/jsFolhinha/tree/main/docs)** folder.
 
 ### Development Mode
 
@@ -26,7 +26,7 @@ For development and testing without all services:
 npm install
 ```
 
-1. Run the application:
+2. Run the application:
 
 ```bash
 npm run dev
@@ -57,7 +57,7 @@ docker compose down
   - `apis/` - API integrations
   - `clients/` - Client connections
   - `commands/` - Bot commands and handlers
-  - `db/` - Database operations (`[schemas/](src/db/schemas/)` has JSON Schema per collection)
+  - `db/` - Database operations ([`schemas/`](https://github.com/leafyzito/jsFolhinha/tree/main/src/db/schemas) has JSON Schema per collection)
   - `extras/` - Extra files/functions
   - `handlers/` - Event handlers and middleware
   - `log/` - Logging functionality
@@ -79,7 +79,7 @@ The bot includes a built-in HTTP API server for monitoring and uptime tracking.
 
 ### Configuration
 
-The API server listens on port **3323** by default (see `[docker-compose.yml](docker-compose.yml)`). Override with `STATUS_PORT`:
+The API server listens on port **3323** by default (see [`docker-compose.yml`](https://github.com/leafyzito/jsFolhinha/blob/main/docker-compose.yml)). Override with `STATUS_PORT`:
 
 ```bash
 STATUS_PORT=8080
@@ -101,7 +101,7 @@ STATUS_PORT=8080
 }
 ```
 
-Exact fields may change as the handler evolves; see `[src/utils/api-server.js](src/utils/api-server.js)`.
+Exact fields may change as the handler evolves; see [`src/utils/api-server.js`](https://github.com/leafyzito/jsFolhinha/blob/main/src/utils/api-server.js).
 
 ## Code Quality
 
