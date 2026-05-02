@@ -8,7 +8,7 @@ const HLTB_USER_AGENT =
 async function fetchToken() {
   const now = Date.now();
   const response = await fb.got(
-    `https://howlongtobeat.com/api/find/init?t=${now}`,
+    `https://howlongtobeat.com/api/bleed/init?t=${now}`,
     {
       headers: {
         Origin: "https://howlongtobeat.com",
@@ -42,7 +42,7 @@ async function hltbSearch(query) {
     throw new Error("Token not fetched");
   }
 
-  const response = await fb.got(`https://howlongtobeat.com/api/find`, {
+  const response = await fb.got(`https://howlongtobeat.com/api/bleed`, {
     method: "POST",
     headers: {
       Origin: "https://howlongtobeat.com",
