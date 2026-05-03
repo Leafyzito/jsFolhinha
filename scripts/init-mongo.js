@@ -15,14 +15,11 @@ const STANDARD_COLLECTIONS = [
   "customcommands",
   "dungeon",
   "jokenpo",
-  "lastfm",
-  "letterboxd",
   "pendingjoin",
   "pet",
   "remind",
   "sugestoes",
   "users",
-  "weather",
 ];
 
 /** Indexes aligned with common fb.db.get(...) query shapes. */
@@ -33,13 +30,6 @@ const INDEX_SPECS = [
   { collection: "bans", keys: { userId: 1 }, options: { unique: true } },
   { collection: "cookie", keys: { userId: 1 }, options: { unique: true } },
   { collection: "dungeon", keys: { userId: 1 }, options: { unique: true } },
-  { collection: "weather", keys: { userId: 1 }, options: { unique: true } },
-  { collection: "lastfm", keys: { twitch_uid: 1 }, options: { unique: true } },
-  {
-    collection: "letterboxd",
-    keys: { twitch_uid: 1 },
-    options: { unique: true },
-  },
   {
     collection: "afk",
     keys: { channel: 1, user: 1 },
