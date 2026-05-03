@@ -5,9 +5,6 @@ const mongoUri = process.env.MONGO_URI;
 const clientMongo = new MongoClient(mongoUri);
 const db = clientMongo.db("folhinha");
 
-const processedConfigs = [];
-const duppedConfigs = [];
-
 // Create readline interface
 const rl = readline.createInterface({
   input: process.stdin,
@@ -30,20 +27,25 @@ function askForConfirmation() {
 async function main() {
   try {
     await clientMongo.connect();
-    const configs = await db.collection("config").find({}).toArray();
-    console.log(configs.length);
 
-    for (const config of configs) {
-      const channelId = config.channelId;
+    const duplicateGroups = await db
+      .collection("config")
+      .aggregate([
+        { $group: { _id: "$channelId", count: { $sum: 1 } } },
+        { $match: { count: { $gt: 1 } } },
+      ])
+      .toArray();
 
-      if (processedConfigs.includes(channelId)) {
-        duppedConfigs.push(channelId);
-      } else {
-        processedConfigs.push(channelId);
-      }
-    }
-
-    console.log("Duplicated configs found:", duppedConfigs);
+    const duppedConfigs = duplicateGroups.map((g) => g._id);
+    console.log(
+      "Total config docs in DB:",
+      await db.collection("config").countDocuments()
+    );
+    console.log(
+      "Duplicated channel ids found:",
+      duppedConfigs.length,
+      duppedConfigs
+    );
 
     if (duppedConfigs.length === 0) {
       console.log("No duplicated configs found. Exiting...");

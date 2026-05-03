@@ -5,9 +5,6 @@ const mongoUri = process.env.MONGO_URI;
 const clientMongo = new MongoClient(mongoUri);
 const db = clientMongo.db("folhinha");
 
-const processedUsers = [];
-const duppedUsers = [];
-
 // Create readline interface
 const rl = readline.createInterface({
   input: process.stdin,
@@ -30,20 +27,18 @@ function askForConfirmation() {
 async function main() {
   try {
     await clientMongo.connect();
-    const users = await db.collection("users").find({}).toArray();
-    console.log(users.length);
 
-    for (const user of users) {
-      const userId = user.userid;
+    const duplicateGroups = await db
+      .collection("users")
+      .aggregate([
+        { $group: { _id: "$userid", count: { $sum: 1 } } },
+        { $match: { count: { $gt: 1 } } },
+      ])
+      .toArray();
 
-      if (processedUsers.includes(userId)) {
-        duppedUsers.push(userId);
-      } else {
-        processedUsers.push(userId);
-      }
-    }
-
-    console.log("Duplicated users found:", duppedUsers);
+    const duppedUsers = duplicateGroups.map((g) => g._id);
+    console.log("Total users in DB:", await db.collection("users").countDocuments());
+    console.log("Duplicated user ids found:", duppedUsers.length, duppedUsers);
 
     if (duppedUsers.length === 0) {
       console.log("No duplicated users found. Exiting...");
