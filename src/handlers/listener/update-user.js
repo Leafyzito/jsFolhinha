@@ -114,6 +114,11 @@ const updateUserListener = async (message) => {
       optoutRemind: false,
       optoutOwnChannel: false,
       blocks: {},
+      isPlus: false,
+      isSupporter: false,
+      lastSupportDate: null,
+      totalDonated: 0,
+      connections: {},
     })
     .catch((err) => {
       fb.discord.importantLog(

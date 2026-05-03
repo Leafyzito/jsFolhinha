@@ -16,7 +16,8 @@
     "optoutStalk",
     "optoutRemind",
     "optoutOwnChannel",
-    "blocks"
+    "blocks",
+    "connections"
   ],
   "properties": {
     "_id": { "bsonType": "objectId" },
@@ -78,6 +79,56 @@
           "bsonType": "array",
           "description": "Twitch user ids the user has blocked from sending them reminders",
           "items": { "bsonType": "string" }
+        }
+      }
+    },
+    "connections": {
+      "bsonType": "object",
+      "description": "Linked third-party accounts / saved per-user settings. Initialized to {} on user creation; sub-keys are added on demand by the relevant !set commands. Replaces the legacy `weather`, `lastfm`, `letterboxd` collections.",
+      "properties": {
+        "weather": {
+          "bsonType": "object",
+          "description": "Saved weather location, used by !weather and !time. Mirrors the legacy `weather` collection.",
+          "required": ["location", "secret"],
+          "properties": {
+            "location": {
+              "bsonType": "string",
+              "description": "Free-form location string (city, region, country, ...)"
+            },
+            "secret": {
+              "bsonType": "bool",
+              "description": "When true, the location is hidden from other users' weather lookups"
+            }
+          }
+        },
+        "lastfm": {
+          "bsonType": "object",
+          "description": "Last.fm / Stats.fm linkage, used by !song and friends. Mirrors the legacy `lastfm` collection.",
+          "properties": {
+            "lastfm_user": {
+              "bsonType": ["string", "null"],
+              "description": "Last.fm username, or null when only Stats.fm is set"
+            },
+            "statsfm_user": {
+              "bsonType": ["string", "null"],
+              "description": "Stats.fm username, or null when not linked"
+            },
+            "use_statsfm": {
+              "bsonType": "bool",
+              "description": "When true, prefer Stats.fm over Last.fm for lookups"
+            }
+          }
+        },
+        "letterboxd": {
+          "bsonType": "object",
+          "description": "Letterboxd account linkage. Mirrors the legacy `letterboxd` collection.",
+          "required": ["letterboxd_user"],
+          "properties": {
+            "letterboxd_user": {
+              "bsonType": "string",
+              "description": "Letterboxd username (the path segment after letterboxd.com/)"
+            }
+          }
         }
       }
     },

@@ -34,14 +34,11 @@ The filename matches the collection name 1:1 (e.g. `afk.json` →
 | `customcommands.json` | yes                                    | Per-channel user-defined commands                       |
 | `dungeon.json`        | yes                                    | Per-user dungeon game stats                             |
 | `jokenpo.json`        | **no** — legacy data, no writes        | Old jokenpo win/loss stats                              |
-| `lastfm.json`         | yes                                    | Last.fm / stats.fm linkage by Twitch user id            |
-| `letterboxd.json`     | yes                                    | Letterboxd linkage by Twitch user id                    |
 | `pendingjoin.json`    | updates only — **inserted by website** | Channel join requests coming from folhinhabot.com       |
 | `pet.json`            | yes                                    | One pet per channel                                     |
 | `remind.json`         | yes                                    | Reminders. `_id` is a numeric auto-incremented counter  |
 | `sugestoes.json`      | yes                                    | User suggestions. `_id` is a numeric counter            |
-| `users.json`          | yes                                    | Per-user state (aliases, optouts, lastseen, plus, ...)  |
-| `weather.json`        | yes                                    | Saved weather location per user                         |
+| `users.json`          | yes                                    | Per-user state (aliases, optouts, lastseen, plus, connections, ...) |
 
 ## Conventions
 

@@ -95,15 +95,16 @@ const timeCommand = async (message) => {
 
   // Get location from database if not provided
   if (!targetLocation) {
-    const userWeatherDb = await fb.db.get("weather", {
-      userId: message.senderUserID,
+    const userDoc = await fb.db.get("users", {
+      userid: message.senderUserID,
     });
-    if (!userWeatherDb) {
+    const savedWeather = userDoc?.connections?.weather;
+    if (!savedWeather?.location) {
       return {
         reply: `Você ainda não configurou uma localização. Use ${message.prefix}weather set <localização> para configurar`,
       };
     }
-    targetLocation = userWeatherDb.location;
+    targetLocation = savedWeather.location;
     usedDbInfo = true;
   }
 
@@ -129,10 +130,10 @@ const timeCommand = async (message) => {
 
   // Hide location if user has it marked as secret
   if (usedDbInfo) {
-    const userWeatherDb = await fb.db.get("weather", {
-      userId: message.senderUserID,
+    const userDoc = await fb.db.get("users", {
+      userid: message.senderUserID,
     });
-    if (userWeatherDb.secret) {
+    if (userDoc?.connections?.weather?.secret) {
       timeInfo.displayName = "(Localização escondida)";
     }
   }

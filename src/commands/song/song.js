@@ -99,31 +99,19 @@ const songCommand = async (message) => {
         };
       }
 
-      // check if lastfm user is already set in db
-      const matchFromDb = await fb.db.get("lastfm", {
-        twitch_uid: message.senderUserID,
-      });
-      if (matchFromDb) {
-        // if already set, update
-        await fb.db.update(
-          "lastfm",
-          { twitch_uid: message.senderUserID },
-          {
-            $set: {
-              statsfm_user: userToSet.replace(/^statsfm:/, ""),
-              use_statsfm: true,
-            },
-          }
-        );
-      } else {
-        // if not set, insert
-        await fb.db.insert("lastfm", {
-          twitch_uid: message.senderUserID,
-          lastfm_user: null,
-          statsfm_user: userToSet.replace(/^statsfm:/, ""),
-          use_statsfm: true,
-        });
-      }
+      await fb.db.update(
+        "users",
+        { userid: message.senderUserID },
+        {
+          $set: {
+            "connections.lastfm.statsfm_user": userToSet.replace(
+              /^statsfm:/,
+              ""
+            ),
+            "connections.lastfm.use_statsfm": true,
+          },
+        }
+      );
 
       const emote = await fb.emotes.getEmoteFromList(
         message.channelName,
@@ -143,25 +131,16 @@ const songCommand = async (message) => {
       };
     }
 
-    // check if lastfm user is already set in db
-    const matchFromDb = await fb.db.get("lastfm", {
-      twitch_uid: message.senderUserID,
-    });
-    if (matchFromDb) {
-      // if already set, update
-      await fb.db.update(
-        "lastfm",
-        { twitch_uid: message.senderUserID },
-        { $set: { lastfm_user: userToSet, use_statsfm: false } }
-      );
-    } else {
-      // if not set, insert
-      await fb.db.insert("lastfm", {
-        twitch_uid: message.senderUserID,
-        lastfm_user: userToSet,
-        use_statsfm: false,
-      });
-    }
+    await fb.db.update(
+      "users",
+      { userid: message.senderUserID },
+      {
+        $set: {
+          "connections.lastfm.lastfm_user": userToSet,
+          "connections.lastfm.use_statsfm": false,
+        },
+      }
+    );
 
     const emote = await fb.emotes.getEmoteFromList(
       message.channelName,
@@ -183,22 +162,26 @@ const songCommand = async (message) => {
         ? (await fb.api.helix.getUserByUsername(statsTarget))?.id
         : message.senderUserID;
 
-    const statsTargetUser = await fb.db.get("lastfm", {
-      twitch_uid: statsTargetId,
+    const statsTargetDoc = await fb.db.get("users", {
+      userid: statsTargetId,
     });
-    if (!statsTargetUser) {
+    const statsTargetLastfm = statsTargetDoc?.connections?.lastfm;
+    if (
+      !statsTargetLastfm ||
+      (!statsTargetLastfm.lastfm_user && !statsTargetLastfm.statsfm_user)
+    ) {
       return {
         reply: `O usuário ${statsTarget} não registou a sua conta no bot. Se estiver com dúvidas sobre o comando, acesse https://folhinhabot.com/comandos/song 😁`,
       };
     }
 
-    if (!statsTargetUser.use_statsfm || !statsTargetUser.statsfm_user) {
+    if (!statsTargetLastfm.use_statsfm || !statsTargetLastfm.statsfm_user) {
       return {
         reply: `O comando de estatísticas é limitado a usuários que usam Stats.fm. Se estiver com dúvidas sobre o comando, acesse https://folhinhabot.com/comandos/song 😁`,
       };
     }
 
-    const statsInfo = await getStatsfmStats(statsTargetUser.statsfm_user);
+    const statsInfo = await getStatsfmStats(statsTargetLastfm.statsfm_user);
     if (statsInfo === null) {
       return {
         reply: `O usuário ${statsTarget} não está registrado no Stats.fm. Se estiver com dúvidas sobre o comando, acesse https://folhinhabot.com/comandos/song 😁`,
@@ -223,13 +206,14 @@ const songCommand = async (message) => {
   let fmUser = songTarget;
   let isStatsFm = false;
   if (songTargetId) {
-    const matchFromDb = await fb.db.get("lastfm", { twitch_uid: songTargetId });
-    if (matchFromDb) {
-      if (matchFromDb.use_statsfm) {
-        fmUser = matchFromDb.statsfm_user;
+    const userDoc = await fb.db.get("users", { userid: songTargetId });
+    const lastfmConn = userDoc?.connections?.lastfm;
+    if (lastfmConn) {
+      if (lastfmConn.use_statsfm) {
+        fmUser = lastfmConn.statsfm_user;
         isStatsFm = true;
       } else {
-        fmUser = matchFromDb.lastfm_user;
+        fmUser = lastfmConn.lastfm_user;
       }
     }
   }

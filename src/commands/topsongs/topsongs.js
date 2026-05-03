@@ -104,13 +104,14 @@ const topSongsCommand = async (message) => {
   let fmUser = songTarget;
   let isStatsFm = false;
   if (songTargetId) {
-    const matchFromDb = await fb.db.get("lastfm", { twitch_uid: songTargetId });
-    if (matchFromDb) {
-      if (matchFromDb.use_statsfm) {
-        fmUser = matchFromDb.statsfm_user;
+    const userDoc = await fb.db.get("users", { userid: songTargetId });
+    const lastfmConn = userDoc?.connections?.lastfm;
+    if (lastfmConn) {
+      if (lastfmConn.use_statsfm) {
+        fmUser = lastfmConn.statsfm_user;
         isStatsFm = true;
       } else {
-        fmUser = matchFromDb.lastfm_user;
+        fmUser = lastfmConn.lastfm_user;
       }
     }
   }

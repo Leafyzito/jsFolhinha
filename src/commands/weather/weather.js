@@ -92,16 +92,16 @@ const weatherCommand = async (message) => {
   let usedDbInfo = false;
 
   if (!weatherTargetLocation) {
-    // get weather location from db
-    const userWeatherDb = await fb.db.get("weather", {
-      userId: message.senderUserID,
+    const userDoc = await fb.db.get("users", {
+      userid: message.senderUserID,
     });
-    if (!userWeatherDb) {
+    const savedWeather = userDoc?.connections?.weather;
+    if (!savedWeather?.location) {
       return {
         reply: `Você ainda não configurou uma localização. Use ${message.prefix}weather set <localização> para configurar`,
       };
     }
-    weatherTargetLocation = userWeatherDb.location;
+    weatherTargetLocation = savedWeather.location;
     usedDbInfo = true;
   }
 
@@ -114,19 +114,20 @@ const weatherCommand = async (message) => {
     }
 
     if (["secret", "secreto"].includes(location.toLowerCase())) {
-      const userWeatherDb = await fb.db.get("weather", {
-        userId: message.senderUserID,
+      const userDoc = await fb.db.get("users", {
+        userid: message.senderUserID,
       });
-      if (!userWeatherDb) {
+      const savedWeather = userDoc?.connections?.weather;
+      if (!savedWeather?.location) {
         return {
           reply: `Você ainda não configurou uma localização. Use ${message.prefix}weather set <localização> para configurar`,
         };
       }
-      const currentSecretState = userWeatherDb.secret;
+      const currentSecretState = savedWeather.secret;
       await fb.db.update(
-        "weather",
-        { userId: message.senderUserID },
-        { $set: { secret: !currentSecretState } }
+        "users",
+        { userid: message.senderUserID },
+        { $set: { "connections.weather.secret": !currentSecretState } }
       );
 
       const emote = await fb.emotes.getEmoteFromList(
@@ -141,15 +142,16 @@ const weatherCommand = async (message) => {
       };
     }
 
-    const userWeatherDb = await fb.db.get("weather", {
-      userId: message.senderUserID,
+    const userDoc = await fb.db.get("users", {
+      userid: message.senderUserID,
     });
-    if (!userWeatherDb) {
-      await fb.db.insert("weather", {
-        userId: message.senderUserID,
-        location: location,
-        secret: false,
-      });
+    const savedWeather = userDoc?.connections?.weather;
+    if (!savedWeather?.location) {
+      await fb.db.update(
+        "users",
+        { userid: message.senderUserID },
+        { $set: { "connections.weather": { location, secret: false } } }
+      );
 
       const emote = await fb.emotes.getEmoteFromList(
         message.channelName,
@@ -161,9 +163,9 @@ const weatherCommand = async (message) => {
       };
     }
     await fb.db.update(
-      "weather",
-      { userId: message.senderUserID },
-      { $set: { location: location } }
+      "users",
+      { userid: message.senderUserID },
+      { $set: { "connections.weather.location": location } }
     );
 
     const emote = await fb.emotes.getEmoteFromList(
@@ -183,11 +185,13 @@ const weatherCommand = async (message) => {
     };
   }
 
-  const userWeatherDb = await fb.db.get("weather", {
-    userId: message.senderUserID,
-  });
-  if (usedDbInfo && userWeatherDb.secret) {
-    weatherInfo.displayName = "(Localização escondida)";
+  if (usedDbInfo) {
+    const userDoc = await fb.db.get("users", {
+      userid: message.senderUserID,
+    });
+    if (userDoc?.connections?.weather?.secret) {
+      weatherInfo.displayName = "(Localização escondida)";
+    }
   }
 
   return {

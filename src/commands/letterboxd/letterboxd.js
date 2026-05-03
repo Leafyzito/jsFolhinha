@@ -120,21 +120,11 @@ const letterboxdCommand = async (message) => {
       };
     }
 
-    const matchFromDb = await fb.db.get("letterboxd", {
-      twitch_uid: message.senderUserID,
-    });
-    if (matchFromDb) {
-      await fb.db.update(
-        "letterboxd",
-        { twitch_uid: message.senderUserID },
-        { $set: { letterboxd_user: userToSet } }
-      );
-    } else {
-      await fb.db.insert("letterboxd", {
-        twitch_uid: message.senderUserID,
-        letterboxd_user: userToSet,
-      });
-    }
+    await fb.db.update(
+      "users",
+      { userid: message.senderUserID },
+      { $set: { "connections.letterboxd.letterboxd_user": userToSet } }
+    );
 
     const emote = await fb.emotes.getEmoteFromList(
       message.channelName,
@@ -150,27 +140,27 @@ const letterboxdCommand = async (message) => {
   let whoLabel;
 
   if (!lbTarget) {
-    const fromDb = await fb.db.get("letterboxd", {
-      twitch_uid: message.senderUserID,
+    const userDoc = await fb.db.get("users", {
+      userid: message.senderUserID,
     });
-    if (!fromDb?.letterboxd_user) {
+    const savedLetterboxd = userDoc?.connections?.letterboxd?.letterboxd_user;
+    if (!savedLetterboxd) {
       return {
         reply: `Você ainda não configurou o Letterboxd no bot. Use ${message.prefix}lbx set usuario_do_letterboxd`,
       };
     }
-    lbUser = fromDb.letterboxd_user;
+    lbUser = savedLetterboxd;
     whoLabel = "Você";
   } else {
     const twitchUser = await fb.api.helix.getUserByUsername(lbTarget);
-    let fromDb = null;
+    let savedLetterboxd = null;
     if (twitchUser?.id) {
-      fromDb = await fb.db.get("letterboxd", {
-        twitch_uid: twitchUser.id,
-      });
+      const userDoc = await fb.db.get("users", { userid: twitchUser.id });
+      savedLetterboxd = userDoc?.connections?.letterboxd?.letterboxd_user;
     }
 
-    if (fromDb?.letterboxd_user) {
-      lbUser = fromDb.letterboxd_user;
+    if (savedLetterboxd) {
+      lbUser = savedLetterboxd;
       whoLabel = twitchUser?.displayName || lbTarget;
     } else {
       lbUser = lbTarget;
