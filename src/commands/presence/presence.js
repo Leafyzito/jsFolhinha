@@ -28,7 +28,7 @@ const presenceCommand = async (message) => {
     };
   }
 
-  await fb.api.stv.updatePresence(sevenTvUserId, message.channelID, true);
+  fb.api.stv.updatePresence(sevenTvUserId, message.channelID, true);
 
   const emote = await fb.emotes.getEmoteFromList(
     message.channelName,
