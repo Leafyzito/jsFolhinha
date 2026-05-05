@@ -36,10 +36,12 @@ class MongoUtils {
     this.isConnected = false;
 
     // Initialize Redis client (or local cache if env vars are missing)
+    const redisPrefix = (process.env.REDIS_PREFIX || "").trim();
     this.redis = new RedisClient(
       redisHost || "localhost",
       redisPort || "6379",
-      shouldUseRedis
+      shouldUseRedis,
+      redisPrefix
     );
 
     // Initialize cache containers
