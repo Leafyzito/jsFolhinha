@@ -84,10 +84,28 @@ module.exports = async function onMessage(channel, username, text, message) {
     enumerable: true,
   });
 
-  // Set prefix based on config or defaults
-  // For non-command messages, use default prefix
+  const isProd = process.env.ENV === "prod";
+  const configuredPrefixes = isProd
+    ? Array.isArray(channelData?.prefix) && channelData.prefix.length > 0
+      ? channelData.prefix
+      : ["!"]
+    : ["!!"];
+
+  const sortedPrefixes = [...configuredPrefixes].sort(
+    (a, b) => b.length - a.length
+  );
+  const matchedPrefix =
+    sortedPrefixes.find((p) => message.messageText.startsWith(p)) ??
+    configuredPrefixes[0];
+
+  Object.defineProperty(message, "prefixes", {
+    value: configuredPrefixes,
+    writable: true,
+    configurable: true,
+    enumerable: true,
+  });
   Object.defineProperty(message, "prefix", {
-    value: process.env.ENV === "prod" ? channelData?.prefix || "!" : "!!",
+    value: matchedPrefix,
     writable: true,
     configurable: true,
     enumerable: true,

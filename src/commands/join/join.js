@@ -5,10 +5,19 @@ const joinCommand = async (message) => {
   );
 
   if (alreadyJoinedChannels.includes(channelToJoin)) {
+    const channelConfig = await fb.db.get("config", {
+      channel: channelToJoin,
+    });
+    const channelPrefixes =
+      Array.isArray(channelConfig?.prefix) && channelConfig.prefix.length > 0
+        ? channelConfig.prefix
+        : ["!"];
+    const prefixLabel =
+      channelPrefixes.length > 1
+        ? `os meus prefixos lá são ${channelPrefixes.join(" ")}`
+        : `o meu prefixo lá é ${channelPrefixes[0]}`;
     return {
-      reply: `Eu já estou no seu chat! O meu prefixo lá é ${
-        (await fb.db.get("config", { channel: channelToJoin }))?.prefix || "!"
-      }`,
+      reply: `Eu já estou no seu chat! ${prefixLabel}`,
     };
   }
 

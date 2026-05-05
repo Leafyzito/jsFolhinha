@@ -2,6 +2,7 @@ const { commandHandler } = require("../../../handlers");
 
 module.exports = function onWhisper(message) {
   message.prefix = "!";
+  message.prefixes = ["!"];
   message.internalTimestamp = new Date().getTime();
   message.serverTimestamp = new Date();
   message.serverTimestampRaw = new Date().getTime();

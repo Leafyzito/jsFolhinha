@@ -25,7 +25,7 @@ const replyMentionListener = async (message) => {
     return;
   }
 
-  if (message.messageText.startsWith(message.prefix)) {
+  if (message.prefixes?.some((p) => message.messageText.startsWith(p))) {
     return;
   }
 
@@ -66,7 +66,7 @@ const replyMentionListener = async (message) => {
       const emote = await fb.emotes.getEmoteFromList(
         message.channelName,
         GREETING_EMOTES,
-        "KonCha",
+        "KonCha"
       );
 
       fb.log.send(message.channelName, `Oioi ${message.displayName} ${emote}`);
@@ -100,7 +100,7 @@ const notifyDevMentionListener = async (message) => {
           // Remove any non-alphanumeric characters from both the word and mention
           const cleanWord = word.replace(/[^a-zA-Z0-9]/g, "");
           return cleanWord === mention.toLowerCase();
-        }),
+        })
       )
   ) {
     fb.discord.notifyDevMention(message);

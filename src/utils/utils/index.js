@@ -353,7 +353,7 @@ class Utils {
     const newConfig = {
       channel: channelName,
       channelId: channelId,
-      prefix: "!",
+      prefix: ["!"],
       offlineOnly: false,
       emoteStreak: false,
       isPaused: false,

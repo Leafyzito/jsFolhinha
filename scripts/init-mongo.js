@@ -132,7 +132,7 @@ function buildInitialBotConfig(channelId, channelLogin) {
   return {
     channel: channelLogin.trim().toLowerCase(),
     channelId: String(channelId).trim(),
-    prefix: "!",
+    prefix: ["!"],
     offlineOnly: false,
     emoteStreak: false,
     isPaused: false,

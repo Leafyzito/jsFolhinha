@@ -21,32 +21,43 @@ const configCommand = async (message) => {
   // MARKER: prefix
   if (["prefixo", "prefix"].includes(configTarget)) {
     if (message.args.length < 3) {
+      const currentPrefixes = message.prefixes || ["!"];
       return {
-        reply: `Use o formato: ${
+        reply: `Prefixos atuais: ${currentPrefixes.join(" ")}. Use o formato: ${
           message.prefix
-        }config prefixo <prefixo>. Prefixos disponíveis: ${fb.utils
+        }config prefixo <prefixo1> [prefixo2] ... Prefixos disponíveis: ${fb.utils
           .validPrefixes()
           .join("")}`,
       };
     }
-    const chosenPrefix = message.args[2];
 
-    if (!fb.utils.validPrefixes().includes(chosenPrefix)) {
+    const requestedPrefixes = message.args.slice(2);
+    const validPrefixes = fb.utils.validPrefixes();
+    const invalid = requestedPrefixes.filter((p) => !validPrefixes.includes(p));
+
+    if (invalid.length > 0) {
       return {
-        reply: `Prefixo inválido. Prefixos disponíveis: ${fb.utils
-          .validPrefixes()
-          .join("")}`,
+        reply: `Prefixo(s) inválido(s): ${invalid.join(
+          " "
+        )}. Prefixos disponíveis: ${validPrefixes.join("")}`,
+      };
+    }
+
+    const dedupedPrefixes = [...new Set(requestedPrefixes)];
+    if (dedupedPrefixes.length === 0) {
+      return {
+        reply: `Você precisa fornecer pelo menos um prefixo`,
       };
     }
 
     await fb.db.update(
       "config",
       { channelId: message.channelID },
-      { $set: { prefix: chosenPrefix } }
+      { $set: { prefix: dedupedPrefixes } }
     );
 
     return {
-      reply: `Prefixo atualizado para ${chosenPrefix}`,
+      reply: `Prefixo(s) atualizado(s) para: ${dedupedPrefixes.join(" ")}`,
     };
   }
 
@@ -256,9 +267,12 @@ configCommand.whisperable = false;
 configCommand.description = `Mude algumas configurações do bot para o chat atual
 Para uma forma mais intuitiva de mudar as configurações do bot, veja o Dashboard no site
 
-Caso queira trocar o prefixo do bot, pode usar o comando !config prefixo {prefixo}, sendo a lista de prefixos válidos:
+Caso queira trocar os prefixos do bot, pode usar o comando !config prefixo {prefixo1} {prefixo2} ..., sendo a lista de prefixos válidos:
 ?&%+*-=|@#$~\\_,;<>
-• Exemplo: !config prefixo ? - Muda o prefixo do bot para "?"
+O bot aceita múltiplos prefixos ao mesmo tempo. Cada execução do comando substitui a lista inteira (é necessário pelo menos 1 prefixo)
+• Exemplo: !config prefixo ? - Define o prefixo do bot apenas como "?"
+• Exemplo: !config prefixo ! ? - Define os prefixos do bot como "!" e "?"
+• Use !config prefixo (sem argumentos) para ver os prefixos atuais
 
 Caso deseje desativar algum comando no chat, pode usar !config ban {comando} ou !config unban {comando} para reabilitá-lo
 • Exemplo: !config ban piada - Desativa o comando "piada" no canal

@@ -17,7 +17,9 @@
     "thankSubs"
   ],
   "properties": {
-    "_id": { "bsonType": "objectId" },
+    "_id": {
+      "bsonType": "objectId"
+    },
     "channel": {
       "bsonType": "string",
       "description": "Channel login (kept in sync on rename via user-update event)"
@@ -27,8 +29,12 @@
       "description": "Channel Twitch user id (immutable)"
     },
     "prefix": {
-      "bsonType": "string",
-      "description": "Command prefix character(s), e.g. '!' or '?'"
+      "bsonType": "array",
+      "minItems": 1,
+      "items": {
+        "bsonType": "string"
+      },
+      "description": "Command prefix character(s) the channel accepts, e.g. ['!'] or ['!', '?']"
     },
     "offlineOnly": {
       "bsonType": "bool",
@@ -41,25 +47,41 @@
     "disabledCommands": {
       "bsonType": "array",
       "description": "Command names disabled by the broadcaster",
-      "items": { "bsonType": "string" }
+      "items": {
+        "bsonType": "string"
+      }
     },
     "devBanCommands": {
       "bsonType": "array",
       "description": "Command names disabled by a dev (overrides broadcaster)",
-      "items": { "bsonType": "string" }
+      "items": {
+        "bsonType": "string"
+      }
     },
     "commandSetting": {
       "bsonType": "object",
       "description": "Per-command tunables for this channel",
       "properties": {
-        "maxPiramide": { "bsonType": ["int", "long"] }
+        "maxPiramide": {
+          "bsonType": ["int", "long"]
+        }
       }
     },
-    "emoteStreak": { "bsonType": "bool" },
-    "thankFollows": { "bsonType": "bool" },
-    "thankSubs": { "bsonType": "bool" },
-    "botIsMod": { "bsonType": "bool" },
-    "botIsVip": { "bsonType": "bool" },
+    "emoteStreak": {
+      "bsonType": "bool"
+    },
+    "thankFollows": {
+      "bsonType": "bool"
+    },
+    "thankSubs": {
+      "bsonType": "bool"
+    },
+    "botIsMod": {
+      "bsonType": "bool"
+    },
+    "botIsVip": {
+      "bsonType": "bool"
+    },
     "state": {
       "bsonType": "string",
       "description": "Lifecycle state (e.g. 'active')"
@@ -68,9 +90,15 @@
       "bsonType": "object",
       "description": "Optional custom thank-you messages. Tokens supported: {user}, {emote}, {months}",
       "properties": {
-        "follow": { "bsonType": "string" },
-        "newSub": { "bsonType": "string" },
-        "resub": { "bsonType": "string" }
+        "follow": {
+          "bsonType": "string"
+        },
+        "newSub": {
+          "bsonType": "string"
+        },
+        "resub": {
+          "bsonType": "string"
+        }
       }
     }
   }
