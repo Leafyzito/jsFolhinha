@@ -119,12 +119,11 @@ const configCommand = async (message) => {
 
   // MARKER: offline
   if (["offline", "online"].includes(configTarget)) {
-    const channelConfig =
-      message.channelConfig ||
-      (await fb.db.get("config", {
+    const currState = (
+      await fb.db.get("config", {
         channelId: message.channelID,
-      }));
-    const currState = channelConfig?.offlineOnly;
+      })
+    ).offlineOnly;
     await fb.db.update(
       "config",
       { channelId: message.channelID },
@@ -144,12 +143,11 @@ const configCommand = async (message) => {
 
   // MARKER: emote streak
   if (["emotestreak", "emote"].includes(configTarget)) {
-    const channelConfig =
-      message.channelConfig ||
-      (await fb.db.get("config", {
+    const currState = (
+      await fb.db.get("config", {
         channelId: message.channelID,
-      }));
-    const currState = channelConfig?.emoteStreak;
+      })
+    ).emoteStreak;
     await fb.db.update(
       "config",
       { channelId: message.channelID },
@@ -186,12 +184,11 @@ const configCommand = async (message) => {
       };
     } else {
       // Toggle the boolean
-      const channelConfig =
-        message.channelConfig ||
-        (await fb.db.get("config", {
+      const currState = (
+        await fb.db.get("config", {
           channelId: message.channelID,
-        }));
-      const currState = channelConfig?.thankFollows;
+        })
+      ).thankFollows;
       await fb.db.update(
         "config",
         { channelId: message.channelID },
@@ -231,12 +228,11 @@ const configCommand = async (message) => {
       };
     } else {
       // Toggle the boolean
-      const channelConfig =
-        message.channelConfig ||
-        (await fb.db.get("config", {
+      const currState = (
+        await fb.db.get("config", {
           channelId: message.channelID,
-        }));
-      const currState = channelConfig?.thankSubs;
+        })
+      ).thankSubs;
       await fb.db.update(
         "config",
         { channelId: message.channelID },

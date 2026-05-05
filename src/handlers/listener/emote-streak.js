@@ -60,7 +60,11 @@ function announceStreak(channelName, streakData) {
 const emoteStreakListener = async (message) => {
   if (await shouldSkipMessage(message)) return;
 
-  const channelData = message.channelConfig;
+  const channelData =
+    message.channelConfig ||
+    (await fb.db.get("config", {
+      channelId: message.channelID,
+    }));
 
   if (!channelData || !channelData.emoteStreak) return;
 

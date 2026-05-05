@@ -5,17 +5,9 @@ const joinCommand = async (message) => {
   );
 
   if (alreadyJoinedChannels.includes(channelToJoin)) {
-    const canReuseMessageConfig =
-      message.channelConfig &&
-      message.channelConfig.channel &&
-      message.channelConfig.channel.toLowerCase() ===
-        channelToJoin.toLowerCase();
-
-    const channelConfig = canReuseMessageConfig
-      ? message.channelConfig
-      : await fb.db.get("config", {
-          channel: channelToJoin,
-        });
+    const channelConfig = await fb.db.get("config", {
+      channel: channelToJoin,
+    });
     const channelPrefixes =
       Array.isArray(channelConfig?.prefix) && channelConfig.prefix.length > 0
         ? channelConfig.prefix

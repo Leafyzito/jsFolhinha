@@ -1,12 +1,11 @@
 const { createClient } = require("redis");
 
 class RedisClient {
-  constructor(host, port, shouldUseRedis = true, redisPrefix = "") {
+  constructor(host, port, shouldUseRedis = true) {
     this.host = host;
     this.port = port;
     this.redisConnecting = false;
     this.cacheTTL = 24 * 60 * 60; // 24 hours in seconds
-    this.redisPrefix = redisPrefix;
 
     // Initialize local cache as fallback
     this.localCache = new Map(); // key -> { value, expiresAt }
@@ -184,51 +183,12 @@ class RedisClient {
     }
   }
 
-  normalizePrefix(prefix) {
-    if (!prefix) return "";
-    return prefix.endsWith(":") ? prefix : `${prefix}:`;
-  }
-
-  get prefix() {
-    // normalize lazily so callers can set REDIS_PREFIX without colon
-    this.redisPrefix = this.normalizePrefix(this.redisPrefix);
-    return this.redisPrefix;
-  }
-
-  serializeId(id) {
-    if (id === null || id === undefined) return "";
-    if (typeof id === "string" || typeof id === "number") return String(id);
-    if (typeof id === "object" && typeof id.toString === "function") {
-      const s = id.toString();
-      // Guard against "[object Object]" for random objects
-      if (s && s !== "[object Object]") return s;
-    }
-    return JSON.stringify(id);
-  }
-
-  serializeIndexValue(v) {
-    if (v === null || v === undefined) return "";
-    if (typeof v === "string") return v;
-    if (typeof v === "number" || typeof v === "boolean") return String(v);
-    return JSON.stringify(v);
-  }
-
   getCacheKey(collectionName, documentId) {
-    return `${this.prefix}cache:${collectionName}:${this.serializeId(documentId)}`;
+    return `cache:${collectionName}:${JSON.stringify(documentId)}`;
   }
 
   getStatsKey(collectionName, statType) {
-    return `${this.prefix}stats:${collectionName}:${statType}`;
-  }
-
-  getRevKey(collectionName, documentId) {
-    return `${this.prefix}rev:${collectionName}:${this.serializeId(documentId)}`;
-  }
-
-  getIdxKey(collectionName, indexName, indexValue) {
-    return `${this.prefix}idx:${collectionName}:${indexName}:${this.serializeIndexValue(
-      indexValue
-    )}`;
+    return `stats:${collectionName}:${statType}`;
   }
 
   async incrementStat(collectionName, statType) {
@@ -287,35 +247,11 @@ class RedisClient {
     try {
       await this.ensureRedisConnection();
       const key = this.getCacheKey(collectionName, documentId);
-      const revKey = this.getRevKey(collectionName, documentId);
-
-      // Remove prior index keys (if any) for correctness on updates/renames
-      const oldRev = await this.redisClient.get(revKey);
-      if (oldRev) {
-        try {
-          const oldKeys = JSON.parse(oldRev);
-          if (Array.isArray(oldKeys) && oldKeys.length > 0) {
-            await this.redisClient.del(oldKeys);
-          }
-        } catch {
-          // ignore invalid old reverse data
-        }
-      }
-
-      const { idxWrites, idxKeys } = this.buildIndexWrites(
-        collectionName,
-        documentId,
-        document
+      await this.redisClient.setEx(
+        key,
+        this.cacheTTL,
+        JSON.stringify(document)
       );
-
-      const multi = this.redisClient.multi();
-      multi.setEx(key, this.cacheTTL, JSON.stringify(document));
-      if (idxWrites.length > 0) {
-        for (const op of idxWrites) op(multi);
-      }
-      // Store reverse pointers so deleteCache can cleanup index keys
-      multi.setEx(revKey, this.cacheTTL, JSON.stringify(idxKeys));
-      await multi.exec();
     } catch {
       // Fallback to local cache on error
       if (!this.useLocalCache) {
@@ -379,21 +315,7 @@ class RedisClient {
     try {
       await this.ensureRedisConnection();
       const key = this.getCacheKey(collectionName, documentId);
-      const revKey = this.getRevKey(collectionName, documentId);
-
-      const rev = await this.redisClient.get(revKey);
-      if (rev) {
-        try {
-          const idxKeys = JSON.parse(rev);
-          if (Array.isArray(idxKeys) && idxKeys.length > 0) {
-            await this.redisClient.del(idxKeys);
-          }
-        } catch {
-          // ignore invalid JSON
-        }
-      }
-
-      await this.redisClient.del(key, revKey);
+      await this.redisClient.del(key);
     } catch {
       // Fallback to local cache on error
       if (!this.useLocalCache) {
@@ -419,12 +341,9 @@ class RedisClient {
 
     try {
       await this.ensureRedisConnection();
-      const pattern = `${this.prefix}cache:${collectionName}:*`;
-      let count = 0;
-      for await (const _key of this.scanKeys(pattern)) {
-        count++;
-      }
-      return count;
+      const pattern = `cache:${collectionName}:*`;
+      const keys = await this.redisClient.keys(pattern);
+      return keys.length;
     } catch {
       // Fallback to local cache on error
       if (!this.useLocalCache) {
@@ -513,51 +432,49 @@ class RedisClient {
           return [];
         }
 
-        // Indexed single-field fast paths
-        const fast = await this.searchViaIndex(collectionName, query);
-        if (fast !== null) {
-          return fast;
-        }
+        // For other single field queries, search all cached documents
+        const pattern = `cache:${collectionName}:*`;
+        const keys = await this.redisClient.keys(pattern);
 
-        // Fallback: scan all cached documents (SCAN, not KEYS)
-        for await (const cacheKey of this.scanKeys(
-          `${this.prefix}cache:${collectionName}:*`
-        )) {
+        for (const cacheKey of keys) {
           const docStr = await this.redisClient.get(cacheKey);
-          if (!docStr) continue;
-          try {
-            const doc = JSON.parse(docStr);
-            if (doc && doc[key] === value) matches.push(doc);
-          } catch {
-            // Skip invalid JSON
+          if (docStr) {
+            try {
+              const doc = JSON.parse(docStr);
+              if (doc[key] === value) {
+                matches.push(doc);
+              }
+            } catch {
+              // Skip invalid JSON
+              continue;
+            }
           }
         }
         return matches;
       } else {
-        // Indexed multi-field fast paths (e.g., customcommands {channelId,name})
-        const fast = await this.searchViaIndex(collectionName, query);
-        if (fast !== null) {
-          return fast;
-        }
+        // For multi-field queries, search all cached documents
+        const pattern = `cache:${collectionName}:*`;
+        const keys = await this.redisClient.keys(pattern);
 
-        // Fallback: scan all cached documents (SCAN, not KEYS)
-        for await (const cacheKey of this.scanKeys(
-          `${this.prefix}cache:${collectionName}:*`
-        )) {
+        for (const cacheKey of keys) {
           const docStr = await this.redisClient.get(cacheKey);
-          if (!docStr) continue;
-          try {
-            const doc = JSON.parse(docStr);
-            let isMatch = true;
-            for (const [k, v] of Object.entries(query)) {
-              if (!doc || doc[k] !== v) {
-                isMatch = false;
-                break;
+          if (docStr) {
+            try {
+              const doc = JSON.parse(docStr);
+              let isMatch = true;
+              for (const [key, value] of Object.entries(query)) {
+                if (doc[key] !== value) {
+                  isMatch = false;
+                  break;
+                }
               }
+              if (isMatch) {
+                matches.push(doc);
+              }
+            } catch {
+              // Skip invalid JSON
+              continue;
             }
-            if (isMatch) matches.push(doc);
-          } catch {
-            // Skip invalid JSON
           }
         }
         return matches;
@@ -668,9 +585,11 @@ class RedisClient {
     try {
       await this.ensureRedisConnection();
       if (collectionName) {
-        await this.delByPattern(`${this.prefix}cache:${collectionName}:*`);
-        await this.delByPattern(`${this.prefix}idx:${collectionName}:*`);
-        await this.delByPattern(`${this.prefix}rev:${collectionName}:*`);
+        const pattern = `cache:${collectionName}:*`;
+        const keys = await this.redisClient.keys(pattern);
+        if (keys.length > 0) {
+          await this.redisClient.del(keys);
+        }
         // Also clear stats
         await this.redisClient.del(
           this.getStatsKey(collectionName, "hits"),
@@ -678,11 +597,18 @@ class RedisClient {
         );
         console.log(`Cleared cache for collection: ${collectionName}`);
       } else {
-        // Clear only this app's namespaced keys
-        await this.delByPattern(`${this.prefix}cache:*`);
-        await this.delByPattern(`${this.prefix}idx:*`);
-        await this.delByPattern(`${this.prefix}rev:*`);
-        await this.delByPattern(`${this.prefix}stats:*`);
+        // Clear all caches
+        const pattern = "cache:*";
+        const keys = await this.redisClient.keys(pattern);
+        if (keys.length > 0) {
+          await this.redisClient.del(keys);
+        }
+        // Clear all stats
+        const statsPattern = "stats:*";
+        const statsKeys = await this.redisClient.keys(statsPattern);
+        if (statsKeys.length > 0) {
+          await this.redisClient.del(statsKeys);
+        }
         console.log("Cleared all caches");
       }
     } catch {
@@ -822,146 +748,6 @@ class RedisClient {
       const total = totalHits + totalMisses;
       return total > 0 ? ((totalHits / total) * 100).toFixed(2) + "%" : "0%";
     }
-  }
-
-  async *scanKeys(match, count = 250) {
-    let cursor = "0";
-    do {
-      const res = await this.redisClient.scan(cursor, {
-        MATCH: match,
-        COUNT: count,
-      });
-      cursor = res.cursor;
-      for (const k of res.keys) yield k;
-    } while (cursor !== "0");
-  }
-
-  async delByPattern(match) {
-    const batch = [];
-    for await (const k of this.scanKeys(match)) {
-      batch.push(k);
-      if (batch.length >= 250) {
-        await this.redisClient.del(batch);
-        batch.length = 0;
-      }
-    }
-    if (batch.length > 0) {
-      await this.redisClient.del(batch);
-    }
-  }
-
-  buildIndexWrites(collectionName, documentId, document) {
-    const idStr = this.serializeId(documentId);
-    const idxOps = [];
-    const idxKeys = [];
-
-    const addStringIndex = (indexName, indexValue) => {
-      if (indexValue === undefined || indexValue === null) return;
-      const idxKey = this.getIdxKey(collectionName, indexName, indexValue);
-      idxKeys.push(idxKey);
-      idxOps.push((multi) => multi.setEx(idxKey, this.cacheTTL, idStr));
-    };
-
-    const addSetIndex = (indexName, indexValue) => {
-      if (indexValue === undefined || indexValue === null) return;
-      const idxKey = this.getIdxKey(collectionName, indexName, indexValue);
-      idxKeys.push(idxKey);
-      idxOps.push((multi) => multi.sAdd(idxKey, idStr));
-      idxOps.push((multi) => multi.expire(idxKey, this.cacheTTL));
-    };
-
-    // Collection-specific indexes (hottest lookups)
-    if (collectionName === "config") {
-      addStringIndex("channelId", document.channelId);
-      if (typeof document.channel === "string") {
-        addStringIndex("channel", document.channel.toLowerCase());
-      }
-    } else if (collectionName === "users") {
-      addStringIndex("userid", document.userid);
-    } else if (collectionName === "bans") {
-      // Potentially 1-to-many per userId, so store as SET
-      addSetIndex("userId", document.userId);
-    } else if (collectionName === "customcommands") {
-      const channelId = document.channelId;
-      const name =
-        typeof document.name === "string" ? document.name.toLowerCase() : null;
-      if (channelId && name) {
-        addStringIndex("channelIdName", `${channelId}|${name}`);
-      }
-    }
-
-    return { idxWrites: idxOps, idxKeys };
-  }
-
-  async searchViaIndex(collectionName, query) {
-    const keys = Object.keys(query);
-
-    // config by channelId / channel
-    if (collectionName === "config" && keys.length === 1) {
-      if (keys[0] === "channelId") {
-        const idxKey = this.getIdxKey("config", "channelId", query.channelId);
-        const id = await this.redisClient.get(idxKey);
-        if (!id) return [];
-        const doc = await this.getCache("config", id);
-        return doc ? [doc] : [];
-      }
-      if (keys[0] === "channel" && typeof query.channel === "string") {
-        const idxKey = this.getIdxKey(
-          "config",
-          "channel",
-          query.channel.toLowerCase()
-        );
-        const id = await this.redisClient.get(idxKey);
-        if (!id) return [];
-        const doc = await this.getCache("config", id);
-        return doc ? [doc] : [];
-      }
-    }
-
-    // users by userid
-    if (collectionName === "users" && keys.length === 1 && keys[0] === "userid") {
-      const idxKey = this.getIdxKey("users", "userid", query.userid);
-      const id = await this.redisClient.get(idxKey);
-      if (!id) return [];
-      const doc = await this.getCache("users", id);
-      return doc ? [doc] : [];
-    }
-
-    // bans by userId (set)
-    if (collectionName === "bans" && keys.length === 1 && keys[0] === "userId") {
-      const idxKey = this.getIdxKey("bans", "userId", query.userId);
-      const ids = await this.redisClient.sMembers(idxKey);
-      if (!ids || ids.length === 0) return [];
-      const out = [];
-      for (const id of ids) {
-        const doc = await this.getCache("bans", id);
-        if (doc) out.push(doc);
-      }
-      return out;
-    }
-
-    // customcommands by (channelId,name)
-    if (
-      collectionName === "customcommands" &&
-      keys.length === 2 &&
-      query.channelId &&
-      query.name
-    ) {
-      const nameLower =
-        typeof query.name === "string" ? query.name.toLowerCase() : null;
-      if (!nameLower) return null;
-      const idxKey = this.getIdxKey(
-        "customcommands",
-        "channelIdName",
-        `${query.channelId}|${nameLower}`
-      );
-      const id = await this.redisClient.get(idxKey);
-      if (!id) return [];
-      const doc = await this.getCache("customcommands", id);
-      return doc ? [doc] : [];
-    }
-
-    return null;
   }
 }
 

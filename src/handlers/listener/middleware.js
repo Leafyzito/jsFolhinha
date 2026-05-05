@@ -2,11 +2,19 @@
 const shouldSkipMessage = async (message, commandName = null) => {
   const channelName = message.channelName;
 
-  const channelData =
-    message.channelConfig ||
-    (await fb.db.get("config", {
-      channelId: message.channelID,
-    }));
+  // Use message.channelConfig if available and channel name matches, otherwise fetch
+  let channelData = null;
+  if (
+    message.channelConfig &&
+    message.channelConfig.channel &&
+    message.channelConfig.channel.toLowerCase() === channelName.toLowerCase()
+  ) {
+    channelData = message.channelConfig;
+  } else {
+    channelData = await fb.db.get("config", {
+      channel: channelName.toLowerCase(),
+    });
+  }
 
   if (!channelData) {
     return false;

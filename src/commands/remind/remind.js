@@ -97,11 +97,9 @@ const createScheduledReminderJob = (
     const reminderTime = fb.utils.relativeTime(remindCheck.remindTime, true);
 
     // Check for banned content in reminder message
-    const channelData =
-      message.channelConfig ||
-      (await fb.db.get("config", {
-        channelId: message.channelID,
-      }));
+    const channelData = await fb.db.get("config", {
+      channelId: message.channelID,
+    });
     const channelName = channelData?.channel || message.channelName;
     const checkedMessage = fb.utils.checkRegex(remindMessage, channelName);
     const isBannedContent = checkedMessage.includes(

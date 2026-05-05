@@ -1,10 +1,8 @@
 const path = require("path");
 const unpauseCommand = async (message) => {
-  const channelConfig =
-    message.channelConfig ||
-    (await fb.db.get("config", {
-      channelId: message.channelID,
-    }));
+  const channelConfig = await fb.db.get("config", {
+    channelId: message.channelID,
+  });
 
   if (!channelConfig) {
     return {
