@@ -49,6 +49,7 @@ async function commandHandler(message) {
   }
 
   const command = message.args[0].slice(message.prefix.length).toLowerCase();
+  message.aliasUsed = command;
 
   let commandResult;
 
@@ -93,6 +94,7 @@ async function commandHandler(message) {
       value: {
         commandName: command,
         aliases: [command],
+        aliasUsed: command,
         cooldown:
           typeof custom.cooldownMs === "number" ? custom.cooldownMs : 5000,
         cooldownType: "channel",

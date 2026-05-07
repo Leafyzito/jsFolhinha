@@ -92,6 +92,7 @@ class Logger {
       user: message.senderUsername,
       userId: message.senderUserID,
       command: message.command.commandName,
+      aliasUsed: message.aliasUsed,
       custom: message.command?.custom ?? false,
       content: message.messageText,
       response: response,

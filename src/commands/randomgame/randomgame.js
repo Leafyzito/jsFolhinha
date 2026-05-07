@@ -21,8 +21,36 @@ async function getRandomGame() {
   return game;
 }
 
-const randomGameCommand = async () => {
-  const game = await getRandomGame();
+async function getRandomSteamGame() {
+  const random_num = fb.utils.randomInt(1, 500);
+  const api_url = `https://api.rawg.io/api/games?key=${process.env.RAWG_API_KEY}&page=${random_num}&stores=1`;
+  const response = await fb.got(api_url);
+  if (!response) {
+    return null;
+  }
+  const random = fb.utils.randomChoice(response.results);
+  const game = {
+    name: random.name,
+    slug: random.slug,
+    site: `https://rawg.io/games/${random.slug}`,
+    released: new Date(random.released).toLocaleDateString("fr-FR") || "N/A",
+    platforms: random.platforms
+      .map((platform) => platform.platform.name)
+      .join(", "),
+    genres: random.genres.map((genre) => genre.name).join(", "),
+  };
+  return game;
+}
+
+const randomGameCommand = async (message) => {
+  let game;
+  if (
+    ["randomsteam", "randomsteamgame"].includes(message.aliasUsed.toLowerCase())
+  ) {
+    game = await getRandomSteamGame();
+  } else {
+    game = await getRandomGame();
+  }
   if (!game) {
     return {
       reply: "Não foi possível encontrar um jogo aleatório",
@@ -34,7 +62,7 @@ const randomGameCommand = async () => {
 };
 
 randomGameCommand.commandName = "randomgame";
-randomGameCommand.aliases = ["randomgame", "rg"];
+randomGameCommand.aliases = ["randomgame", "randomsteam", "randomsteamgame"];
 randomGameCommand.shortDescription = "Comando para encontrar um jogo aleatório";
 randomGameCommand.cooldown = 5000;
 randomGameCommand.cooldownType = "channel";
