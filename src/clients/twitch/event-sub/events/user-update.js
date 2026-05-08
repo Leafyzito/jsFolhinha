@@ -38,19 +38,13 @@ module.exports = async function handleUserUpdate(event) {
       fb.discord.log(
         `* EventSub: NEW USER detected via update: ${userLogin} (${userId})`
       );
-      await fb.db.insert("users", {
-        userid: userId,
-        aliases: [userLogin],
-        currAlias: userLogin,
-        customAliases: [],
-        lsChannel: userLogin,
-        lsMessage: "",
-        lsDate: Math.floor(Date.now() / 1000),
-        optoutLs: false,
-        optoutStalk: false,
-        optoutRemind: false,
-        optoutOwnChannel: false,
-        blocks: {},
+      await fb.db.insertTemplate("users", {
+        message: {
+          senderUserID: userId,
+          senderUsername: userLogin,
+          channelName: userLogin,
+          messageText: "",
+        },
       });
       // Handle broadcaster config possibility too
       await handleExistingConfigUsernameChange(userId, userLogin);
@@ -60,4 +54,3 @@ module.exports = async function handleUserUpdate(event) {
     fb.discord.logError(`Error handling user update event: ${error.message}`);
   }
 };
-

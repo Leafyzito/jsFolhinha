@@ -99,33 +99,12 @@ const updateUserListener = async (message) => {
   );
   // console.log(`NEW USER: #${message.channelName}/${message.senderUsername}`);
 
-  fb.db
-    .insert("users", {
-      userid: message.senderUserID,
-      aliases: [message.senderUsername],
-      currAlias: message.senderUsername,
-      customAliases: [],
-      lsChannel: message.channelName,
-      lsMessage: message.messageText,
-      lsDate: Math.floor(Date.now() / 1000),
-      firstSeen: Math.floor(Date.now() / 1000),
-      optoutLs: false,
-      optoutStalk: false,
-      optoutRemind: false,
-      optoutOwnChannel: false,
-      blocks: {},
-      isPlus: false,
-      isSupporter: false,
-      lastSupportDate: null,
-      totalDonated: 0,
-      connections: {},
-    })
-    .catch((err) => {
-      fb.discord.importantLog(
-        `Failed to insert new user ${message.senderUsername} (${message.senderUserID}): ${err.message}`
-      );
-      console.error("insert new user error:", err);
-    });
+  fb.db.insertTemplate("users", { message }).catch((err) => {
+    fb.discord.importantLog(
+      `Failed to insert new user ${message.senderUsername} (${message.senderUserID}): ${err.message}`
+    );
+    console.error("insert new user error:", err);
+  });
 };
 
 module.exports = {

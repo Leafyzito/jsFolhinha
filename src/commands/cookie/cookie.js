@@ -25,30 +25,6 @@ const cookieFrases = fs.readFileSync(
   "utf8"
 );
 
-async function createUserCookieBase(message, isUserPlus = false) {
-  // isto é só para o cd, acho eu
-  const insert_doc = {
-    userId: message.senderUserID,
-    user: message.senderUsername,
-    total: isUserPlus ? 2 : 1,
-    gifted: 0,
-    beenGifted: 0,
-    opened: 0,
-    sloted: 0,
-    eaten: 0,
-    claimedToday: true,
-    giftedToday: false,
-    usedSlot: false,
-    stolenToday: false,
-    gotStolen: 0,
-    gotStolenBy: null,
-    totalStolen: 0,
-    totalGotStolen: 0,
-  };
-  await fb.db.insert("cookie", insert_doc);
-  return insert_doc;
-}
-
 async function loadUserCookieStats(targetId) {
   const findFilter = { userId: targetId };
   const userCookieStats = await fb.db.get("cookie", findFilter);
@@ -143,7 +119,7 @@ const cookieCommand = async (message) => {
     const userCookieStats = await loadUserCookieStats(message.senderUserID);
 
     if (!userCookieStats) {
-      await createUserCookieBase(message, isUserPlus);
+      await fb.db.insertTemplate("cookie", { message, isUserPlus });
       return {
         reply: `Você ${
           isUserPlus
@@ -912,6 +888,5 @@ cookieCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/comm
 module.exports = {
   cookieCommand,
   loadUserCookieStats,
-  createUserCookieBase,
   getTimeUntilNext9AM,
 };

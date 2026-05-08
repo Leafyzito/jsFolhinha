@@ -11,29 +11,12 @@ const dungeonData = (() => {
   }
 })();
 
-// User-specific dungeon base creation
-async function createUserDungeonBase(message) {
-  const insert_doc = {
-    userId: message.senderUserID,
-    username: message.senderUsername,
-    xp: 0,
-    level: 0,
-    wins: 0,
-    losses: 0,
-    lastDungeon: 0,
-    cooldown: 0,
-  };
-
-  await fb.db.insert("dungeon", insert_doc);
-  return insert_doc;
-}
-
 async function loadUserDungeonStats(message) {
   const userDungeonStats = await fb.db.get("dungeon", {
     userId: message.senderUserID,
   });
   if (!userDungeonStats) {
-    return await createUserDungeonBase(message);
+    return await fb.db.insertTemplate("dungeon", { message });
   }
 
   return userDungeonStats;
@@ -328,7 +311,6 @@ dungeonCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/com
 module.exports = {
   dungeonCommand,
   dungeonData,
-  createUserDungeonBase,
   loadUserDungeonStats,
   getFormattedRemainingTime,
   checkDungeonCooldown,

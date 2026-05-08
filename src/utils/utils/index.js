@@ -349,22 +349,7 @@ class Utils {
       return;
     }
 
-    const channelName = (await fb.api.helix.getUserByID(channelId)).login;
-    const newConfig = {
-      channel: channelName,
-      channelId: channelId,
-      prefix: ["!"],
-      offlineOnly: false,
-      emoteStreak: false,
-      isPaused: false,
-      disabledCommands: [],
-      devBanCommands: [],
-      thankFollows: false,
-      thankSubs: false,
-      state: "active",
-    };
-
-    await fb.db.insert("config", newConfig);
+    await fb.db.insertTemplate("config", { channelId });
     await fb.api.rustlog.addChannel(channelId);
   }
 

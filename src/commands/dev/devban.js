@@ -48,7 +48,7 @@ const devBanCommand = async (message) => {
   // Check if user already has ban record, create if not
   const hasBanRecord = await fb.db.get("bans", { userId: targetUserId });
   if (!hasBanRecord) {
-    await fb.db.insert("bans", { userId: targetUserId, bannedCommands: [] });
+    await fb.db.insertTemplate("bans", { userId: targetUserId });
   }
 
   // Add command to banned commands

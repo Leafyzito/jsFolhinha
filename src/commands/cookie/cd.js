@@ -1,9 +1,5 @@
 const path = require("path");
-const {
-  loadUserCookieStats,
-  createUserCookieBase,
-  getTimeUntilNext9AM,
-} = require("./cookie");
+const { loadUserCookieStats, getTimeUntilNext9AM } = require("./cookie");
 
 const cookieDiarioCommand = async (message) => {
   const isUserPlus =
@@ -11,7 +7,7 @@ const cookieDiarioCommand = async (message) => {
     true;
   const userCookieStats = await loadUserCookieStats(message.senderUserID);
   if (!userCookieStats) {
-    await createUserCookieBase(message, isUserPlus);
+    await fb.db.insertTemplate("cookie", { message, isUserPlus });
     return {
       reply: `Você ${
         isUserPlus

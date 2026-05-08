@@ -6,22 +6,6 @@ afkInfoObjects.forEach((afk) => {
   afkAliasList = afkAliasList.concat(afk.alias);
 });
 
-async function createAfkBase(message) {
-  const insert_base_afk_doc = {
-    channel: message.channelName,
-    user: message.senderUsername,
-    is_afk: false,
-    afk: null,
-    afk_message: null,
-    afk_since: 0,
-    afk_return: 0,
-    afk_type: null,
-    rafk_counter: 0,
-  };
-
-  await fb.db.insert("afk", insert_base_afk_doc);
-}
-
 const afkCommand = async (message) => {
   const commandInvoker = message.messageText
     .split(" ")[0]
@@ -29,7 +13,7 @@ const afkCommand = async (message) => {
     .trim()
     .toLowerCase();
   const afkInfoObject = afkInfoObjects.find((afk) =>
-    afk.alias.includes(commandInvoker),
+    afk.alias.includes(commandInvoker)
   );
 
   const afkStats = await fb.db.get("afk", {
@@ -38,7 +22,7 @@ const afkCommand = async (message) => {
   });
 
   if (!afkStats) {
-    await createAfkBase(message);
+    await fb.db.insertTemplate("afk", { message });
   }
 
   let afkMessage = message.args.slice(1).join(" ");
@@ -61,7 +45,7 @@ const afkCommand = async (message) => {
         afk_type: afkType,
         rafk_counter: 0,
       },
-    },
+    }
   );
 
   return {

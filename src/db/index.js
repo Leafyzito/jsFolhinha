@@ -1,5 +1,6 @@
 const { MongoClient } = require("mongodb");
 const RedisClient = require("./redis");
+const { getInsertTemplate } = require("./insert-templates");
 
 const mongoUri = process.env.MONGO_URI;
 const clientMongo = new MongoClient(mongoUri);
@@ -77,6 +78,17 @@ class MongoUtils {
 
     // Return the result so we can access insertedId
     return result;
+  }
+
+  async insertTemplate(templateName, params) {
+    const template = getInsertTemplate(templateName);
+    if (!template) {
+      throw new Error(`Unknown insert template '${templateName}'`);
+    }
+
+    const doc = await template.build(params);
+    const result = await this.insert(template.collection, doc);
+    return { result, doc };
   }
 
   async setCache(collectionName, documentId, document) {

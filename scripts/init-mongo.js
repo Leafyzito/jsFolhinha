@@ -1,4 +1,5 @@
 require("dotenv").config();
+const buildConfigTemplate = require("../src/db/insert-templates/config");
 
 const { MongoClient } = require("mongodb");
 
@@ -128,21 +129,8 @@ async function ensureStandardCollections(db) {
  * Insert one `config` row for the bot's own channel so dev boots match production shape.
  * Mirrors src/utils/utils/index.js createNewChannelConfig defaults, plus fields commonly present in prod.
  */
-function buildInitialBotConfig(channelId, channelLogin) {
-  return {
-    channel: channelLogin.trim().toLowerCase(),
-    channelId: String(channelId).trim(),
-    prefix: ["!"],
-    offlineOnly: false,
-    emoteStreak: false,
-    isPaused: false,
-    disabledCommands: [],
-    devBanCommands: [],
-    thankFollows: false,
-    thankSubs: false,
-    commandSetting: { maxPiramide: 20 },
-    state: "active",
-  };
+async function buildInitialBotConfig(channelId, channelLogin) {
+  return await buildConfigTemplate({ channelId, channelName: channelLogin });
 }
 
 async function seedBotChannelConfig(db) {
@@ -167,7 +155,7 @@ async function seedBotChannelConfig(db) {
     return;
   }
 
-  const doc = buildInitialBotConfig(userId, username);
+  const doc = await buildInitialBotConfig(userId, username);
   await coll.insertOne(doc);
   console.log(
     `config: inserted initial doc for bot channel: ${doc.channel} - id: ${doc.channelId}`
