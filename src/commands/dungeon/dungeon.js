@@ -16,7 +16,8 @@ async function loadUserDungeonStats(message) {
     userId: message.senderUserID,
   });
   if (!userDungeonStats) {
-    return await fb.db.insertTemplate("dungeon", { message });
+    const { doc } = await fb.db.insertTemplate("dungeon", { message });
+    return doc;
   }
 
   return userDungeonStats;
