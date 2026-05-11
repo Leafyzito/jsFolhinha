@@ -2,7 +2,7 @@ const path = require("path");
 const testeCommand = async () => {
   return {
     replyType: "reply",
-    reply: "testado 4",
+    reply: "testado",
     notes: "notes test",
   };
 };
