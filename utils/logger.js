@@ -18,26 +18,12 @@ const COLORS = {
 
 const RESET = "\x1b[0m";
 
-function colorEnabled(method) {
-  if (process.env.NO_COLOR) {
-    return false;
-  }
-
-  if (process.env.FORCE_COLOR) {
-    return true;
-  }
-
-  const stream =
-    method === "error" || method === "warn" ? process.stderr : process.stdout;
-  return stream.isTTY === true;
-}
-
 function formatPrefix(method) {
   const timestamp = `[${new Date().toISOString()}]`;
   const label = LABELS[method];
   const prefix = label ? `${timestamp} ${label}` : timestamp;
 
-  if (!colorEnabled(method) || !COLORS[method]) {
+  if (!COLORS[method]) {
     return prefix;
   }
 
