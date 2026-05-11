@@ -119,7 +119,7 @@ class AuthProvider {
   registerEvents() {
     this.provider.onRefresh(async (userId, newTokenData) => {
       try {
-        console.log(`Token refreshed for userId: ${userId}`);
+        console.info(`Token refreshed for userId: ${userId}`);
 
         // Map newTokenData to database format
         const updateData = {
@@ -137,7 +137,7 @@ class AuthProvider {
         // Update the token in the database
         await fb.db.update("auth", { user_id: userId }, { $set: updateData });
 
-        console.log(`Token data updated in database for userId: ${userId}`);
+        console.info(`Token data updated in database for userId: ${userId}`);
       } catch (error) {
         console.error(
           `Error updating token data for userId: ${userId}:`,

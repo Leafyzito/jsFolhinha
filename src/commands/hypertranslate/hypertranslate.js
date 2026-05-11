@@ -2,7 +2,7 @@ const path = require("path");
 const { LANGUAGE_MAPPINGS } = require("../translate/langs.js");
 
 async function translateText(targetLanguage, textToTranslate) {
-  console.log(`translating to: ${targetLanguage} - text: ${textToTranslate}`);
+  console.debug(`translating to: ${targetLanguage} - text: ${textToTranslate}`);
   const params = new URLSearchParams({
     client: "gtx",
     dt: "t",

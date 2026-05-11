@@ -47,7 +47,7 @@ class Emotes {
 
       return data.emote_set.emotes.map((emote) => emote.name);
     } catch (err) {
-      console.log(`* Error fetching 7tv emotes for ${channelId}: ${err}`);
+      console.error(`* Error fetching 7tv emotes for ${channelId}: ${err}`);
       fb.discord.logError(`Error fetching 7tv emotes for ${channelId}: ${err}`);
       return [];
     }
@@ -69,7 +69,7 @@ class Emotes {
         (emote) => emote.code
       );
     } catch (err) {
-      console.log(`* Error fetching bttv emotes for ${channelId}: ${err}`);
+      console.error(`* Error fetching bttv emotes for ${channelId}: ${err}`);
       fb.discord.logError(
         `Error fetching bttv emotes for ${channelId}: ${err}`
       );
@@ -92,7 +92,7 @@ class Emotes {
       const setId = data.room.set;
       return data.sets[setId].emoticons.map((emote) => emote.name);
     } catch (err) {
-      console.log(`* Error fetching bttv emotes for ${channelId}: ${err}`);
+      console.error(`* Error fetching bttv emotes for ${channelId}: ${err}`);
       fb.discord.logError(
         `Error fetching bttv emotes for ${channelId}: ${err}`
       );

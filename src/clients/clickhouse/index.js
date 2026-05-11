@@ -41,7 +41,7 @@ class ClickHouseClient {
       // Test connection
       await this.testConnection();
       this.isConnected = true;
-      console.log("* ClickHouse client connected successfully");
+      console.info("* ClickHouse client connected successfully");
     } catch (error) {
       console.error("Failed to initialize ClickHouse client:", error);
       throw error;
@@ -122,7 +122,7 @@ class ClickHouseClient {
       if (this.client) {
         await this.client.close();
         this.isConnected = false;
-        console.log("ClickHouse client connection closed");
+        console.info("ClickHouse client connection closed");
       }
     } catch (error) {
       console.error("Error closing ClickHouse client:", error);

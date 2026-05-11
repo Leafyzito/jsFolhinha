@@ -91,7 +91,7 @@ class TwitchClient {
             helixParams
           )
           .catch(async (err) => {
-            console.log(
+            console.warn(
               `Twitch API message send failed, falling back to IRC: ${err}`
             );
             // await this.client.IrcSay(channelName, content, ircParams);
@@ -183,7 +183,7 @@ class TwitchClient {
 
   async joinMultiple(channels = []) {
     if (channels.length === 0) {
-      console.log(`* No channels to join`);
+      console.info(`* No channels to join`);
       return;
     }
 

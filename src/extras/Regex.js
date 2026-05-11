@@ -490,9 +490,9 @@ class CreateRegex {
                     ? `Found blacklisted content (Caught by: '${name}') in ${channelID}`
                     : `Found blacklisted content (Caught by: '${name}')`;
                 // Logger.warn(caughtPhrase, testString);
-                console.log(caughtPhrase, testString);
+                console.debug("[REGEX] ", caughtPhrase, testString);
                 // pb.cord.misc(caughtPhrase, `Message: ${testString}`, '16744576');
-                console.log(caughtPhrase, `Message: ${testString}`);
+                console.debug("[REGEX] ", caughtPhrase, `Message: ${testString}`);
                 return { caught: true, caughtCategory: name, matchedWord };
             }
         }

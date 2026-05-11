@@ -18,7 +18,7 @@ module.exports = async function handleVipAdd(event) {
       );
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     fb.discord.logError(`Error handling VIP add event: ${error.message}`);
   }
 };

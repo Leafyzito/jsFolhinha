@@ -45,7 +45,7 @@ const loadCommands = () => {
     });
   });
 
-  console.log(`* Loaded ${Object.keys(commandsList).length} commands`);
+  console.info(`* Loaded ${Object.keys(commandsList).length} commands`);
 
   return commandsList;
 };

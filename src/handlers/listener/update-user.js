@@ -23,7 +23,7 @@ async function handleExistingConfigUsernameChange(userId, newUsername) {
     fb.discord.log(
       `* Updating channel config for ${oldUsername} -> ${newUsername}`
     );
-    console.log(`Updating channel config for ${oldUsername} -> ${newUsername}`);
+    console.info(`Updating channel config for ${oldUsername} -> ${newUsername}`);
 
     await fb.db.update(
       "config",

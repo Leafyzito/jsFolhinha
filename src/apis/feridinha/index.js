@@ -31,7 +31,7 @@ class FeridinhaApi {
         return data.message;
       }
 
-      console.log(
+      console.warn(
         `Failed to upload image to Feridinha. Response: ${JSON.stringify(data)}`
       );
       return null;
@@ -66,7 +66,7 @@ class FeridinhaApi {
         return data.message;
       }
 
-      console.log(
+      console.warn(
         `Failed to upload audio to Feridinha. Response: ${JSON.stringify(data)}`
       );
       return null;
@@ -101,7 +101,7 @@ class FeridinhaApi {
         return data.message;
       }
 
-      console.log(
+      console.warn(
         `Failed to upload video to Feridinha. Response: ${JSON.stringify(data)}`
       );
       return null;
@@ -128,7 +128,7 @@ class FeridinhaApi {
       return this.uploadVideo(fileData, filename);
     } else {
       // Default to image upload for unknown extensions
-      console.log(
+      console.warn(
         `Unknown file extension: ${extension}, defaulting to image upload`
       );
       return this.uploadImage(fileData, filename);

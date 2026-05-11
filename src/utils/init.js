@@ -99,7 +99,7 @@ async function initializeEventSubListener() {
           eventSub.liveChannels.set(stream.channelId, stream);
         }
       }
-      console.log(
+      console.info(
         `* Populated liveChannels with ${eventSub.liveChannels.size} currently live streams`
       );
     }

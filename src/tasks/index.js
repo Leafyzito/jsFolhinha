@@ -14,7 +14,7 @@ const {
 const startAllTasks = () => {
   // Start recurring tasks
   if (process.env.ENV == "prod") {
-    console.log("* Starting production tasks");
+    console.info("* Starting production tasks");
     const cron = require("node-cron");
     cron.schedule("0 9 * * *", async () => {
       await dailyCookieResetTask();

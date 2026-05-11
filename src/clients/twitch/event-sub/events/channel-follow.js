@@ -41,7 +41,7 @@ module.exports = async function handleChannelFollow(event) {
       fb.log.send(broadcasterLogin, message);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     fb.discord.logError(
       `Error handling channel follow event: ${error.message}`
     );

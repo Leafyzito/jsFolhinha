@@ -21,7 +21,7 @@ const shouldUseRedis = !!(
 
 // Debug: Log Redis configuration status
 if (!shouldUseRedis) {
-  console.log(
+  console.warn(
     `* Redis disabled: REDIS_HOST=${
       redisHostRaw === undefined ? "undefined" : `"${redisHostRaw}"`
     }, REDIS_PORT=${
@@ -252,10 +252,10 @@ class MongoUtils {
   // Utility methods for cache management
   async preloadCollection(collectionName, query = {}) {
     try {
-      console.log(`Preloading collection: ${collectionName}`);
+      console.info(`Preloading collection: ${collectionName}`);
       const results = await this.fetchFromDbAndCache(collectionName, query);
       const size = await this.getCacheSize(collectionName);
-      console.log(`Preloaded ${size} documents from ${collectionName}`);
+      console.info(`Preloaded ${size} documents from ${collectionName}`);
       return results;
     } catch (err) {
       console.error(`Failed to preload collection ${collectionName}:`, err);

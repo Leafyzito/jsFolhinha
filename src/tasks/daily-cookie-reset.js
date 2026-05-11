@@ -1,6 +1,6 @@
 async function dailyCookieResetTask() {
   fb.discord.log("* Resetting daily cookies");
-  console.log("* Resetting daily cookies");
+  console.info("* Resetting daily cookies");
 
   await fb.db.updateMany(
     "cookie",

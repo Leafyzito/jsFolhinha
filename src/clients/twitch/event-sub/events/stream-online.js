@@ -34,7 +34,7 @@ module.exports = async function handleStreamOnline(event, liveChannels) {
 
     fb.discord.log(`* ${broadcasterName} went live`);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     fb.discord.logError(`Error handling stream online event: ${error.message}`);
   }
 };

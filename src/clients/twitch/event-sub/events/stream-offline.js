@@ -27,7 +27,7 @@ module.exports = async function handleStreamOffline(event, liveChannels) {
 
     fb.discord.log(`* ${broadcasterName} went offline`);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     fb.discord.logError(
       `Error handling stream offline event: ${error.message}`,
     );

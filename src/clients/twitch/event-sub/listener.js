@@ -38,7 +38,7 @@ class EventSubListener {
     try {
       // Start the EventSub listener
       await this.listener.start();
-      console.log("* EventSub listener started");
+      console.info("* EventSub listener started");
 
       // Register event handlers
       this.registerEventHandlers();
@@ -78,7 +78,7 @@ class EventSubListener {
   async fetchModeratedChannels() {
     const botUserId = process.env.BOT_USERID;
     if (!botUserId) {
-      console.log("* Bot user ID not found, skipping moderated channels fetch");
+      console.warn("* Bot user ID not found, skipping moderated channels fetch");
       return null;
     }
 
@@ -89,7 +89,7 @@ class EventSubListener {
       );
 
       if (!botHasModeratedChannelsScope) {
-        console.log(
+        console.warn(
           "* Bot does not have user:read:moderated_channels scope, skipping moderated channels fetch"
         );
         this.moderatedChannels = null;
@@ -132,7 +132,7 @@ class EventSubListener {
 
       // Cache the result
       this.moderatedChannels = moderatedChannelsSet;
-      console.log(
+      console.info(
         `* Fetched and cached ${moderatedChannelsSet.size} moderated channels`
       );
 

@@ -9,7 +9,7 @@ const { emoteStreakListener } = require("./emote-streak.js");
 
 function listenerHandler(message) {
   notifyDevMentionListener(message).catch((err) => {
-    console.log(`Error in notify dev mention listener: ${err}`);
+    console.error(`Error in notify dev mention listener: ${err}`);
     fb.discord.log(`* Error in notify dev mention listener: ${err}`);
   });
 
@@ -18,7 +18,7 @@ function listenerHandler(message) {
   }
 
   replyMentionListener(message).catch((err) => {
-    console.log(`Error in reply mention listener: ${err}`);
+    console.error(`Error in reply mention listener: ${err}`);
     fb.discord.log(`* Error in reply mention listener: ${err}`);
   });
 
@@ -27,22 +27,22 @@ function listenerHandler(message) {
   // }
 
   emoteStreakListener(message).catch((err) => {
-    console.log(`Error in emote streak listener: ${err}`);
+    console.error(`Error in emote streak listener: ${err}`);
     fb.discord.log(`* Error in emote streak listener: ${err}`);
   });
 
   afkUserListener(message).catch((err) => {
-    console.log(`Error in afk listener: ${err}`);
+    console.error(`Error in afk listener: ${err}`);
     fb.discord.log(`* Error in afk listener: ${err}`);
   });
 
   reminderListener(message).catch((err) => {
-    console.log(`Error in reminder listener: ${err}`);
+    console.error(`Error in reminder listener: ${err}`);
     fb.discord.log(`* Error in reminder listener: ${err}`);
   });
 
   updateUserListener(message).catch((err) => {
-    console.log(`Error in update user listener: ${err}`);
+    console.error(`Error in update user listener: ${err}`);
     fb.discord.log(`* Error in update user listener: ${err}`);
   });
 }

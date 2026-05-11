@@ -39,7 +39,7 @@ class CobaltApi {
       );
 
       if (!feridinhaUrl) {
-        console.log(
+        console.warn(
           "Failed to upload to feridinha, falling back to original URL"
         );
         return resUrl;
@@ -86,7 +86,7 @@ class CobaltApi {
       );
 
       if (!feridinhaUrl) {
-        console.log(
+        console.warn(
           "Failed to upload to feridinha, falling back to original URL"
         );
         return resUrl;

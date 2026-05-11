@@ -18,7 +18,7 @@ module.exports = async function handleModeratorAdd(event) {
       );
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     fb.discord.logError(`Error handling moderator add event: ${error.message}`);
   }
 };

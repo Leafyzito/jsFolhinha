@@ -36,7 +36,7 @@ async function subscribeToChannel(
       is_valid: true,
     });
     if (!authRow) {
-      console.log(
+      console.warn(
         `* Skipping EventSub subscriptions for ${broadcasterId}: no valid auth row in database`
       );
       return; // Skip all subscriptions if no auth row exists
@@ -166,13 +166,13 @@ async function subscribeToChannel(
         );
       }
     } else {
-      console.log(
+      console.warn(
         `* Skipping EventSub subscriptions for ${broadcasterId}: broadcaster token not available`
       );
     }
 
     subscribedChannels.add(broadcasterId);
-    console.log(`* Subscribed to EventSub events for channel ${broadcasterId}`);
+    console.info(`* Subscribed to EventSub events for channel ${broadcasterId}`);
   } catch (error) {
     console.error(
       `Error subscribing to EventSub events for ${broadcasterId}:`,
@@ -200,7 +200,7 @@ async function unsubscribeFromChannel(subscribedChannels, broadcasterId) {
     // Note: EventSubWsListener doesn't have explicit unsubscribe methods
     // The subscriptions are tied to the broadcasterId, so we just remove from tracking
     subscribedChannels.delete(broadcasterId);
-    console.log(
+    console.info(
       `* Unsubscribed from EventSub events for channel ${broadcasterId}`
     );
   } catch (error) {

@@ -39,7 +39,7 @@ module.exports = async function handleChannelSubscriptionGift(event) {
       fb.log.send(broadcasterLogin, message);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     fb.discord.logError(
       `Error handling channel subscription gift event: ${error.message}`
     );

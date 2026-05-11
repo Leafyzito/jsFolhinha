@@ -7,7 +7,7 @@ async function fetchPendingJoins() {
 
   // Check if pendingJoins exists and handle both single document and array cases
   if (!pendingJoins) {
-    //    console.log("* No pending joins to process");
+    //    console.info("* No pending joins to process");
     return;
   }
 
@@ -30,7 +30,7 @@ async function fetchPendingJoins() {
         ]),
       ];
       if (alreadyJoinedChannels.includes(channelName)) {
-        console.log(`* ${channelName} is already joined`);
+        console.info(`* ${channelName} is already joined`);
         await fb.db.update(
           "pendingjoin",
           { _id: channelToJoin._id },
@@ -41,7 +41,7 @@ async function fetchPendingJoins() {
 
       const userInfo = await fb.api.ivr.getUser(channelName);
 
-      console.log(`* Joining ${channelName} to ${channelName}`);
+      console.info(`* Joining ${channelName} to ${channelName}`);
 
       if (userInfo) {
         fb.discord.importantLog(
@@ -104,7 +104,7 @@ async function fetchPendingJoins() {
         { $set: { status: "joined" } }
       );
     } else {
-      console.log(`* ${channelToJoin.userid} not found from website`);
+      console.info(`* ${channelToJoin.userid} not found from website`);
       fb.discord.importantLog(
         `* ${channelToJoin.userid} not found from website`
       );

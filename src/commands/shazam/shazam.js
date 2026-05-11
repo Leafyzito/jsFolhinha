@@ -24,17 +24,17 @@ async function makeClip(channelName) {
     const result = await fb.api.clipper.makeClip(channelName);
     return result;
   } catch (error) {
-    console.log("Error making clip:", error);
+    console.error("Error making clip:", error);
     return null;
   }
 }
 
 /** Returns clip URL for Shazam, or null if clip creation failed. */
 async function resolveTwitchLiveClipUrl(channelLogin) {
-  console.log(`Detected Twitch channel: ${channelLogin}, creating clip...`);
+  console.debug(`Detected Twitch channel: ${channelLogin}, creating clip...`);
   const clip = await makeClip(channelLogin);
   if (!clip || !clip.makeClipUrl) {
-    console.log(`Não deu pra criar clip com o makeClip`);
+    console.debug(`Não deu pra criar clip com o makeClip`);
     return null;
   }
   return clip.makeClipUrl;
@@ -44,32 +44,32 @@ async function shazamIt(url) {
   try {
     // If it's not a direct file URL, download and upload to feridinha first
     if (!isDirectFileUrl(url)) {
-      console.log("URL is not a direct file URL, getting video download...");
+      console.debug("URL is not a direct file URL, getting video download...");
       try {
         url = await fb.api.cobalt.downloadVideo(url);
         if (!url) {
           return "cobalt-error";
         }
       } catch (e) {
-        console.log(`erro no getVideoDownload: ${e}`);
+        console.error(`erro no getVideoDownload: ${e}`);
         return "cobalt-error";
       }
     }
 
-    console.log(`Downloading audio content from ${url}...`);
+    console.debug(`Downloading audio content from ${url}...`);
     // Download the audio content
     const response = await fb.got(url);
     if (!response) {
       throw new Error("Failed to download audio content");
     }
 
-    console.log("Audio content downloaded, saving to buffer...");
+    console.debug("Audio content downloaded, saving to buffer...");
     // Save the buffer to a temporary file
     const tempFile = path.join(__dirname, `temp_audio_${Date.now()}.mp3`);
     fs.writeFileSync(tempFile, response);
 
-    console.log(tempFile);
-    console.log("Using Shazam to recognize audio...");
+    console.debug(tempFile);
+    console.debug("Using Shazam to recognize audio...");
     // Use the file path with Shazam
     const recognition = await shazam.recognise(tempFile, "en-US");
 

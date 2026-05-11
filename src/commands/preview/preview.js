@@ -13,7 +13,7 @@ async function getOfflineImage(previewTarget) {
 
     return await fb.api.feridinha.uploadFromUrl(userData.offlineImageUrl);
   } catch (error) {
-    console.log("Error getting offline image:", error);
+    console.error("Error getting offline image:", error);
     return null;
   }
 }
@@ -26,7 +26,7 @@ async function getPreview(previewTarget) {
       return { isLive: true, image: result.makePreviewUrl };
     }
   } catch (error) {
-    console.log("Error making preview with clipper API:", error);
+    console.error("Error making preview with clipper API:", error);
   }
 
   // If clipper API fails, fall back to Helix API
@@ -55,7 +55,7 @@ async function getPreview(previewTarget) {
 
     return { isLive: true, image: thumbPreviewUrl };
   } catch (error) {
-    console.log("Error getting thumbnail preview:", error);
+    console.error("Error getting thumbnail preview:", error);
     return { isLive: true, image: null };
   }
 }

@@ -28,7 +28,7 @@ const downloadCommand = async (message) => {
         reply: `💾 ${downloadUrl}`,
       };
     } catch (e) {
-      console.log(`erro no getVideoDownload: ${e}`);
+      console.error(`erro no getVideoDownload: ${e}`);
       try {
         const errorText = e.message;
         if ("connect to the service api" in errorText) {
@@ -41,7 +41,7 @@ const downloadCommand = async (message) => {
           };
         }
       } catch (e2) {
-        console.log(`erro no try-catch do getVideoDownload: ${e2}`);
+        console.error(`erro no try-catch do getVideoDownload: ${e2}`);
         return {
           reply: `Não foi possível fazer o download desse link`,
         };
@@ -68,7 +68,7 @@ const downloadCommand = async (message) => {
         reply: `💾 ${downloadUrl}`,
       };
     } catch (e) {
-      console.log(`erro no getAudioDownload: ${e}`);
+      console.error(`erro no getAudioDownload: ${e}`);
       return {
         reply: `Não foi possível fazer o download desse link`,
       };

@@ -22,10 +22,10 @@ async function petAttentionTask() {
     const elapsedTime = currentTime - lastInteraction;
 
     if (elapsedTime > 54_000 && warns === 0) {
-      console.log(`* 1st warning for ${channelName}`);
+      console.info(`* 1st warning for ${channelName}`);
 
       if (await fb.api.helix.isStreamOnline(channelName)) {
-        console.log(
+        console.info(
           `* ${channelName} is paused or streaming, skipping and adding 10mins`
         );
         await fb.db.update(
@@ -50,13 +50,13 @@ async function petAttentionTask() {
     }
 
     if (elapsedTime > 108_000 && warns === 1) {
-      console.log(`* 2nd warning for ${channelName}`);
+      console.info(`* 2nd warning for ${channelName}`);
 
       if (
         channelConfig.isPaused ||
         (await fb.api.helix.isStreamOnline(channelName))
       ) {
-        console.log(
+        console.info(
           `* ${channelName} is paused or streaming, skipping and adding 10mins`
         );
         await fb.db.update(
@@ -81,13 +81,13 @@ async function petAttentionTask() {
     }
 
     if (elapsedTime > 180_000 && warns === 2) {
-      console.log(`* 3rd warning for ${channelName}`);
+      console.info(`* 3rd warning for ${channelName}`);
 
       if (
         channelConfig.isPaused ||
         (await fb.api.helix.isStreamOnline(channelName))
       ) {
-        console.log(
+        console.info(
           `* ${channelName} is paused or streaming, skipping and adding 10mins`
         );
         await fb.db.update(

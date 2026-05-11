@@ -140,8 +140,8 @@ class ApiServer {
 
   start() {
     this.server = this.app.listen(this.port, "0.0.0.0", () => {
-      console.log(`* API server running on port ${this.port}`);
-      console.log(`* API endpoint: http://0.0.0.0:${this.port}/`);
+      console.info(`* API server running on port ${this.port}`);
+      console.info(`* API endpoint: http://0.0.0.0:${this.port}/`);
     });
 
     // Graceful shutdown
@@ -151,7 +151,7 @@ class ApiServer {
 
   shutdown() {
     if (this.server) {
-      console.log("* Shutting down API server...");
+      console.info("* Shutting down API server...");
     }
     // Force exit
     process.exit(0);

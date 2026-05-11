@@ -43,7 +43,7 @@ class Logger {
 
     // Handle identical message error - no retries needed
     if (err.message.includes("identical to the previous one")) {
-      console.log("sending identical message error, ending here");
+      console.warn("sending identical message error, ending here");
       return;
     }
 
@@ -51,14 +51,14 @@ class Logger {
     if (retryCount >= 3) {
       // send whisper to user as last resort
       if (lastResortWhisperTarget) {
-        console.log("Max retries reached, whispering response to user");
+        console.warn("Max retries reached, whispering response to user");
         fb.discord.log(
           `* Dropped message in #${channel}, whispering response to ${lastResortWhisperTarget}: ${content}`
         );
         fb.api.helix.whisper(lastResortWhisperTarget, content);
         return;
       }
-      console.log("Max retries reached, dropping message");
+      console.warn("Max retries reached, dropping message");
       fb.discord.log(`* Dropped message in #${channel}: ${content}`);
       return;
     }
@@ -72,7 +72,7 @@ class Logger {
       : "waiting for response";
 
     if (isRetryableError) {
-      console.log(`${errorType} error, retrying (${retryCount + 1}/3)`);
+      console.warn(`${errorType} error, retrying (${retryCount + 1}/3)`);
       setTimeout(() => {
         retryMethod(channel, content, retryCount + 1, lastResortWhisperTarget);
       }, 1500);
@@ -80,7 +80,7 @@ class Logger {
     }
 
     // Handle any other errors
-    console.log("send error: ", err);
+    console.error("send error: ", err);
   }
 
   async createCommandLog(message, response, sentVia = null) {
@@ -99,7 +99,7 @@ class Logger {
       notes: message.notes || null,
     };
 
-    console.log(
+    console.info(
       `#${message.channelName}/${message.senderUsername} - ${message.command.commandName}`
     );
     fb.discord.logCommand(message, response, sentVia);

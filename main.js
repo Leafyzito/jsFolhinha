@@ -1,4 +1,5 @@
 // <reference path="./types/global.d.ts" />
+require("./utils/logger");
 require("dotenv").config();
 
 // IMPORTS
@@ -47,7 +48,7 @@ fb.markReady = () => {
 // MAIN INITIALIZATION FUNCTION
 async function initializeApp() {
   try {
-    console.log("* Starting application initialization...");
+    console.info("* Starting application initialization...");
 
     // Initialize all utility instances first
     const { utils, emotes, db, log } =
@@ -57,49 +58,49 @@ async function initializeApp() {
     fb.db = db;
     fb.log = log;
 
-    console.log("* Utilities initialized");
+    console.info("* Utilities initialized");
 
     await fb.emotes.getGlobalEmotes();
-    console.log("* Global emotes initialized");
+    console.info("* Global emotes initialized");
 
     // Initialize Auth Provider
     fb.authProvider =
       await require("./src/utils/init").initializeAuthProvider();
-    console.log("* Twurple Auth provider initialized");
+    console.info("* Twurple Auth provider initialized");
 
     // Initialize APIs
     fb.api = await require("./src/utils/init").initializeAPIs();
-    console.log("* APIs initialized");
+    console.info("* APIs initialized");
 
     // Initialize API Client
     fb.api.twurple = await require("./src/utils/init").initializeApiClient();
-    console.log("* Twurple API client initialized");
+    console.info("* Twurple API client initialized");
 
     // Initialize clients
     fb.discord = await require("./src/utils/init").initializeDiscord();
-    console.log("* Discord client initialized");
+    console.info("* Discord client initialized");
 
     fb.twitch = await require("./src/utils/init").initializeTwitch();
-    console.log("* Twitch client initialized");
+    console.info("* Twitch client initialized");
 
     fb.twitch.eventSub =
       await require("./src/utils/init").initializeEventSubListener();
-    console.log("* EventSub listener initialized");
+    console.info("* EventSub listener initialized");
 
     fb.clickhouse = await require("./src/utils/init").initializeClickHouse();
-    console.log("* ClickHouse client initialized");
+    console.info("* ClickHouse client initialized");
 
     // Load commands
     fb.commandsList = loadCommands();
-    console.log("* Commands loaded");
+    console.info("* Commands loaded");
 
     // Load and process reminders (handle missed and schedule future ones)
     await loadReminders();
-    console.log("* Reminders loaded");
+    console.info("* Reminders loaded");
 
     // Mark fb as ready
     fb.markReady = true;
-    console.log("* fb object is now ready");
+    console.info("* fb object is now ready");
 
     // Start recurring tasks
     const { startAllTasks } = require("./src/tasks/index");

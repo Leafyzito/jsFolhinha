@@ -21,7 +21,7 @@ const formatReminderMessage = (
 const clearNotifiedCacheForUser = (userId) => {
   if (fb.notifiedUsers && fb.notifiedUsers.has(userId)) {
     fb.notifiedUsers.delete(userId);
-    console.log(`* Cleared notifiedUsers cache for user ${userId}`);
+    console.debug(`* Cleared notifiedUsers cache for user ${userId}`);
   }
 };
 
@@ -30,7 +30,7 @@ const clearAllNotifiedCache = () => {
   if (fb.notifiedUsers) {
     const cacheSize = fb.notifiedUsers.size;
     fb.notifiedUsers.clear();
-    console.log(`* Cleared all notifiedUsers cache (${cacheSize} users)`);
+    console.debug(`* Cleared all notifiedUsers cache (${cacheSize} users)`);
   }
 };
 
@@ -113,7 +113,7 @@ const handleMissedReminder = async (reminder) => {
       reminder.fromChannelId
     } (${reminderDate.toLocaleString()})`,
   );
-  console.log(
+  console.info(
     `* Sending missed reminder to ${
       reminder.fromChannelId
     } (${reminderDate.toLocaleString()})`,
@@ -257,7 +257,7 @@ const loadReminders = async () => {
       }
     }
   } catch (err) {
-    console.log(`Error in reminder: ${err}`);
+    console.error(`Error in reminder: ${err}`);
     if (fb.discord && fb.discord.logError) {
       fb.discord.logError(`Error in reminder: ${err}`);
     }

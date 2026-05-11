@@ -113,7 +113,7 @@ class DiscordClient {
   }
 
   async logSend(channel, content, sentVia = null) {
-    console.log(`[SEND] #${channel}: ${content}`);
+    console.info(`[SEND] #${channel}: ${content}`);
     const embed = new this.client.EmbedBuilder()
       .setTitle(`Enviado para #${channel}`)
       .setURL(`${this.getLogsUrl(channel)}`)
@@ -138,14 +138,14 @@ class DiscordClient {
   }
 
   async log(content) {
-    console.log(content);
+    console.info(content);
     try {
       const logChannel = await this.client.channels.fetch(
         process.env.DISCORD_LOG_CHANNEL
       );
       await logChannel.send(content);
     } catch (err) {
-      console.log(`Erro ao enviar mensagem no discord log: ${err}`);
+      console.error(`Erro ao enviar mensagem no discord log: ${err}`);
       setTimeout(async () => {
         try {
           const logChannel = await this.client.channels.fetch(
@@ -153,7 +153,7 @@ class DiscordClient {
           );
           await logChannel.send(content);
         } catch (secondErr) {
-          console.log(
+          console.error(
             `Erro ao enviar mensagem no segundo envio no discord log: ${secondErr}`
           );
         }
@@ -162,14 +162,14 @@ class DiscordClient {
   }
 
   async importantLog(content) {
-    console.log(`[IMPORTANT LOG] ${content}`);
+    console.info(`[IMPORTANT LOG] ${content}`);
     try {
       const logChannel = await this.client.channels.fetch(
         process.env.DISCORD_IMPORTANT_LOGS_CHANNEL
       );
       await logChannel.send(content);
     } catch (err) {
-      console.log(`Erro ao enviar mensagem no discord log: ${err}`);
+      console.error(`Erro ao enviar mensagem no discord log: ${err}`);
       setTimeout(async () => {
         try {
           const logChannel = await this.client.channels.fetch(
@@ -177,7 +177,7 @@ class DiscordClient {
           );
           await logChannel.send(content);
         } catch (secondErr) {
-          console.log(
+          console.error(
             `Erro ao enviar mensagem no segundo envio no discord log: ${secondErr}`
           );
         }
@@ -186,7 +186,7 @@ class DiscordClient {
   }
 
   async logWhisper(recipient, content) {
-    console.log(`[WHISPER] to #${recipient}: ${content}`);
+    console.info(`[WHISPER] to #${recipient}: ${content}`);
     const embed = new this.client.EmbedBuilder()
       .setTitle(`📨 Whisper para #${recipient}`)
       .addFields({
@@ -208,7 +208,7 @@ class DiscordClient {
   }
 
   async logWhisperFrom(message) {
-    console.log(
+    console.info(
       `[WHISPER] from #${message.senderUsername}: ${message.messageText}`
     );
 
@@ -236,7 +236,7 @@ class DiscordClient {
   }
 
   async logError(content) {
-    console.log(content);
+    console.error(content);
     const embed = new this.client.EmbedBuilder()
       .setTitle(`Error Alert`)
       .addFields({
@@ -263,7 +263,7 @@ class DiscordClient {
   }
 
   async notifyDevMention(message) {
-    console.log(`[DEV MENTION] #${message.channelName}/${message.displayName}`);
+    console.info(`[DEV MENTION] #${message.channelName}/${message.displayName}`);
     const embed = new this.client.EmbedBuilder()
       .setTitle(`#${message.channelName}/${message.displayName}`)
       .setURL(`${this.getLogsUrl(message.channelName, message.id)}`)

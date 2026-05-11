@@ -311,7 +311,7 @@ class Utils {
     // limit the response to 500 characters, including the gist, add gist link to end of it
     const truncatedContent = content.substring(0, maxContentLength);
     const response = `${truncatedContent}... ${gist}`;
-    console.log(response);
+    console.debug(response);
 
     return sendOnlyLink ? gist : response;
   }
@@ -319,7 +319,7 @@ class Utils {
   checkRegex(content, channelName, message = null) {
     const result = regexObj.check(content, content.split(" "), channelName);
     if (result.caught) {
-      console.log(
+      console.warn(
         `* Caught by ${result.caughtCategory} (${result.matchedWord}) - original content: ${content}`
       );
       fb.discord.importantLog(

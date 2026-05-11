@@ -43,7 +43,7 @@ class RedisClient {
       this.useLocalCache = false;
     } catch {
       // Redis connection failed, use local cache
-      console.log(
+      console.warn(
         "* Redis connection unavailable, using local in-memory cache"
       );
       if (global.fb?.discord?.importantLog) {
@@ -82,7 +82,7 @@ class RedisClient {
     });
 
     client.on("connect", () => {
-      console.log(`* Redis client connected to ${host}:${port}`);
+      console.info(`* Redis client connected to ${host}:${port}`);
     });
 
     // Connect to Redis with fallback logic
@@ -95,7 +95,7 @@ class RedisClient {
           !this.redisConnecting
         ) {
           this.redisConnecting = true;
-          console.log(
+          console.warn(
             `Cannot resolve ${host}, trying localhost as fallback...`
           );
 
@@ -157,7 +157,7 @@ class RedisClient {
     } catch {
       // Connection failed, switch to local cache
       if (!this.useLocalCache) {
-        console.log(
+        console.warn(
           "* Redis connection lost, switching to local in-memory cache"
         );
         this.useLocalCache = true;
@@ -490,7 +490,7 @@ class RedisClient {
 
   async initializeCacheContainers(collections) {
     try {
-      console.log("Initializing cache containers...");
+      console.info("Initializing cache containers...");
 
       if (this.useLocalCache) {
         // Clear all cache on startup
@@ -516,7 +516,7 @@ class RedisClient {
             this.localStats.set(missesKey, 0);
           }
         }
-        console.log("* Cache containers initialized (local cache)");
+        console.info("* Cache containers initialized (local cache)");
         return;
       }
 
@@ -541,10 +541,10 @@ class RedisClient {
           await this.redisClient.setNX(hitsKey, "0");
           await this.redisClient.setNX(missesKey, "0");
         }
-        console.log("* Cache containers initialized");
+        console.info("* Cache containers initialized");
       } catch {
         // Fallback to local cache
-        console.log(
+        console.info(
           "* Redis unavailable during initialization, using local cache"
         );
         if (global.fb?.discord?.importantLog) {
@@ -572,12 +572,12 @@ class RedisClient {
         // Also clear stats
         this.localStats.delete(this.getLocalStatsKey(collectionName, "hits"));
         this.localStats.delete(this.getLocalStatsKey(collectionName, "misses"));
-        console.log(`Cleared cache for collection: ${collectionName}`);
+        console.info(`Cleared cache for collection: ${collectionName}`);
       } else {
         // Clear all caches
         this.localCache.clear();
         this.localStats.clear();
-        console.log("Cleared all caches");
+        console.info("Cleared all caches");
       }
       return;
     }
@@ -595,7 +595,7 @@ class RedisClient {
           this.getStatsKey(collectionName, "hits"),
           this.getStatsKey(collectionName, "misses")
         );
-        console.log(`Cleared cache for collection: ${collectionName}`);
+        console.info(`Cleared cache for collection: ${collectionName}`);
       } else {
         // Clear all caches
         const pattern = "cache:*";
@@ -609,7 +609,7 @@ class RedisClient {
         if (statsKeys.length > 0) {
           await this.redisClient.del(statsKeys);
         }
-        console.log("Cleared all caches");
+        console.info("Cleared all caches");
       }
     } catch {
       // Fallback to local cache on error

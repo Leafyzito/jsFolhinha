@@ -50,7 +50,7 @@ module.exports = async function handleUserUpdate(event) {
       await handleExistingConfigUsernameChange(userId, userLogin);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     fb.discord.logError(`Error handling user update event: ${error.message}`);
   }
 };

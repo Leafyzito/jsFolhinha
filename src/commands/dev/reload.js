@@ -6,18 +6,18 @@ const pullGitChanges = () => {
   return new Promise((resolve, reject) => {
     exec("git pull", { cwd: process.cwd() }, (err, stdout, stderr) => {
       if (err) {
-        console.log(`* Erro ao puxar mudanças do Git: ${err}`);
+        console.error(`* Erro ao puxar mudanças do Git: ${err}`);
         reject(new Error(`Git pull failed: ${err}`));
         return;
       }
 
       if (stderr && !stderr.includes("Already up to date")) {
-        console.log(`* Git stderr: ${stderr}`);
+        console.warn(`* Git stderr: ${stderr}`);
         resolve({ stdout, stderr, warning: true });
         return;
       }
 
-      console.log(`* Mudanças puxadas do Git: ${stdout}`);
+      console.info(`* Mudanças puxadas do Git: ${stdout}`);
       resolve({ stdout, stderr: null, warning: false });
     });
   });
@@ -29,7 +29,7 @@ const reloadCommands = () => {
     // Clear require cache for all command files
     Object.keys(require.cache).forEach((key) => {
       if (key.includes("\\commands\\") || key.includes("/commands/")) {
-        console.log(`deleting ${key} `);
+        console.debug(`deleting ${key} `);
         delete require.cache[key];
       }
     });

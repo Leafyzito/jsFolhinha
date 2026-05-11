@@ -80,7 +80,7 @@ module.exports = async function handleChannelSubscription(event) {
       fb.log.send(broadcasterLogin, message);
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     fb.discord.logError(
       `Error handling channel subscription event: ${error.message}`
     );

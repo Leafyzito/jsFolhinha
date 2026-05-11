@@ -70,7 +70,7 @@ async function checkNewAuthUsers() {
           // User is in DB but not in provider - add them
           const result = await fb.authProvider.addUserFromDb(userId);
           if (result.success) {
-            console.log(`User ${userId} added to auth provider dynamically`);
+            console.info(`User ${userId} added to auth provider dynamically`);
             addedCount++;
           } else {
             console.error(
@@ -87,7 +87,7 @@ async function checkNewAuthUsers() {
             // Database has new scopes - update the user
             const result = await fb.authProvider.addUserFromDb(userId);
             if (result.success) {
-              console.log(
+              console.info(
                 `User ${userId} updated in auth provider with new scopes`
               );
               updatedCount++;
@@ -110,7 +110,7 @@ async function checkNewAuthUsers() {
 
     // Log summary if there was activity
     if (addedCount > 0 || updatedCount > 0 || errorCount > 0) {
-      console.log(
+      console.info(
         `Auth polling complete: ${addedCount} users added, ${updatedCount} users updated, ${errorCount} errors, ${authTokens.length} total checked`
       );
     }

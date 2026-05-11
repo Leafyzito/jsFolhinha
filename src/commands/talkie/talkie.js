@@ -49,7 +49,7 @@ const talkieCommand = async (message) => {
       break;
     }
 
-    console.log(
+    console.debug(
       `looping looking for next talkie target, currentTarget: ${targetChannel}`
     );
     joinedChannels = joinedChannels.filter(

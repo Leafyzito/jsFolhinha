@@ -15,7 +15,7 @@ async function checkInitialStatus(
     const broadcasterToken = await getBroadcasterToken(broadcasterId);
 
     if (!broadcasterToken) {
-      console.log(
+      console.warn(
         `* Skipping initial status check for ${broadcasterId}: broadcaster token not available`
       );
       // Set botIsMod and botIsVip to false as default when token is not available
@@ -87,7 +87,7 @@ async function checkInitialStatus(
           } while (cursor);
         } else {
           // Bot doesn't have required scope, botIsMod remains false
-          console.log(
+          console.warn(
             `* Bot does not have user:read:moderated_channels scope for ${broadcasterId}`
           );
         }
@@ -153,7 +153,7 @@ async function checkInitialStatus(
       }
     );
 
-    console.log(
+    console.info(
       `* Initial status for ${broadcasterId}: mod=${botIsMod}, vip=${botIsVip}`
     );
   } catch (error) {
