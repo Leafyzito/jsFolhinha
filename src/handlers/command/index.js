@@ -134,7 +134,7 @@ async function commandHandler(message) {
   commandResult.reply = commandResult.reply.replace(/[\n\r]/g, " ").trim();
 
   message.notes = commandResult.notes;
-  message.responseTime = new Date().getTime() - message.internalTimestamp;
+  message.responseTime = performance.now() - message.internalTimestamp;
 
   switch (commandResult.replyType) {
     case "reply":

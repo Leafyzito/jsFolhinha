@@ -331,7 +331,7 @@ class DiscordClient {
   }
 
   formatResponseTime(responseTime) {
-    return `${responseTime}ms (${(responseTime / 1000).toFixed(1)}s)`;
+    return `${Math.floor(responseTime)}ms (${(responseTime / 1000).toFixed(1)}s)`;
   }
 }
 
