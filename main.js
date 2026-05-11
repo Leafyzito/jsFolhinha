@@ -56,7 +56,11 @@ async function initializeApp() {
     fb.emotes = emotes;
     fb.db = db;
     fb.log = log;
+
     console.log("* Utilities initialized");
+
+    await fb.emotes.getGlobalEmotes();
+    console.log("* Global emotes initialized");
 
     // Initialize Auth Provider
     fb.authProvider =
@@ -91,7 +95,7 @@ async function initializeApp() {
 
     // Load and process reminders (handle missed and schedule future ones)
     await loadReminders();
-    console.log("* Reminders loaded and processed");
+    console.log("* Reminders loaded");
 
     // Mark fb as ready
     fb.markReady = true;
@@ -108,7 +112,7 @@ async function initializeApp() {
 
     fb.totalCommandsUsed = await fb.db.count("commandlog", {}, true);
 
-    console.log("* Application initialization complete!");
+    fb.discord.log("* Application initialization complete!");
   } catch (error) {
     console.error("Failed to initialize application:", error);
     process.exit(1);

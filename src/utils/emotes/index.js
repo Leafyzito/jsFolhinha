@@ -1,6 +1,7 @@
 class Emotes {
   constructor() {
     this.cachedEmotes = {};
+    this.globalEmotes = [];
     this.sadEmotes = ["sadge", "sadgecry", "sadcat", "sadchamp", "saj"];
     this.happyEmotes = [
       "peepoglad",
@@ -99,12 +100,28 @@ class Emotes {
     }
   }
 
-  async getEmotes(channelId, channelName) {
-    const ttv = await this.get7tv(channelId).catch(() => []);
-    const bttv = await this.getBttv(channelId).catch(() => []);
-    const ffz = await this.getFfz(channelId).catch(() => []);
+  async getServiceEmotes(channelName) {
+    const url = `https://emotes.adamcy.pl/v1/channel/${channelName}/emotes/all`;
+    const response = await fb.got(url, { timeout: 5000 });
+    if (!response || response.error) return [];
+    return response.map((emote) => emote.code);
+  }
 
-    const channelEmotes = ttv.concat(bttv, ffz);
+  async getGlobalEmotes() {
+    const url = "https://emotes.adamcy.pl/v1/global/emotes/all";
+    const response = await fb.got(url, { timeout: 5000 });
+    if (!response || response.error) return [];
+    this.globalEmotes = response.map((emote) => emote.code);
+    return this.globalEmotes;
+  }
+
+  async getEmotes(channelName) {
+    // const ttv = await this.get7tv(channelId).catch(() => []);
+    // const bttv = await this.getBttv(channelId).catch(() => []);
+    // const ffz = await this.getFfz(channelId).catch(() => []);
+    const emotes = await this.getServiceEmotes(channelName);
+
+    const channelEmotes = emotes.concat(this.globalEmotes);
     this.cachedEmotes[channelName] = channelEmotes;
     return channelEmotes;
   }
@@ -112,11 +129,11 @@ class Emotes {
   async getChannelEmotes(channelName) {
     if (!this.cachedEmotes[channelName]) {
       fb.discord.log(`* Fetching emotes for ${channelName}`);
-      const channelId = (await fb.api.helix.getUserByUsername(channelName))?.id;
-      if (!channelId) {
-        return [];
-      }
-      return this.getEmotes(channelId, channelName);
+      // const channelId = (await fb.api.helix.getUserByUsername(channelName))?.id;
+      // if (!channelId) {
+      //   return [];
+      // }
+      return this.getEmotes(channelName);
     }
 
     return this.cachedEmotes[channelName];
