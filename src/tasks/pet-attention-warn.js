@@ -38,7 +38,7 @@ async function petAttentionTask() {
 
       fb.log.send(
         channelName,
-        `${pet.pet_emoji} ${pet.pet_name} está pedindo atenção! Se ninguém interagir com ele, ele vai ficar rabugento!`
+        `${pet.pet_emoji} ${pet.pet_name} está pedindo atenção! Se ninguém fizer carinho ou brincar com ele, ele vai ficar rabugento!`
       );
       await new Promise((resolve) => setTimeout(resolve, 2000));
       await fb.db.update(
