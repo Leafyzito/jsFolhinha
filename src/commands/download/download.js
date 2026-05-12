@@ -87,13 +87,23 @@ downloadCommand.cooldown = 5000;
 downloadCommand.cooldownType = "channel";
 downloadCommand.whisperable = true;
 downloadCommand.description = `Faça o download de mídias através do bot
-• Exemplo: !download https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
 Pode também fazer download apenas do audio (mp3), utilizando o formato !download audio {link}
-• Exemplo: !download audio https://www.youtube.com/watch?v=dQw4w9WgXcQ
 
 Sites mais famosos suportados: Youtube, Instagram, Facebook, Reddit, Tiktok, Twitter, clipes da Twitch
 Para mais informações sobre a API utilizada, acesse https://github.com/imputnet/cobalt/tree/main/api#supported-services`;
+downloadCommand.examples = [
+  {
+    description: "Fazer o download de um vídeo",
+    input: "!download https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    output: "💾 https://f.feridinha.com/abcde.mp4",
+  },
+  {
+    description: "Fazer o download apenas do áudio",
+    input: "!download audio https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    output: "💾 https://f.feridinha.com/abcde.mp3",
+  },
+];
 downloadCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

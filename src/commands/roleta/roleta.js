@@ -103,10 +103,20 @@ roletaCommand.cooldownType = "channel";
 roletaCommand.whisperable = false;
 roletaCommand.description = `Teste a sua sorte (1 em 6) para uma chance de levar um timeout no chat
 O tempo do timeout pode ser customizado, sendo o tempo padrão 10 minutos
-• Exemplo: !roleta - Caso calhe de rolar um timeout, quem executou o comando tomará um timeout de 10 minutos
-• Exemplo: !roleta 2 - Caso calhe de rolar um timeout, quem executou o comando tomará um timeout de 2 minutos
 
 Para este comando funcione corretamente, o Folhinha precisa do cargo de moderador`;
+roletaCommand.examples = [
+  {
+    description: "Jogar a roleta russa com o timeout padrão (10 minutos)",
+    input: "!roleta",
+    output: "Click! Não foi dessa vez saved",
+  },
+  {
+    description: "Jogar a roleta russa com um timeout customizado",
+    input: "!roleta 2",
+    output: "BANG! Foi de F ripbozo",
+  },
+];
 roletaCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

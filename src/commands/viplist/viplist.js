@@ -55,10 +55,19 @@ vipListCommand.cooldownType = "channel";
 vipListCommand.whisperable = false;
 vipListCommand.description = `Exibe uma lista de canais onde o usuário fornecido é vip, quantos desses canais são parceiros, afiliados e a soma total de seguidores de todos os canais
 
-• Exemplo: !viplist - Exibe a lista de canais que o usuário que executou o comando é moderador
-• Exemplo: !viplist {usuário} - Exibe a lista de canais que o usuário fornecido é moderador
-
 Nota: De momento o site está a exibir informação não atualizada`;
+vipListCommand.examples = [
+  {
+    description: "Ver os canais em que você é VIP",
+    input: "!viplist",
+    output: "EmbellishingGrandma é VIP em 7 canais ● 1 Parceiros ● 2 Afiliados ● 87,420 Seguidores no total - https://roles.tv/u/embellishinggrandma",
+  },
+  {
+    description: "Ver os canais em que outro usuário é VIP",
+    input: "!viplist leafyzito",
+    output: "leafyzito é VIP em 14 canais ● 3 Parceiros ● 6 Afiliados ● 521,108 Seguidores no total - https://roles.tv/u/leafyzito",
+  },
+];
 vipListCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

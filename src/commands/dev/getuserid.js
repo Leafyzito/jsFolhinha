@@ -35,9 +35,18 @@ getUserIdCommand.cooldownType = "user";
 getUserIdCommand.permissions = ["admin"];
 getUserIdCommand.flags = ["dev"];
 getUserIdCommand.whisperable = false;
-getUserIdCommand.description = `Permite descobrir o ID de um usuário a partir do nome de usuário, ou obter o nome de usuário a partir do ID
-
-• Exemplo: !getuserid fulano - Mostra o ID do usuário "fulano"
-• Exemplo: !getuserid id 123456789 - Mostra o nome de usuário associado ao ID 123456789`;
+getUserIdCommand.description = "Permite descobrir o ID de um usuário a partir do nome de usuário, ou obter o nome de usuário a partir do ID";
+getUserIdCommand.examples = [
+  {
+    description: "Obter o ID a partir do nome de usuário",
+    input: "!getuserid fulano",
+    output: "O ID do usuário fulano é 123456789",
+  },
+  {
+    description: "Obter o nome de usuário a partir do ID",
+    input: "!getuserid id 123456789",
+    output: "O usuário do ID 123456789 é fulano",
+  },
+];
 
 module.exports = { getUserIdCommand };

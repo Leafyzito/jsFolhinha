@@ -131,14 +131,27 @@ translateCommand.langCodes = Object.entries(LANGUAGE_MAPPINGS).map(
 );
 translateCommand.description = `Forneça um texto para o bot traduzir para português, ou, caso especificado, para outra língua
 
-• Exemplo: !translate Hello World - O bot irá traduzir "Hello World" para português
-• Exemplo: !translate to:es Hello World - O bot irá traduzir "Hello World" para espanhol
-• Exemplo: !translate to:spanish Hello World - O bot irá traduzir "Hello World" para espanhol
-
 A percentagem na resposta do bot é a confiança da tradução, ou seja, a probabilidade de a tradução estar correta
 
 A língua fornecida deve ser o seu código ou o nome do idioma em inglês
 Pode ver uma lista de idiomas suportados aqui: https://folhinhabot.com/linguagens`;
+translateCommand.examples = [
+  {
+    description: "Traduzir um texto para português (idioma padrão)",
+    input: "!translate Hello World",
+    output: "English → Portuguese: Olá Mundo",
+  },
+  {
+    description: "Traduzir para outro idioma pelo código",
+    input: "!translate to:es Hello World",
+    output: "English → Spanish: Hola Mundo",
+  },
+  {
+    description: "Traduzir para outro idioma pelo nome em inglês",
+    input: "!translate to:spanish Hello World",
+    output: "English → Spanish: Hola Mundo",
+  },
+];
 translateCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

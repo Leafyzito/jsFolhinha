@@ -90,9 +90,14 @@ talkieCommand.cooldownType = "channel";
 talkieCommand.whisperable = false;
 talkieCommand.description = `Envie uma mensagem misteriosa para um canal aleatório que o Folhinha esteja conectado
 
-• Exemplo: !talkie Olá mundo - O bot irá enviar a mensagem "Olá mundo" para um canal aleatório
-
 Se quiser desabilitar a possibilidade do seu chat ser um dos canais onde o bot irá enviar mensagens misteriosas, use o comando !config ban talkie`;
+talkieCommand.examples = [
+  {
+    description: "Enviar uma mensagem para um canal aleatório",
+    input: "!talkie Olá mundo",
+    output: "Mensagem enviada peepogiggle",
+  },
+];
 talkieCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

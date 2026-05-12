@@ -27,9 +27,18 @@ allEmotesCommand.cooldownType = "user";
 allEmotesCommand.permissions = ["admin"];
 allEmotesCommand.whisperable = false;
 allEmotesCommand.flags = ["dev"];
-allEmotesCommand.description = `Mostra todos os emotes (BTTV, FFZ, 7TV) do canal especificado. O comando envia a lista de emotes em partes, respeitando o limite de caracteres do chat.
-  
-• Exemplo: !allemotes - Lista todos os emotes do canal atual
-• Exemplo: !allemotes canalexemplo - Lista todos os emotes do canal "canalexemplo"`;
+allEmotesCommand.description = "Mostra todos os emotes (BTTV, FFZ, 7TV) do canal especificado. O comando envia a lista de emotes em partes, respeitando o limite de caracteres do chat.";
+allEmotesCommand.examples = [
+  {
+    description: "Listar todos os emotes do canal atual",
+    input: "!allemotes",
+    output: "FeelsDankMan PepeLaugh peepoHappy monkaS Pog forsenE forsenCD ... (em várias mensagens)",
+  },
+  {
+    description: "Listar todos os emotes de um canal específico",
+    input: "!allemotes canalexemplo",
+    output: "FeelsDankMan PepeLaugh peepoHappy ... (em várias mensagens, do canalexemplo)",
+  },
+];
 
 module.exports = { allEmotesCommand };

@@ -32,8 +32,13 @@ devPartChannelCommand.cooldownType = "user";
 devPartChannelCommand.permissions = ["admin"];
 devPartChannelCommand.whisperable = false;
 devPartChannelCommand.flags = ["dev"];
-devPartChannelCommand.description = `Remove o bot de um canal específico e apaga a configuração
-
-• Exemplo: !devpart canalexemplo - O bot sai do canal "canalexemplo" e remove a configuração`;
+devPartChannelCommand.description = "Remove o bot de um canal específico e apaga a configuração";
+devPartChannelCommand.examples = [
+  {
+    description: "Remover o bot de um canal e apagar a configuração",
+    input: "!devpart canalexemplo",
+    output: "Saí do canal canalexemplo e removi a configuração ✅",
+  },
+];
 
 module.exports = { devPartChannelCommand };

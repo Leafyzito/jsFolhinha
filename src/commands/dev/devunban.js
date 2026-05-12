@@ -85,9 +85,18 @@ unbanDevCommand.permissions = ["admin"];
 unbanDevCommand.whisperable = false;
 unbanDevCommand.flags = ["dev"];
 unbanDevCommand.description = `Remove o banimento de um usuário do uso de um comando específico, ou de todos os comandos, no bot.
-Para remover o banimento de todos os comandos, utilize "all" no lugar do nome do comando.
-
-• Exemplo: !devunban usuario123 piada - Permite que o usuário "usuario123" volte a usar o comando "piada"
-• Exemplo: !devunban usuario123 all - Permite que o usuário "usuario123" volte a usar todos os comandos do bot`;
+Para remover o banimento de todos os comandos, utilize "all" no lugar do nome do comando.`;
+unbanDevCommand.examples = [
+  {
+    description: "Permitir que um usuário volte a usar um comando específico",
+    input: "!devunban usuario123 piada",
+    output: "Usuário 'usuario123' desbanido do comando 'piada' ✅",
+  },
+  {
+    description: "Permitir que um usuário volte a usar todos os comandos",
+    input: "!devunban usuario123 all",
+    output: "Usuário 'usuario123' desbanido de todos os comandos ✅",
+  },
+];
 
 module.exports = { unbanDevCommand };

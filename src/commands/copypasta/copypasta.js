@@ -39,9 +39,19 @@ copypastaCommand.shortDescription = "Mostra uma copypasta aleatória";
 copypastaCommand.cooldown = 5000;
 copypastaCommand.cooldownType = "channel";
 copypastaCommand.whisperable = true;
-copypastaCommand.description = `Veja uma copypasta aleatória ou específica quando determinado um número da lista de copypastas
-• Exemplo: "!copypasta - O bot vai enviar uma copypasta aleatória
-• Exemplo: "!copypasta 4 - O bot vai enviar a copypasta número 4 da lista de copypastas`;
+copypastaCommand.description = "Veja uma copypasta aleatória ou específica quando determinado um número da lista de copypastas";
+copypastaCommand.examples = [
+  {
+    description: "Receber uma copypasta aleatória",
+    input: "!copypasta",
+    output: "#42/250 - <texto da copypasta aleatória>",
+  },
+  {
+    description: "Receber uma copypasta específica",
+    input: "!copypasta 4",
+    output: "#4/250 - <texto da copypasta número 4>",
+  },
+];
 copypastaCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/commands/${copypastaCommand.commandName}/${copypastaCommand.commandName}.js`;
 
 module.exports = {

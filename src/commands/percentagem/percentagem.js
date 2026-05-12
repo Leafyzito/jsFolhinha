@@ -13,8 +13,14 @@ percentagemCommand.shortDescription = "Mostra uma percentagem aleatória";
 percentagemCommand.cooldown = 5000;
 percentagemCommand.cooldownType = "channel";
 percentagemCommand.whisperable = true;
-percentagemCommand.description =
-  "Uso: !% {quantidade}; Resposta esperada: {percentagem aleatória}";
+percentagemCommand.description = "Mostra uma percentagem aleatória";
+percentagemCommand.examples = [
+  {
+    description: "Ver uma percentagem aleatória",
+    input: "!%",
+    output: "73.42%",
+  },
+];
 percentagemCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

@@ -38,8 +38,14 @@ avatarCommand.shortDescription = "Mostra o avatar de algum usuário";
 avatarCommand.cooldown = 5000;
 avatarCommand.cooldownType = "channel";
 avatarCommand.whisperable = true;
-avatarCommand.description = `Marque alguém para ver a foto de perfil.
-• Exemplo: !avatar @pessoa`;
+avatarCommand.description = "Marque alguém para ver a foto de perfil.";
+avatarCommand.examples = [
+  {
+    description: "Ver o avatar de algum usuário",
+    input: "!avatar @leafyzito",
+    output: "O avatar de leafyzito é: https://f.feridinha.com/abcde.png",
+  },
+];
 avatarCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

@@ -87,8 +87,13 @@ reloadCommand.cooldownType = "user";
 reloadCommand.permissions = ["admin"];
 reloadCommand.whisperable = false;
 reloadCommand.flags = ["dev"];
-reloadCommand.description = `Atualiza os arquivos do bot a partir do GitHub e recarrega todos os comandos carregados em tempo real, sem precisar reiniciar o bot
-
-• Exemplo: !reload - Atualiza os comandos do bot com as últimas alterações`;
+reloadCommand.description = "Atualiza os arquivos do bot a partir do GitHub e recarrega todos os comandos carregados em tempo real, sem precisar reiniciar o bot";
+reloadCommand.examples = [
+  {
+    description: "Recarregar os comandos do bot",
+    input: "!reload",
+    output: "Comandos recarregados ✅",
+  },
+];
 
 module.exports = { reloadCommand };

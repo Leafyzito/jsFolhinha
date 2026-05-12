@@ -45,9 +45,14 @@ delcmdCommand.cooldown = 1000;
 delcmdCommand.cooldownType = "channel";
 delcmdCommand.permissions = ["mod", "admin"];
 delcmdCommand.whisperable = false;
-delcmdCommand.description = `Remove um comando customizado do canal atual
-
-• Exemplo: !delcmd discord`;
+delcmdCommand.description = "Remove um comando customizado do canal atual";
+delcmdCommand.examples = [
+  {
+    description: "Remover um comando customizado",
+    input: "!delcmd discord",
+    output: "Comando customizado 'discord' removido ✅",
+  },
+];
 delcmdCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

@@ -67,8 +67,14 @@ checkNickCommand.shortDescription =
 checkNickCommand.cooldown = 5000;
 checkNickCommand.cooldownType = "channel";
 checkNickCommand.whisperable = true;
-checkNickCommand.description = `Use este comando para ver se um nick específico é válido e está disponível ou não
-• Exemplo: !checknick leafyzito - Verifica se o nick "leafyzito" está disponível`;
+checkNickCommand.description = "Use este comando para ver se um nick específico é válido e está disponível ou não";
+checkNickCommand.examples = [
+  {
+    description: "Verificar se um nick está disponível",
+    input: "!checknick leafyzito",
+    output: "O nick leafyzito não está disponível 👎",
+  },
+];
 checkNickCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

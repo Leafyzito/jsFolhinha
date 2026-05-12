@@ -46,7 +46,6 @@ queryCommand.cooldown = 5000;
 queryCommand.cooldownType = "channel";
 queryCommand.whisperable = true;
 queryCommand.description = `Use !query {expressão matemática} para fazer cálculos matemáticos
-• Exemplo: !query 2+2*4 - O bot irá responder com o resultado: 10
 
 Pode também fazer algumas conversões, apenas em inglês, como:
 • Conversão de unidades de medida: !query 10cm to inches - O bot irá responder com o resultado: 3.937007874015748
@@ -59,6 +58,18 @@ Pode também fazer algumas conversões, apenas em inglês, como:
 • Distância entre dois pontos: !query distance between portugal and brazil - O bot irá responder com o resultado: 7318 km (kilometers)
 
 Para mais informações, consulte o site oficial do Wolfram Alpha`;
+queryCommand.examples = [
+  {
+    description: "Fazer um cálculo simples",
+    input: "!query 2+2*4",
+    output: "🤓 10",
+  },
+  {
+    description: "Converter unidades",
+    input: "!query 10cm to inches",
+    output: "🤓 3.937007874015748 inches",
+  },
+];
 queryCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

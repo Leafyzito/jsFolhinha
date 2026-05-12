@@ -44,9 +44,19 @@ corCommand.shortDescription = "Mostra a cor de algum usuário";
 corCommand.cooldown = 5000;
 corCommand.cooldownType = "channel";
 corCommand.whisperable = true;
-corCommand.description = `Veja a cor de algum usuário. O bot responderá com o código hexadecimal da cor juntamente com o nome da mesma. Caso nenhum usuário tenha sido marcado, exibirá a cor de quem realizou o comando
-• Exemplo: !cor - O bot vai responder com a informações sobre a cor de quem realizou o comando
-• Exemplo: !cor @usuário - O bot vai responder com a informações sobre a cor de @usuário`;
+corCommand.description = "Veja a cor de algum usuário. O bot responderá com o código hexadecimal da cor juntamente com o nome da mesma. Caso nenhum usuário tenha sido marcado, exibirá a cor de quem realizou o comando";
+corCommand.examples = [
+  {
+    description: "Ver a sua própria cor no chat",
+    input: "!cor",
+    output: "A sua cor é: #1E90FF - Dodger Blue",
+  },
+  {
+    description: "Ver a cor de outro usuário",
+    input: "!cor @leafyzito",
+    output: "A cor de leafyzito é: #FF4500 - Orange Red",
+  },
+];
 corCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

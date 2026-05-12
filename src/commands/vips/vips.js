@@ -42,9 +42,19 @@ vipsCommand.cooldownType = "channel";
 vipsCommand.whisperable = false;
 vipsCommand.description = `Exibe uma lista de vips do canal fornecido ou, caso nenhum canal seja fornecido, da canal onde o comando foi executado
 
-O comando funcionará mesmo em canais que o Folhinha não esteja presente
-• Exemplo: !vips - Exibe a lista de vips do canal atual
-• Exemplo: !vips {canal} - Exibe a lista de vips do canal escolhido`;
+O comando funcionará mesmo em canais que o Folhinha não esteja presente`;
+vipsCommand.examples = [
+  {
+    description: "Ver a lista de VIPs do canal atual",
+    input: "!vips",
+    output: "Existem 12 VIPs em #canalatual - https://roles.tv/c/canalatual",
+  },
+  {
+    description: "Ver a lista de VIPs de outro canal",
+    input: "!vips xqc",
+    output: "Existem 47 VIPs em #xqc - https://roles.tv/c/xqc",
+  },
+];
 vipsCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

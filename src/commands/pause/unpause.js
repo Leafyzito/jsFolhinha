@@ -47,8 +47,14 @@ unpauseCommand.cooldownType = "channel";
 unpauseCommand.whisperable = false;
 unpauseCommand.permissions = ["mod", "admin"];
 unpauseCommand.flags = ["always"];
-unpauseCommand.description =
-  "Uso: !unpause; Resposta esperada: despausado. O bot irá voltar a responder";
+unpauseCommand.description = "Despausa o bot no chat atual";
+unpauseCommand.examples = [
+  {
+    description: "Despausar o bot no chat atual",
+    input: "!unpause",
+    output: "Despausado 👍",
+  },
+];
 unpauseCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = { unpauseCommand };

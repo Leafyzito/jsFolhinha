@@ -55,10 +55,19 @@ modListCommand.cooldownType = "channel";
 modListCommand.whisperable = false;
 modListCommand.description = `Exibe uma lista de canais onde o usuário fornecido é moderador, quantos desses canais são parceiros, afiliados e a soma total de seguidores de todos os canais
 
-• Exemplo: !modlist - Exibe a lista de canais que o usuário que executou o comando é moderador
-• Exemplo: !modlist {usuário} - Exibe a lista de canais que o usuário fornecido é moderador
-
 Nota: De momento o site está a exibir informação não atualizada`;
+modListCommand.examples = [
+  {
+    description: "Ver os canais em que você é moderador",
+    input: "!modlist",
+    output: "EmbellishingGrandma é moderador em 12 canais ● 2 Parceiros ● 5 Afiliados ● 145,320 Seguidores no total - https://roles.tv/u/embellishinggrandma",
+  },
+  {
+    description: "Ver os canais em que outro usuário é moderador",
+    input: "!modlist leafyzito",
+    output: "leafyzito é moderador em 47 canais ● 8 Parceiros ● 21 Afiliados ● 2,341,108 Seguidores no total - https://roles.tv/u/leafyzito",
+  },
+];
 modListCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

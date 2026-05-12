@@ -274,13 +274,9 @@ Para uma forma mais intuitiva de mudar as configurações do bot, veja o Dashboa
 Caso queira trocar os prefixos do bot, pode usar o comando !config prefixo {prefixo1} {prefixo2} ..., sendo a lista de prefixos válidos:
 ?&%+*-=|@#$~\\_,;<>
 O bot aceita múltiplos prefixos ao mesmo tempo. Cada execução do comando substitui a lista inteira (é necessário pelo menos 1 prefixo)
-• Exemplo: !config prefixo ? - Define o prefixo do bot apenas como "?"
-• Exemplo: !config prefixo ! ? - Define os prefixos do bot como "!" e "?"
 • Use !config prefixo (sem argumentos) para ver os prefixos atuais
 
 Caso deseje desativar algum comando no chat, pode usar !config ban {comando} ou !config unban {comando} para reabilitá-lo
-• Exemplo: !config ban piada - Desativa o comando "piada" no canal
-• Exemplo: !config unban piada - Reabilita o comando "piada" no canal
 
 Caso queira que o bot apenas funcione quando o canal estiver offline, pode usar o comando !config offline
 Usar o comando !config offline alterna entre o estado ativado e desativado. Por padrão, esta função está desativada
@@ -299,6 +295,28 @@ Você pode definir uma mensagem customizada usando: !config thanksubs mensagem_p
 Placeholders disponíveis: {user}, {gifter}, {months}, {amount}, {emote}
 
 Este comandos podem ser executados apenas pelo streamer ou os moderadores do canal`;
+configCommand.examples = [
+  {
+    description: "Definir o prefixo do bot apenas como \"?\"",
+    input: "!config prefixo ?",
+    output: "Prefixos atualizados para: ?",
+  },
+  {
+    description: "Definir múltiplos prefixos para o bot",
+    input: "!config prefixo ! ?",
+    output: "Prefixos atualizados para: ! ?",
+  },
+  {
+    description: "Desativar um comando no canal",
+    input: "!config ban piada",
+    output: "Comando 'piada' desativado neste canal",
+  },
+  {
+    description: "Reabilitar um comando no canal",
+    input: "!config unban piada",
+    output: "Comando 'piada' reabilitado neste canal",
+  },
+];
 configCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

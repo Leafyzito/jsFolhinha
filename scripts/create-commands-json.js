@@ -205,6 +205,24 @@ function processCommands() {
       cleanCommand.langCodes = command.langCodes;
     }
 
+    if (
+      command.examples &&
+      Array.isArray(command.examples) &&
+      command.examples.length > 0 &&
+      command.examples.every(
+        (example) =>
+          example &&
+          typeof example.description === "string" &&
+          example.description.trim() !== "" &&
+          typeof example.input === "string" &&
+          example.input.trim() !== "" &&
+          typeof example.output === "string" &&
+          example.output.trim() !== ""
+      )
+    ) {
+      cleanCommand.examples = command.examples;
+    }
+
     processedCommands[commandName] = cleanCommand;
     validCommands++;
 

@@ -47,8 +47,14 @@ pauseCommand.cooldownType = "channel";
 pauseCommand.whisperable = false;
 pauseCommand.permissions = ["mod", "admin"];
 pauseCommand.flags = ["always"];
-pauseCommand.description =
-  "Uso: !pause; Resposta esperada: pausado. O bot não irá voltar a responder até !unpause ser usado";
+pauseCommand.description = "Pausa o bot no chat atual";
+pauseCommand.examples = [
+  {
+    description: "Pausar o bot no chat atual",
+    input: "!pause",
+    output: "Pausado 👍",
+  },
+];
 pauseCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = { pauseCommand };

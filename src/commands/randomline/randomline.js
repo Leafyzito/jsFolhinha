@@ -59,11 +59,19 @@ randomLineCommand.cooldownType = "channel";
 randomLineCommand.whisperable = false;
 randomLineCommand.description = `Receba uma mensagem aleatória de um usuário fornecido ou, caso nenhum seja fornecido, da pessoa que executou o comando
 
-• Exemplo: !randomline - O bot vai mostrar uma mensagem aleatória do chat onde o comando foi executado
-
-• Exemplo: !randomline @leafyzito - O bot vai mostrar uma mensagem aleatória de @leafyzito no chat onde o comando foi executado
-
 Contando desde 06/03/2025`;
+randomLineCommand.examples = [
+  {
+    description: "Receber uma mensagem aleatória do chat atual",
+    input: "!randomline",
+    output: "(há 4 dias) EmbellishingGrandma: bom dia chat",
+  },
+  {
+    description: "Receber uma mensagem aleatória de outro usuário",
+    input: "!randomline @leafyzito",
+    output: "(há 12 horas) leafyzito: oi galera",
+  },
+];
 randomLineCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

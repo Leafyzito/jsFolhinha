@@ -29,8 +29,19 @@ coinflipCommand.shortDescription = "Lance uma moeda ao ar";
 coinflipCommand.cooldown = 5000;
 coinflipCommand.cooldownType = "channel";
 coinflipCommand.whisperable = true;
-coinflipCommand.description =
-  "Lance uma moeda ao ar e deixe que ela escolha o destino (cara ou coroa)";
+coinflipCommand.description = "Lance uma moeda ao ar e deixe que ela escolha o destino (cara ou coroa)";
+coinflipCommand.examples = [
+  {
+    description: "Lançar a moeda com o comando principal",
+    input: "!coinflip",
+    output: "🪙 Cara (sim)",
+  },
+  {
+    description: "Usar o alias curto do comando",
+    input: "!cf",
+    output: "🪙 Coroa (não)",
+  }
+];
 coinflipCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/commands/${coinflipCommand.commandName}/${coinflipCommand.commandName}.js`;
 
 module.exports = {

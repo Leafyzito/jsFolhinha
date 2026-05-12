@@ -41,9 +41,19 @@ modsCommand.cooldownType = "channel";
 modsCommand.whisperable = false;
 modsCommand.description = `Exibe uma lista de mods do canal fornecido ou, caso nenhum canal seja fornecido, da canal onde o comando foi executado
 
-O comando funcionará mesmo em canais que o Folhinha não esteja presente
-• Exemplo: !mods - Exibe a lista de mods do canal atual
-• Exemplo: !mods {canal} - Exibe a lista de mods do canal escolhido`;
+O comando funcionará mesmo em canais que o Folhinha não esteja presente`;
+modsCommand.examples = [
+  {
+    description: "Ver a lista de mods do canal atual",
+    input: "!mods",
+    output: "Existem 17 moderadores em #canalatual - https://roles.tv/c/canalatual",
+  },
+  {
+    description: "Ver a lista de mods de outro canal",
+    input: "!mods xqc",
+    output: "Existem 31 moderadores em #xqc - https://roles.tv/c/xqc",
+  },
+];
 modsCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

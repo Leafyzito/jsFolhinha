@@ -75,11 +75,20 @@ rolesCommand.cooldown = 5000;
 rolesCommand.cooldownType = "channel";
 rolesCommand.whisperable = false;
 rolesCommand.description = `Exibe uma lista de cargos que o usuário fornecido tem por toda a Twitch
-    
-    • Exemplo: !roles - Exibe a lista de cargos que o usuário que executou o comando tem por toda a Twitch
-    • Exemplo: !roles {usuário} - Exibe a lista de cargos que o usuário fornecido tem por toda a Twitch
-    
-    Nota: De momento o site está a exibir informação não atualizada`;
+
+Nota: De momento o site está a exibir informação não atualizada`;
+rolesCommand.examples = [
+  {
+    description: "Ver os cargos que você tem por toda a Twitch",
+    input: "!roles",
+    output: "EmbellishingGrandma é mod em 5, founder em 12, vip em 3 ● https://roles.tv/u/embellishinggrandma",
+  },
+  {
+    description: "Ver os cargos de outro usuário por toda a Twitch",
+    input: "!roles leafyzito",
+    output: "leafyzito é mod em 47, founder em 80, vip em 21 ● https://roles.tv/u/leafyzito",
+  },
+];
 rolesCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

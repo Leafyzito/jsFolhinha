@@ -50,8 +50,14 @@ tuckCommand.shortDescription = "Coloca alguém para dormir no chat";
 tuckCommand.cooldown = 5000;
 tuckCommand.cooldownType = "channel";
 tuckCommand.whisperable = true;
-tuckCommand.description = `Deseje bons sonhos a alguém do chat
-• Exemplo !tuck @pessoa`;
+tuckCommand.description = "Deseje bons sonhos a alguém do chat";
+tuckCommand.examples = [
+  {
+    description: "Colocar alguém pra dormir no chat",
+    input: "!tuck @leafyzito",
+    output: "EmbellishingGrandma colocou leafyzito pra dormir tuckk",
+  },
+];
 tuckCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = { tuckCommand };

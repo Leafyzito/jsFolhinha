@@ -36,7 +36,14 @@ EightBallCommand.cooldown = 5000;
 EightBallCommand.cooldownType = "channel";
 EightBallCommand.whisperable = true;
 EightBallCommand.description =
-  "Uso: !8ball; Resposta esperada: Sinais apontam que sim/Não conte com isso/etc";
+  'Uma simulação de um "8ball" e receber uma resposta aleatória';
+EightBallCommand.examples = [
+  {
+    description: "Pergunte algo ao 8ball",
+    input: "!8ball Vou ganhar na loteria?",
+    output: "🎱 Sinais apontam que sim",
+  },
+];
 EightBallCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

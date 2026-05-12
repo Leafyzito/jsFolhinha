@@ -142,8 +142,14 @@ howLongToBeatCommand.shortDescription =
 howLongToBeatCommand.cooldown = 5000;
 howLongToBeatCommand.cooldownType = "channel";
 howLongToBeatCommand.whisperable = true;
-howLongToBeatCommand.description = `Descubra o tempo que leva para um jogo ser completado em média
-• Exemplo: !howlongtobeat Hollow Knight - O bot vai responder com o tempo que leva para completar o jogo fornecido juntamente com um link para a página do jogo no site howlongtobeat.com`;
+howLongToBeatCommand.description = "Descubra o tempo que leva para um jogo ser completado em média";
+howLongToBeatCommand.examples = [
+  {
+    description: "Ver o tempo médio para completar um jogo",
+    input: "!howlongtobeat Hollow Knight",
+    output: "Tempo médio para completar Hollow Knight (2017-02-24): História principal: 27 hrs ● Conteúdo secundário: 41 hrs ● Complecionista: 65 hrs ● Todos os estilos: 38 hrs. https://howlongtobeat.com/game/10440",
+  },
+];
 howLongToBeatCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

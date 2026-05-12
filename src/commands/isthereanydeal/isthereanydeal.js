@@ -112,8 +112,19 @@ isThereAnyDealCommand.cooldown = 5000;
 isThereAnyDealCommand.cooldownType = "channel";
 isThereAnyDealCommand.whisperable = true;
 isThereAnyDealCommand.description = `Mostra o menor preço do momento e o menor preço histórico de um jogo de acordo com o isthereanydeal.com. 
-Se quiser que a moeda da resposta seja diferente de BRL, use 'moeda:' e o código da moeda
-• Exemplo: !deal elden ring moeda:usd`;
+Se quiser que a moeda da resposta seja diferente de BRL, use 'moeda:' e o código da moeda`;
+isThereAnyDealCommand.examples = [
+  {
+    description: "Ver o menor preço atual de um jogo",
+    input: "!deal elden ring",
+    output: "Menor preço atual de \"Elden Ring\": 199.50 BRL na loja Steam ● Menor preço de sempre: 149.62 BRL ● https://isthereanydeal.com/game/elden-ring/info/",
+  },
+  {
+    description: "Ver o menor preço atual em outra moeda",
+    input: "!deal elden ring moeda:usd",
+    output: "Menor preço atual de \"Elden Ring\": 41.99 USD na loja Steam ● Menor preço de sempre: 29.99 USD ● https://isthereanydeal.com/game/elden-ring/info/",
+  },
+];
 isThereAnyDealCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

@@ -73,9 +73,18 @@ devBanCommand.permissions = ["admin"];
 devBanCommand.whisperable = false;
 devBanCommand.flags = ["dev"];
 devBanCommand.description = `Bane um usuário específico de usar um comando específico, ou todos os comandos, no bot
- Para banir o uso de todos os comandos, utilize "all" no lugar do nome do comando
-
-• Exemplo: !devban usuario123 piada - Impede o usuário "usuario123" de usar o comando "piada"
-• Exemplo: !devban usuario123 all - Impede o usuário "usuario123" de usar todos os comandos do bot`;
+ Para banir o uso de todos os comandos, utilize "all" no lugar do nome do comando`;
+devBanCommand.examples = [
+  {
+    description: "Banir um usuário de um comando específico",
+    input: "!devban usuario123 piada",
+    output: "Usuário 'usuario123' banido do comando 'piada' ✅",
+  },
+  {
+    description: "Banir um usuário de todos os comandos",
+    input: "!devban usuario123 all",
+    output: "Usuário 'usuario123' banido de todos os comandos ✅",
+  },
+];
 
 module.exports = { devBanCommand };

@@ -38,8 +38,19 @@ helpCommand.shortDescription = "Mostra um link para o site do bot";
 helpCommand.cooldown = 5000;
 helpCommand.cooldownType = "channel";
 helpCommand.whisperable = true;
-helpCommand.description =
-  "Apenas um comando para direcionar o usuário para a página do bot";
+helpCommand.description = "Apenas um comando para direcionar o usuário para a página do bot";
+helpCommand.examples = [
+  {
+    description: "Ver informações gerais sobre o bot",
+    input: "!help",
+    output: "Para informações sobre o bot, acesse https://folhinhabot.com/ Para ver infomações sobre um comando específico, use !help <comando>",
+  },
+  {
+    description: "Consultar um comando específico",
+    input: "!help coinflip",
+    output: "Coinflip: Lance uma moeda ao ar - https://folhinhabot.com/comandos/coinflip",
+  }
+];
 helpCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = { helpCommand };

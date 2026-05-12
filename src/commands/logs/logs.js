@@ -34,11 +34,24 @@ logsCommand.shortDescription = "Veja os logs do chat";
 logsCommand.cooldown = 5000;
 logsCommand.cooldownType = "channel";
 logsCommand.whisperable = false;
-logsCommand.description = `Obtenha um link para os logs de chat de um determinado par de canal e usuário. Usa a API best-logs do @ZonianMidian para pesquisar todas as instâncias conhecidas e o frontend do @Supelle para visualização dos logs
-
-• Exemplo: !logs - Mostra os logs do canal atual
-• Exemplo: !logs @usuario - Mostra os logs do usuário no canal atual
-• Exemplo: !logs @canal @usuario - Mostra os logs do usuário no canal especificado`;
+logsCommand.description = "Obtenha um link para os logs de chat de um determinado par de canal e usuário. Usa a API best-logs do @ZonianMidian para pesquisar todas as instâncias conhecidas e o frontend do @Supelle para visualização dos logs";
+logsCommand.examples = [
+  {
+    description: "Ver os logs do canal atual",
+    input: "!logs",
+    output: "Logs: https://tv.supa.sh/logs?c=canalatual",
+  },
+  {
+    description: "Ver os logs de um usuário no canal atual",
+    input: "!logs @leafyzito",
+    output: "Logs: https://tv.supa.sh/logs?c=canalatual&u=leafyzito",
+  },
+  {
+    description: "Ver os logs de um usuário em outro canal",
+    input: "!logs @xqc @leafyzito",
+    output: "Logs: https://tv.supa.sh/logs?c=xqc&u=leafyzito",
+  },
+];
 logsCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

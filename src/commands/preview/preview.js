@@ -99,9 +99,14 @@ previewCommand.shortDescription =
 previewCommand.cooldown = 5000;
 previewCommand.cooldownType = "channel";
 previewCommand.whisperable = false;
-previewCommand.description = `Exibe uma imagem do momento atual da live do canal fornecido ou a tela offline caso não esteja em live
-
-• Exemplo: !preview omeiaum - Se o canal "omeiaum" estiver ao vivo, o bot vai enviar uma imagem do momento atual da live`;
+previewCommand.description = "Exibe uma imagem do momento atual da live do canal fornecido ou a tela offline caso não esteja em live";
+previewCommand.examples = [
+  {
+    description: "Ver o preview da live de outro canal",
+    input: "!preview omeiaum",
+    output: "Preview da live de omeiaum: https://f.feridinha.com/preview.jpg",
+  },
+];
 previewCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

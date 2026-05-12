@@ -42,10 +42,19 @@ filosofiaCommand.shortDescription = "Mostra uma filosofia aleatória";
 filosofiaCommand.cooldown = 5000;
 filosofiaCommand.cooldownType = "channel";
 filosofiaCommand.whisperable = true;
-filosofiaCommand.description = `Veja uma filosofia aleatória ou específica quando determinado um número da lista de filosofias
-
-• Exemplo: "!filosofia - O bot vai enviar uma filosofia aleatória
-• Exemplo: "!filosofia 4 - O bot vai enviar a filosofia número 4 da lista de filosofias`;
+filosofiaCommand.description = "Veja uma filosofia aleatória ou específica quando determinado um número da lista de filosofias";
+filosofiaCommand.examples = [
+  {
+    description: "Receber uma filosofia aleatória",
+    input: "!filosofia",
+    output: "#23/200 - <texto da filosofia aleatória>",
+  },
+  {
+    description: "Receber uma filosofia específica",
+    input: "!filosofia 4",
+    output: "#4/200 - <texto da filosofia número 4>",
+  },
+];
 filosofiaCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

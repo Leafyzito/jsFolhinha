@@ -75,9 +75,19 @@ addcmdCommand.whisperable = false;
 addcmdCommand.description = `Cria um comando customizado no canal atual
 
 • Opcional: -cooldown:N define o cooldown em segundos (1-3600). 5 segundos é o padrão.
-• Na resposta você pode usar: {user}, {channel}, {1}/{2}/… (palavras após o comando), {args} (tudo após o comando), ou {{ e }} para chave literal.
-• Exemplo: !addcmd discord Meu discord é: discord.gg/xxxx
-• Exemplo com cooldown: !addcmd discord -cooldown:30 Meu discord é: discord.gg/xxxx`;
+• Na resposta você pode usar: {user}, {channel}, {1}/{2}/… (palavras após o comando), {args} (tudo após o comando), ou {{ e }} para chave literal.`;
+addcmdCommand.examples = [
+  {
+    description: "Crie um comando customizado simples",
+    input: "!addcmd discord Meu discord é: discord.gg/xxxx",
+    output: "Comando customizado 'discord' criado ✅",
+  },
+  {
+    description: "Crie um comando com cooldown customizado",
+    input: "!addcmd discord -cooldown:30 Meu discord é: discord.gg/xxxx",
+    output: "Comando customizado 'discord' criado ✅",
+  },
+];
 addcmdCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

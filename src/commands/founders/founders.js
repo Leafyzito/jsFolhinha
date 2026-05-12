@@ -42,9 +42,19 @@ foundersCommand.cooldownType = "channel";
 foundersCommand.whisperable = false;
 foundersCommand.description = `Exibe uma lista de founders do canal fornecido ou, caso nenhum canal seja fornecido, da canal onde o comando foi executado
 
-O comando funcionará mesmo em canais que o Folhinha não esteja presente
-• Exemplo: !founders - Exibe a lista de founders do canal atual
-• Exemplo: !founders {canal} - Exibe a lista de founders do canal escolhido`;
+O comando funcionará mesmo em canais que o Folhinha não esteja presente`;
+foundersCommand.examples = [
+  {
+    description: "Ver o número de founders do canal atual",
+    input: "!founders",
+    output: "Existem 47 fundadores em canalatual - https://roles.tv/c/canalatual",
+  },
+  {
+    description: "Ver o número de founders de outro canal",
+    input: "!founders xqc",
+    output: "Existem 12345 fundadores em xqc - https://roles.tv/c/xqc",
+  },
+];
 foundersCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

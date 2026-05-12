@@ -37,11 +37,28 @@ reloadEmotesCommand.cooldownType = "user";
 reloadEmotesCommand.permissions = ["admin"];
 reloadEmotesCommand.whisperable = false;
 reloadEmotesCommand.flags = ["dev"];
-reloadEmotesCommand.description = `Recarrega a lista de emotes para um canal específico, para todos os canais em cache, ou limpa toda a cache de emotes
-
-• Exemplo: !reloademotes - Recarrega os emotes do canal atual
-• Exemplo: !reloademotes canal123 - Recarrega os emotes do canal "canal123"
-• Exemplo: !reloademotes all - Recarrega os emotes de todos os canais em cache
-• Exemplo: !reloademotes clear - Limpa toda a cache de emotes`;
+reloadEmotesCommand.description = "Recarrega a lista de emotes para um canal específico, para todos os canais em cache, ou limpa toda a cache de emotes";
+reloadEmotesCommand.examples = [
+  {
+    description: "Recarregar os emotes do canal atual",
+    input: "!reloademotes",
+    output: "Emotes do canal atual recarregados ✅",
+  },
+  {
+    description: "Recarregar os emotes de um canal específico",
+    input: "!reloademotes canal123",
+    output: "Emotes do canal canal123 recarregados ✅",
+  },
+  {
+    description: "Recarregar os emotes de todos os canais em cache",
+    input: "!reloademotes all",
+    output: "Emotes de todos os canais em cache recarregados ✅",
+  },
+  {
+    description: "Limpar toda a cache de emotes",
+    input: "!reloademotes clear",
+    output: "Cache de emotes limpa ✅",
+  },
+];
 
 module.exports = { reloadEmotesCommand };

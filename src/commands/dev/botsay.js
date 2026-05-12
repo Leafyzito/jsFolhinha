@@ -35,9 +35,18 @@ botSayCommand.cooldownType = "user";
 botSayCommand.permissions = ["admin"];
 botSayCommand.whisperable = false;
 botSayCommand.flags = ["dev"];
-botSayCommand.description = `Envie uma mensagem personalizada como o bot em um canal específico ou em todos os canais onde o bot está presente
-
-• Exemplo: !botsay canalexemplo Olá - O bot envia "Olá" no canal "canalexemplo"
-• Exemplo: !botsay all Mensagem global - O bot envia "Mensagem global" em todos os canais onde está presente`;
+botSayCommand.description = "Envie uma mensagem personalizada como o bot em um canal específico ou em todos os canais onde o bot está presente";
+botSayCommand.examples = [
+  {
+    description: "Enviar uma mensagem em um canal específico",
+    input: "!botsay canalexemplo Olá",
+    output: "(O bot envia \"Olá\" em #canalexemplo)",
+  },
+  {
+    description: "Enviar uma mensagem em todos os canais",
+    input: "!botsay all Mensagem global",
+    output: "(O bot envia \"Mensagem global\" em todos os canais)",
+  },
+];
 
 module.exports = { botSayCommand };

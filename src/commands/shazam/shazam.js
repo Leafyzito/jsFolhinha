@@ -177,11 +177,24 @@ shazamCommand.cooldownType = "channel";
 shazamCommand.whisperable = true;
 shazamCommand.description = `Este comando pode estar um pouco instável. Qualquer problema, por favor avise o dev
 
-Identifica músicas de algum link fornecido ou de uma live da Twitch:
-• Exemplo: !shazam https://x.com/billieeilishtrs/status/1839682299673096667 - O bot vai fazer o download do vídeo e depois identificar a música
-• Exemplo: !shazam https://f.feridinha.com/okjxM.mp4 - O bot vai identificar a música do vídeo fornecido
-• Exemplo: !shazam www.twitch.tv/xql - O bot vai criar um clip e depois identificar a música do clip
-• Exemplo: !shazam xqc - Se o canal estiver em live, o bot cria um clip e identifica a música`;
+Identifica músicas de algum link fornecido ou de uma live da Twitch:`;
+shazamCommand.examples = [
+  {
+    description: "Identificar a música a partir de um link de vídeo",
+    input: "!shazam https://f.feridinha.com/okjxM.mp4",
+    output: "🎵 Música identificada: bad guy - Billie Eilish ● https://www.shazam.com/track/...",
+  },
+  {
+    description: "Identificar a música a partir de um link da Twitch",
+    input: "!shazam https://www.twitch.tv/xqc",
+    output: "🎵 Música identificada: Lose Yourself - Eminem ● https://www.shazam.com/track/...",
+  },
+  {
+    description: "Identificar a música do canal de uma live",
+    input: "!shazam xqc",
+    output: "🎵 Música identificada: bad guy - Billie Eilish ● https://www.shazam.com/track/...",
+  },
+];
 shazamCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

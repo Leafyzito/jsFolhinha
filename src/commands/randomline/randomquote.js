@@ -50,10 +50,15 @@ randomQuoteCommand.cooldown = 5000;
 randomQuoteCommand.cooldownType = "channel";
 randomQuoteCommand.whisperable = false;
 randomQuoteCommand.description = `Receba uma mensagem aleatória da pessoa que executou o comando
-  
-  • Exemplo: !randomquote - O bot vai mostrar uma mensagem aleatória de quem executou o comando no chat onde o comando foi executado
-  
-  Contando desde 06/03/2025`;
+
+Contando desde 06/03/2025`;
+randomQuoteCommand.examples = [
+  {
+    description: "Receber uma mensagem aleatória sua",
+    input: "!randomquote",
+    output: "(há 3 dias) EmbellishingGrandma: que jogo é esse?",
+  },
+];
 randomQuoteCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

@@ -42,8 +42,14 @@ beijoCommand.shortDescription = "Dá um beijo em alguém no chat";
 beijoCommand.cooldown = 5000;
 beijoCommand.cooldownType = "channel";
 beijoCommand.whisperable = true;
-beijoCommand.description = `Marque alguém do chat para dar um beijo virtual
-• Exemplo: !beijo @pessoa`;
+beijoCommand.description = "Marque alguém do chat para dar um beijo virtual";
+beijoCommand.examples = [
+  {
+    description: "Dê um beijo virtual em alguém do chat",
+    input: "!beijo @leafyzito",
+    output: "EmbellishingGrandma deu um beijo em leafyzito kiss",
+  },
+];
 beijoCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = { beijoCommand };

@@ -39,10 +39,20 @@ randomEmoteCommand.cooldown = 5000;
 randomEmoteCommand.cooldownType = "channel";
 randomEmoteCommand.whisperable = false;
 randomEmoteCommand.description = `Faça o bot escolher entre 1 e 50 emotes aleatórios do seu chat
-Estes emotes são apenas do FFZ, BTTV e 7TV
-• Exemplo: !randomemote - O bot vai escolher 1 emote aleatório do seu chat
-• Exemplo: !randomemote 10 - O bot vai escolher 10 emotes aleatórios do seu chat`;
+Estes emotes são apenas do FFZ, BTTV e 7TV`;
 
+randomEmoteCommand.examples = [
+  {
+    description: "Receber um emote aleatório do chat",
+    input: "!randomemote",
+    output: "🤖 PepeLaugh",
+  },
+  {
+    description: "Receber vários emotes aleatórios do chat",
+    input: "!randomemote 5",
+    output: "🤖 PepeLaugh monkaS forsenCD Pog peepoHappy",
+  },
+];
 randomEmoteCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

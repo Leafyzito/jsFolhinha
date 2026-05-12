@@ -80,10 +80,19 @@ nicksCommand.shortDescription = "Mostra o histórico de nicks de algum usuário"
 nicksCommand.cooldown = 5000;
 nicksCommand.cooldownType = "channel";
 nicksCommand.whisperable = true;
-nicksCommand.description = `Exibe o histórico de nicks de um usuário ou de quem executou o comando caso nenhum usuário seja fornecido
-
-• Exemplo: !nicks @leafyzito - O bot irá responder com o histórico de nicks de leafyzito
-• Exemplo: !nicks id:12345 - O bot irá responder com o histórico de nicks do usuário de id 12345`;
+nicksCommand.description = "Exibe o histórico de nicks de um usuário ou de quem executou o comando caso nenhum usuário seja fornecido";
+nicksCommand.examples = [
+  {
+    description: "Ver o histórico de nicks de outro usuário",
+    input: "!nick @leafyzito",
+    output: "O histórico de nicks de leafyzito é: leafyzitoOLD → leafy → leafyzito",
+  },
+  {
+    description: "Ver o histórico de nicks por ID",
+    input: "!nick id:12345",
+    output: "O histórico de nicks de fulano é: fulanoX → fulano",
+  },
+];
 nicksCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

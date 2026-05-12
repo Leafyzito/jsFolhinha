@@ -51,8 +51,14 @@ abracoCommand.shortDescription = "Dá um abraço em alguém no chat";
 abracoCommand.cooldown = 5000;
 abracoCommand.cooldownType = "channel";
 abracoCommand.whisperable = true;
-abracoCommand.description = `Marque alguém do chat para dar um abraço virtual
-• Exemplo: !abraco @pessoa`;
+abracoCommand.description = "Marque alguém do chat para dar um abraço virtual";
+abracoCommand.examples = [
+  {
+    description: "Dê um abraço virtual em alguém do chat",
+    input: "!abraco @leafyzito",
+    output: "EmbellishingGrandma abraçou leafyzito bem forte cathug",
+  },
+];
 abracoCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = { abracoCommand };

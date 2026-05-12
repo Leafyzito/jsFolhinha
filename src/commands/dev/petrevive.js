@@ -45,8 +45,13 @@ revivePetCommand.cooldownType = "user";
 revivePetCommand.permissions = ["admin"];
 revivePetCommand.whisperable = false;
 revivePetCommand.flags = ["dev"];
-revivePetCommand.description = `Revive o pet de um canal específico
-
-• Exemplo: !petrevive canal123 - Revive o pet do canal "canal123"`;
+revivePetCommand.description = "Revive o pet de um canal específico";
+revivePetCommand.examples = [
+  {
+    description: "Reviver o pet de um canal específico",
+    input: "!petrevive canal123",
+    output: "Pet do canal canal123 revivido ✅",
+  },
+];
 
 module.exports = { revivePetCommand };

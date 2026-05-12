@@ -48,8 +48,14 @@ slapCommand.shortDescription = "Dá um tapa em alguém no chat";
 slapCommand.cooldown = 5000;
 slapCommand.cooldownType = "channel";
 slapCommand.whisperable = true;
-slapCommand.description = `Dê um tapa virtual em alguém do chat
-• Exemplo: !slap @pessoa`;
+slapCommand.description = "Dê um tapa virtual em alguém do chat";
+slapCommand.examples = [
+  {
+    description: "Dê um tapa virtual em alguém do chat",
+    input: "!slap @leafyzito",
+    output: "EmbellishingGrandma deu um tapa em leafyzito catslap",
+  },
+];
 slapCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = { slapCommand };

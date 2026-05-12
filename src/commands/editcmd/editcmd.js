@@ -79,9 +79,19 @@ editcmdCommand.whisperable = false;
 editcmdCommand.description = `Edita um comando customizado no canal atual
 
 • Opcional: -cooldown:N altera o cooldown em segundos (1-3600). 5 segundos é o padrão.
-• Na resposta você pode usar: {user}, {channel}, {1}/{2}/… (palavras após o comando), {args} (tudo após o comando), ou {{ e }} para chave literal.
-• Exemplo: !editcmd discord Meu discord novo é: discord.gg/yyyy
-• Exemplo com cooldown: !editcmd discord -cooldown:60 Meu discord novo é: discord.gg/yyyy`;
+• Na resposta você pode usar: {user}, {channel}, {1}/{2}/… (palavras após o comando), {args} (tudo após o comando), ou {{ e }} para chave literal.`;
+editcmdCommand.examples = [
+  {
+    description: "Editar a resposta de um comando customizado",
+    input: "!editcmd discord Meu discord novo é: discord.gg/yyyy",
+    output: "Comando customizado 'discord' atualizado ✅",
+  },
+  {
+    description: "Editar um comando customizado e o seu cooldown",
+    input: "!editcmd discord -cooldown:60 Meu discord novo é: discord.gg/yyyy",
+    output: "Comando customizado 'discord' atualizado ✅",
+  },
+];
 editcmdCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

@@ -31,9 +31,14 @@ fillCommand.shortDescription =
 fillCommand.cooldown = 5000;
 fillCommand.cooldownType = "channel";
 fillCommand.whisperable = true;
-fillCommand.description = `O bot vai repetir o que você fornecer até que o limite de caracteres seja atingido (500)
-
-• Exemplo: !fill OMEGALUL - O bot vai repetir OMEGALUL até que o limite de caracteres seja atingido`;
+fillCommand.description = "O bot vai repetir o que você fornecer até que o limite de caracteres seja atingido (500)";
+fillCommand.examples = [
+  {
+    description: "Encher uma mensagem com um texto",
+    input: "!fill OMEGALUL",
+    output: "OMEGALUL OMEGALUL OMEGALUL OMEGALUL OMEGALUL OMEGALUL OMEGALUL ... (até 500 caracteres)",
+  },
+];
 fillCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

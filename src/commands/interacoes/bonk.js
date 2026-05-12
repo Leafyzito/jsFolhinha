@@ -70,8 +70,14 @@ bonkCommand.shortDescription = "Dá um bonk em alguém no chat";
 bonkCommand.cooldown = 5000;
 bonkCommand.cooldownType = "channel";
 bonkCommand.whisperable = true;
-bonkCommand.description = `Marque alguém do chat para dar um bonk com uam força aleatória entre 0% e 100%
-• Exemplo: !bonk @pessoa`;
+bonkCommand.description = "Marque alguém do chat para dar um bonk com uam força aleatória entre 0% e 100%";
+bonkCommand.examples = [
+  {
+    description: "Dê um bonk em alguém do chat",
+    input: "!bonk @leafyzito",
+    output: "EmbellishingGrandma deu um bonk com impacto de 73% em leafyzito bonking",
+  },
+];
 bonkCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = { bonkCommand };

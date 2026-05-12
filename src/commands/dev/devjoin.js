@@ -53,9 +53,18 @@ devJoinChannelCommand.permissions = ["admin"];
 devJoinChannelCommand.whisperable = false;
 devJoinChannelCommand.flags = ["dev"];
 devJoinChannelCommand.description = `Faz o bot entrar em um canal específico e crie a configuração inicial para aquele canal
- Opcionalmente, é possível anunciar a entrada do bot ao canal.
-
-• Exemplo: !devjoin canalexemplo - O bot entra no canal "canalexemplo" e cria a configuração dele
-• Exemplo: !devjoin canalexemplo true - O bot entra no canal "canalexemplo", cria a configuração e anuncia sua entrada no chat`;
+ Opcionalmente, é possível anunciar a entrada do bot ao canal.`;
+devJoinChannelCommand.examples = [
+  {
+    description: "Entrar em um canal e criar a configuração inicial",
+    input: "!devjoin canalexemplo",
+    output: "Entrei no canal canalexemplo e criei a configuração ✅",
+  },
+  {
+    description: "Entrar em um canal e anunciar a entrada",
+    input: "!devjoin canalexemplo true",
+    output: "Entrei no canal canalexemplo, criei a configuração e anunciei no chat ✅",
+  },
+];
 
 module.exports = { devJoinChannelCommand };

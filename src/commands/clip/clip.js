@@ -71,10 +71,24 @@ clipCommand.shortDescription = "Crie um clip de alguma live";
 clipCommand.cooldown = 5000;
 clipCommand.cooldownType = "channel";
 clipCommand.whisperable = false;
-clipCommand.description = `Crie um clip de alguma live. Se nenhum canal for especificado, o comando irá criar um clip do canal onde o comando foi executado
-• Exemplo: !clip - O bot vai criar um clip do canal onde o comando foi executado
-• Exemplo: !clip @leafyzito - O bot vai criar um clip do canal do usuário @leafyzito, caso ele esteja em live
-• Exemplo: !clip @leafyzito -makeclip/-supa - O bot vai criar um clip do canal do usuário @leafyzito, caso ele esteja em live, usando o makeClip/supa e upa pro Feridinha ao invés da API da twitch`;
+clipCommand.description = "Crie um clip de alguma live. Se nenhum canal for especificado, o comando irá criar um clip do canal onde o comando foi executado";
+clipCommand.examples = [
+  {
+    description: "Criar um clip do canal atual",
+    input: "!clip",
+    output: "🎬 https://clips.twitch.tv/AbcDefGhi12345",
+  },
+  {
+    description: "Criar um clip do canal de outro usuário",
+    input: "!clip @leafyzito",
+    output: "🎬 https://clips.twitch.tv/AbcDefGhi12345",
+  },
+  {
+    description: "Forçar o uso do MakeClip (Supa) em vez da API da Twitch",
+    input: "!clip @leafyzito -makeclip",
+    output: "🎬 https://f.feridinha.com/clip.mp4",
+  },
+];
 clipCommand.code = `https://github.com/fchstbot/jsFolhinha/blob/main/src/commands/${__dirname
   .split("/")
   .pop()}/${__filename.split("/").pop()}`;

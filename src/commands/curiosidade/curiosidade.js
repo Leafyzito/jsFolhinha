@@ -44,10 +44,19 @@ curiosidadeCommand.shortDescription = "Mostra uma curiosidade aleatória";
 curiosidadeCommand.cooldown = 5000;
 curiosidadeCommand.cooldownType = "channel";
 curiosidadeCommand.whisperable = true;
-curiosidadeCommand.description = `Veja uma curiosidade aleatória ou específica quando determinado um número da lista de curiosidades
-
-• Exemplo: "!curiosidade - O bot vai enviar uma curiosidade aleatória
-• Exemplo: "!curiosidade 4 - O bot vai enviar a curiosidade número 4 da lista de curiosidades`;
+curiosidadeCommand.description = "Veja uma curiosidade aleatória ou específica quando determinado um número da lista de curiosidades";
+curiosidadeCommand.examples = [
+  {
+    description: "Receber uma curiosidade aleatória",
+    input: "!curiosidade",
+    output: "#17/300 - <texto da curiosidade aleatória>",
+  },
+  {
+    description: "Receber uma curiosidade específica",
+    input: "!curiosidade 4",
+    output: "#4/300 - <texto da curiosidade número 4>",
+  },
+];
 curiosidadeCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

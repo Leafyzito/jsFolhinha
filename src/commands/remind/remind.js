@@ -670,22 +670,37 @@ remindCommand.description = `Use este comando para deixar um lembrete para a pr�
 Pode deixar um lembrete para si mesmo ou para outra pessoa
 Este comando funciona independentemente do chat em que esteja
 
-• Exemplo: !remind me Faz aquilo lá - O bot irá lembrar de "Fazer aquilo lá" a pessoa que executou o comando assim que voltar a falar em qualquer chat
-
-• Exemplo: !remind @leafyzito Faz aquilo lá - O bot irá lembrar @leafyzito de "Fazer aquilo lá" assim que @leafyzito falar no chat
-
 • Vários usuários: !remind user1,user2 mensagem - Cria o mesmo lembrete para todos (formato sem espaços: user1,user2). Máximo 5 por comando.
 
 Pode também deixar lembretes cronometrados:
-• Exemplo: !remind me in 10m Faz aquilo lá - O bot irá lembrar quem executou o comando de "Fazer aquilo lá" 10 minutos depois
-
-• Exemplo: !remind @leafyzito in 15d 10h - @leafyzito será lembrado passado 15 dias e 10 horas
 
 Para ver seus lembretes pendentes: !remind show
 Para ver um lembrete específico: !remind show {ID do lembrete}
 Para ver todos os lembretes: !remind show all
 Para apagar um lembrete: !remind delete {ID do lembrete}
 Para bloquear usuários: !remind block/unblock {usuário}`;
+remindCommand.examples = [
+  {
+    description: "Lembrar você mesmo assim que voltar a falar no chat",
+    input: "!remind me Faz aquilo lá",
+    output: "Vou lembrar você disso assim que falar no chat 👍 (ID 42)",
+  },
+  {
+    description: "Lembrar outro usuário assim que ele falar no chat",
+    input: "!remind @leafyzito Faz aquilo lá",
+    output: "Vou lembrar @leafyzito disso assim que falar no chat 👍 (ID 43)",
+  },
+  {
+    description: "Criar um lembrete cronometrado para você",
+    input: "!remind me in 10m Faz aquilo lá",
+    output: "Vou lembrar você disso em 10 minutos 👍 (ID 44)",
+  },
+  {
+    description: "Criar um lembrete cronometrado para outro usuário",
+    input: "!remind @leafyzito in 15d 10h Faz aquilo lá",
+    output: "Vou lembrar @leafyzito disso em 15 dias 10 horas 👍 (ID 45)",
+  },
+];
 remindCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

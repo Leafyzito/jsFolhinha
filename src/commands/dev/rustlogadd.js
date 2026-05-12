@@ -34,8 +34,13 @@ rustlogAddCommand.cooldownType = "user";
 rustlogAddCommand.permissions = ["admin"];
 rustlogAddCommand.whisperable = false;
 rustlogAddCommand.flags = ["dev"];
-rustlogAddCommand.description = `Adiciona um canal à lista do rustlog
-
-• Exemplo: !rustlogadd usuario123 - Adiciona o canal do usuário "usuario123" ao rustlog`;
+rustlogAddCommand.description = "Adiciona um canal à lista do rustlog";
+rustlogAddCommand.examples = [
+  {
+    description: "Adicionar um canal ao rustlog",
+    input: "!rustlogadd usuario123",
+    output: "Canal usuario123 adicionado ao rustlog ✅",
+  },
+];
 
 module.exports = { rustlogAddCommand };

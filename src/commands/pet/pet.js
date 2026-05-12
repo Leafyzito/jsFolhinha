@@ -137,12 +137,23 @@ petCommand.whisperable = false;
 petCommand.description = `Com este comando, você por ter um pet único no seu chat e poderá fazer algumas coisas com ele, como:
 
 Para criar um pet, use o comando !pet criar {emoji} {nome do pet}
-• Exemplo: !pet criar 🐶 Max - O bot irá criar um pet chamado Max com o emoji 🐶
 
 Para ver algumas informações sobre o pet, use o comando !pet stats
 Este comando mostra quantos carinhos o pet já recebeu, quantas vezes ele brincou e o total de dias desde que ele foi criado
 
 Se quiser sacrificar o seu pet, para talvez criar um outro com nome diferente, use o comando !pet matar`;
+petCommand.examples = [
+  {
+    description: "Criar um pet para o canal",
+    input: "!pet criar 🐶 Max",
+    output: "🐶 Max foi criado no canal! 🎉",
+  },
+  {
+    description: "Ver as estatísticas do pet",
+    input: "!pet stats",
+    output: "🐶 Max está feliz! Ele já recebeu 312 carinhos e 87 brincadeiras num total de 42 dias",
+  },
+];
 petCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 petCommand.emojis = petEmojis;

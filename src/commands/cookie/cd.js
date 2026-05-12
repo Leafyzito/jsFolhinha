@@ -67,8 +67,14 @@ cookieDiarioCommand.shortDescription = "Resgate o seu cookie diário";
 cookieDiarioCommand.cooldown = 5000;
 cookieDiarioCommand.cooldownType = "user";
 cookieDiarioCommand.whisperable = true;
-cookieDiarioCommand.description =
-  "Uso: !cd; Resposta esperada: Você resgatou seu cookie diário e agora tem {cookies}";
+cookieDiarioCommand.description = "Resgate o seu cookie diário";
+cookieDiarioCommand.examples = [
+  {
+    description: "Resgatar o cookie diário",
+    input: "!cd",
+    output: "Você resgatou seu 1 cookie diário e agora tem 47 cookies! 🍪",
+  },
+];
 cookieDiarioCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

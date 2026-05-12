@@ -75,22 +75,37 @@ asciiCommand.description = `Exibe a arte ascii de algum emote fornecido
 Se fornecido um canal específico, o bot irá buscar o emote no canal
 Para emotes animados, o frame é escolhido aleatoriamente
 
-• Exemplo: !ascii OMEGALUL - O bot irá mandar o ascii do emote OMEGALUL do canal atual
-• Exemplo: !ascii xqcL #xqc - O bot irá mandar o ascii do emote xqcL no canal xqc
-
 Pode também usar vários emotes como input
-• Exemplo: !ascii OMEGALUL ALERT - O bot irá mandar o ascii do emote OMEGALUL e ALERT do canal atual juntos, como normalmente apareceria no chat
-• Exemplo: !ascii xqcL #xql ALERT #leafyzito - O bot irá mandar o ascii do emote xqcL no canal xqc, e o ascii do emote ALERT no canal leafyzito juntos, como normalmente apareceria no chat
-• Exemplo: !ascii OMEGALUL monkaS - O bot irá mandar o ascii do emote OMEGALUL e do monkaS um do lado do outro
 
 Pode também passar o link direto do emote:
-• Exemplo: !ascii https://cdn.7tv.app/emote/6042089e77137b000de9e669/4x.avif
 
 Mais alguns input opcionais diretos do dev da API:
 invert:true(default)|false
 removeTransparency:false(default)|true
 threshold:0-254(default: 127)
 mode:simple(default)|ec|hc|nd`;
+asciiCommand.examples = [
+  {
+    description: "Mandar o ascii de um emote do canal atual",
+    input: "!ascii OMEGALUL",
+    output: "<arte ascii do emote OMEGALUL>",
+  },
+  {
+    description: "Mandar o ascii de um emote de outro canal",
+    input: "!ascii xqcL #xqc",
+    output: "<arte ascii do emote xqcL do canal xqc>",
+  },
+  {
+    description: "Mandar o ascii de dois emotes lado a lado",
+    input: "!ascii OMEGALUL monkaS",
+    output: "<arte ascii dos emotes OMEGALUL e monkaS juntos>",
+  },
+  {
+    description: "Mandar o ascii do link direto de um emote",
+    input: "!ascii https://cdn.7tv.app/emote/6042089e77137b000de9e669/4x.avif",
+    output: "<arte ascii do emote desse link>",
+  },
+];
 asciiCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;

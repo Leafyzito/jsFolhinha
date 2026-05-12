@@ -26,8 +26,14 @@ escolhaCommand.shortDescription =
 escolhaCommand.cooldown = 5000;
 escolhaCommand.cooldownType = "channel";
 escolhaCommand.whisperable = true;
-escolhaCommand.description = `Faça o Folhinha escolher entre as escolhas que você fornecer
-• Exemplo: !escolha a b c - O bot vai escolher um dos três itens aleatoriamente`;
+escolhaCommand.description = "Faça o Folhinha escolher entre as escolhas que você fornecer";
+escolhaCommand.examples = [
+  {
+    description: "Escolher um item aleatório de uma lista",
+    input: "!escolha pizza sushi hambúrguer",
+    output: "🤖 sushi",
+  },
+];
 escolhaCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

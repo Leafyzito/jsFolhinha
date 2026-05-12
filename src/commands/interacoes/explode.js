@@ -43,8 +43,14 @@ explodeCommand.shortDescription = "Explode alguém no chat";
 explodeCommand.cooldown = 5000;
 explodeCommand.cooldownType = "channel";
 explodeCommand.whisperable = true;
-explodeCommand.description = `Exploda virtualmente alguém do chat
-• Exemplo: !explode @pessoa`;
+explodeCommand.description = "Exploda virtualmente alguém do chat";
+explodeCommand.examples = [
+  {
+    description: "Explodir alguém do chat",
+    input: "!explode @leafyzito",
+    output: "EmbellishingGrandma explodiu leafyzito 💥",
+  },
+];
 explodeCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = { explodeCommand };

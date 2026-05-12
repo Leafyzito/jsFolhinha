@@ -80,11 +80,19 @@ firstLineCommand.shortDescription = "Veja a primeira mensagem de um usuário";
 firstLineCommand.cooldown = 5000;
 firstLineCommand.cooldownType = "channel";
 firstLineCommand.whisperable = false;
-firstLineCommand.description = `Receba a primeira mensagem de um usuário fornecido ou, caso nenhum seja fornecido, da pessoa que executou o comando
-
-• Exemplo: !firstline - O bot vai mostrar a primeira mensagem de quem executou o comando no chat onde o comando foi executado
-
-• Exemplo: !firstline @leafyzito - O bot vai mostrar a primeira mensagem de @leafyzito no chat onde o comando foi executado`;
+firstLineCommand.description = "Receba a primeira mensagem de um usuário fornecido ou, caso nenhum seja fornecido, da pessoa que executou o comando";
+firstLineCommand.examples = [
+  {
+    description: "Ver a sua própria primeira mensagem no canal atual",
+    input: "!firstline",
+    output: "A sua primeira mensagem neste chat foi em 2024-01-15 18:42:03: olá pessoal",
+  },
+  {
+    description: "Ver a primeira mensagem de outro usuário no canal atual",
+    input: "!firstline @leafyzito",
+    output: "A primeira mensagem de leafyzito neste chat foi em 2023-08-22 12:05:17: oi galera",
+  },
+];
 firstLineCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {

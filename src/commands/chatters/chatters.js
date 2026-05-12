@@ -76,9 +76,19 @@ chattersCommand.cooldown = 5000;
 chattersCommand.cooldownType = "channel";
 chattersCommand.whisperable = false;
 chattersCommand.description = `Exibe uma lista de usuários totais online no canal e suas devidas categorias (Streamer, Moderadores, VIPs, Chatters)
-O comando funcionará mesmo em canais que o Folhinha não esteja presente
-• Exemplo: !chatters - Exibe a lista de chatters do canal atual
-• Exemplo: !chatters {canal} - Exibe a lista de chatters do canal escolhido`;
+O comando funcionará mesmo em canais que o Folhinha não esteja presente`;
+chattersCommand.examples = [
+  {
+    description: "Ver a lista de chatters do canal atual",
+    input: "!chatters",
+    output: "Existem 1234 chatters em #canalatual: https://gist.github.com/xxxxx",
+  },
+  {
+    description: "Ver a lista de chatters de um canal específico",
+    input: "!chatters xqc",
+    output: "Existem 89512 chatters em #xqc: https://gist.github.com/xxxxx (devido a limitações da Twitch, esta lista contém apenas 100 chatters)",
+  },
+];
 chattersCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname.split(path.sep).pop()}/${__filename.split(path.sep).pop()}`;
 
 module.exports = {
