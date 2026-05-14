@@ -66,7 +66,7 @@ const addcmdCommand = async (message) => {
 };
 
 addcmdCommand.commandName = "addcmd";
-addcmdCommand.aliases = ["addcmd", "addcommand"];
+addcmdCommand.aliases = ["addcmd", "addcommand", "cmdadd", "commandadd"];
 addcmdCommand.shortDescription = "Cria um comando customizado no canal";
 addcmdCommand.cooldown = 1000;
 addcmdCommand.cooldownType = "channel";

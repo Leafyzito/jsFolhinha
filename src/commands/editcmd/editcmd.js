@@ -70,7 +70,7 @@ const editcmdCommand = async (message) => {
 };
 
 editcmdCommand.commandName = "editcmd";
-editcmdCommand.aliases = ["editcmd", "editcommand"];
+editcmdCommand.aliases = ["editcmd", "editcommand", "cmdedit", "commandedit"];
 editcmdCommand.shortDescription = "Edita um comando customizado no canal";
 editcmdCommand.cooldown = 1000;
 editcmdCommand.cooldownType = "channel";

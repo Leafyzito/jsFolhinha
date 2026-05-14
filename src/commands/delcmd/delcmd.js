@@ -39,7 +39,15 @@ const delcmdCommand = async (message) => {
 };
 
 delcmdCommand.commandName = "delcmd";
-delcmdCommand.aliases = ["delcmd", "deletecommand"];
+delcmdCommand.aliases = [
+  "delcmd",
+  "deletecommand",
+  "cmddel",
+  "commanddelete",
+  "remcmd",
+  "removecmd",
+  "removecommand",
+];
 delcmdCommand.shortDescription = "Remove um comando customizado do canal";
 delcmdCommand.cooldown = 1000;
 delcmdCommand.cooldownType = "channel";
