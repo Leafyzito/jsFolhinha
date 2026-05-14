@@ -34,7 +34,11 @@ module.exports = async function handleChannelSubscriptionGift(event) {
           fb.emotes.loveEmotes,
           "💚"
         );
-        message = `Obrigado pelos ${amount} sub gift(s), ${gifterDisplayName}! ${emote}`;
+        if (amount > 1) {
+          message = `Obrigado pelos ${amount} sub gifts, ${gifterDisplayName}! ${emote}`;
+        } else {
+          message = `Obrigado pelo ${amount} sub gift, ${gifterDisplayName}! ${emote}`;
+        }
       }
       fb.log.send(broadcasterLogin, message);
     }
@@ -45,4 +49,3 @@ module.exports = async function handleChannelSubscriptionGift(event) {
     );
   }
 };
-
