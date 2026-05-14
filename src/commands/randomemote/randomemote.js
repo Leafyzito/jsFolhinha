@@ -32,7 +32,7 @@ const randomEmoteCommand = async (message) => {
 };
 
 randomEmoteCommand.commandName = "randomemote";
-randomEmoteCommand.aliases = ["randomemote", "rem", "emote", "emotes"];
+randomEmoteCommand.aliases = ["randomemote", "rem"];
 randomEmoteCommand.shortDescription =
   "Mostra um emote aleatório do canal atual";
 randomEmoteCommand.cooldown = 5000;
