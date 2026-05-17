@@ -47,6 +47,10 @@ class Utils {
     return arr[Math.floor(Math.random() * arr.length)];
   }
 
+  sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
   }

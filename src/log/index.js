@@ -3,8 +3,11 @@ class Logger {
     this.channelMsgCooldowns = new Map(); // Track last message timestamp per channel
   }
 
-  async manageChannelMsgCooldown(channel) {
-    // universal cooldown for all channels to avoid timeouts
+  // universal cooldown for all channels to avoid timeouts
+  async manageChannelMsgCooldown(channel, skipCooldown = false) {
+    if (skipCooldown) {
+      return;
+    }
 
     // Parallelize bot status checks for better performance
     const [isBotMod, isBotVip] = await Promise.all([
@@ -200,10 +203,16 @@ class Logger {
     fb.discord.logWhisper(message.senderUsername, response);
   }
 
-  async send(channel, content, retryCount = 0, senderUsername = null) {
+  async send(
+    channel,
+    content,
+    retryCount = 0,
+    senderUsername = null,
+    skipCooldown = false
+  ) {
     content = fb.utils.checkRegex(content, channel);
 
-    await this.manageChannelMsgCooldown(channel);
+    await this.manageChannelMsgCooldown(channel, skipCooldown);
     const res = await fb.twitch.client
       .say(channel, null, content)
       .catch((err) =>
