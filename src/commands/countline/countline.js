@@ -154,6 +154,7 @@ const countlineCommand = async (message) => {
 
     const userCount = parseInt(userMessageCount.data[0]["COUNT()"]);
     const totalCount = parseInt(channelTotalCount.data[0]["COUNT()"]);
+    const percentage = (userCount / totalCount) * 100;
 
     if (userCount === 0) {
       return {
@@ -164,7 +165,9 @@ const countlineCommand = async (message) => {
     return {
       reply: `${clTarget} mandou ${userCount.toLocaleString(
         "fr-FR"
-      )} das ${totalCount.toLocaleString("fr-FR")} mensagens totais deste chat`,
+      )} das ${totalCount.toLocaleString("fr-FR")} mensagens totais deste chat (${percentage.toFixed(
+        2
+      )}%)`,
     };
   } catch (error) {
     console.error("Countline command error:", error);
