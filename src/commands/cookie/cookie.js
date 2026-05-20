@@ -378,13 +378,14 @@ const cookieCommand = async (message) => {
 
     const total = userCookieStats.total;
     const opened = userCookieStats.opened;
+    const eaten = userCookieStats.eaten;
     const gifted = userCookieStats.gifted;
     const beenGifted = userCookieStats.beenGifted;
     const sloted = userCookieStats.sloted;
     const totalStolen = userCookieStats.totalStolen;
     const totalGotStolen = userCookieStats.totalGotStolen;
     return {
-      reply: `${targetUser} tem ${total} cookies, 🥠 abriu ${opened}, 🎁 ofereceu ${gifted}, 🎁 foi presenteado com ${beenGifted}, 🎰 apostou ${sloted}, 💰 roubou ${totalStolen} e 🏚️ foi roubado ${totalGotStolen} vezes`,
+      reply: `${targetUser} tem ${total} cookies, 🥠 abriu ${opened}, 🍽️ comeu ${eaten}, 🎁 ofereceu ${gifted}, 🎁 foi presenteado com ${beenGifted}, 🎰 apostou ${sloted}, 💰 roubou ${totalStolen} e 🏚️ foi roubado ${totalGotStolen} vezes`,
     };
   }
 
