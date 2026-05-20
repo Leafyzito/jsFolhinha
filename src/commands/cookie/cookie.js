@@ -376,14 +376,14 @@ const cookieCommand = async (message) => {
       };
     }
 
-    const total = userCookieStats.total;
-    const opened = userCookieStats.opened;
-    const eaten = userCookieStats.eaten;
-    const gifted = userCookieStats.gifted;
-    const beenGifted = userCookieStats.beenGifted;
-    const sloted = userCookieStats.sloted;
-    const totalStolen = userCookieStats.totalStolen;
-    const totalGotStolen = userCookieStats.totalGotStolen;
+    const total = userCookieStats.total || 0;
+    const opened = userCookieStats.opened || 0;
+    const eaten = userCookieStats.eaten || 0;
+    const gifted = userCookieStats.gifted || 0;
+    const beenGifted = userCookieStats.beenGifted || 0;
+    const sloted = userCookieStats.sloted || 0;
+    const totalStolen = userCookieStats.totalStolen || 0;
+    const totalGotStolen = userCookieStats.totalGotStolen || 0;
     return {
       reply: `${targetUser} tem ${total} cookies, 🥠 abriu ${opened}, 🍽️ comeu ${eaten}, 🎁 ofereceu ${gifted}, 🎁 foi presenteado com ${beenGifted}, 🎰 apostou ${sloted}, 💰 roubou ${totalStolen} e 🏚️ foi roubado ${totalGotStolen} vezes`,
     };
