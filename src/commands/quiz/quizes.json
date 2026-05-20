@@ -1454,8 +1454,7 @@
     "categoria": "Entretenimento: Música",
     "tipo": "multiple",
     "dificuldade": "médio",
-    "resposta": ["Miami"],
-    "dicas": ["New York", "Detroit", "Miami", "Atlanta"]
+    "resposta": ["New Orleans", "Louisiana", "Nova Orleans"]
   },
   {
     "id": 148,
