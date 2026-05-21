@@ -299,7 +299,7 @@ const cookieCommand = async (message) => {
       );
       if (!giftTargetUserInfo) {
         return {
-          reply: `Erro ao escolher um usuário aleatório para presentear. Tente novamente. (@${process.env.DEV_NICK})`,
+          reply: `Erro ao escolher um usuário aleatório para presentear, tente novamente.`,
         };
       }
 
@@ -580,7 +580,7 @@ const cookieCommand = async (message) => {
       );
       if (!stealTargetUserInfo) {
         return {
-          reply: `Erro ao escolher um usuário aleatório para roubar. Tente novamente. (@${process.env.DEV_NICK}`,
+          reply: `Erro ao escolher um usuário aleatório para roubar, tente novamente.`,
         };
       }
 
