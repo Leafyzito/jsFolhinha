@@ -1,5 +1,29 @@
 const path = require("path");
 
+async function getRandomFandomPage() {
+  try {
+    const searchParams = new URLSearchParams({
+      action: "query",
+      list: "random",
+      rnnamespace: "0",
+      format: "json",
+    });
+
+    const data = await fb.got(
+      `https://ordemparanormal.fandom.com/api.php?${searchParams}`
+    );
+
+    if (!data || !data.query || !data.query.random || data.query.random.length === 0) {
+      return null;
+    }
+
+    const pageTitle = data.query.random[0].title.replace(/ /g, "_");
+    return `https://ordemparanormal.fandom.com/wiki/${pageTitle}`;
+  } catch (error) {
+    throw new Error(`Failed to get random Fandom page: ${error.message}`);
+  }
+}
+
 async function searchFandomPage(query) {
   try {
     const searchParams = new URLSearchParams({
@@ -33,13 +57,10 @@ async function searchFandomPage(query) {
 
 const ordemCommand = async (message) => {
   const query = message.args.slice(1).join(" ").trim();
-  if (query === "" || query === null) {
-    return {
-      reply: `Use o formato: ${message.prefix}ordem <algo sobre Ordem Paranormal>`,
-    };
-  }
-
-  const wikiLink = await searchFandomPage(query);
+  const wikiLink =
+    query === "" || query === null
+      ? await getRandomFandomPage()
+      : await searchFandomPage(query);
   if (wikiLink === null) {
     return {
       reply: `Não encontrei nenhuma página sobre isso na wiki de Ordem Paranormal`,
@@ -54,11 +75,11 @@ const ordemCommand = async (message) => {
 ordemCommand.commandName = "ordem";
 ordemCommand.aliases = ["ordem", "op"];
 ordemCommand.shortDescription =
-  "Pesquise personagens e páginas na wiki de Ordem Paranormal";
+  "Pesquise ou receba uma página aleatória da wiki de Ordem Paranormal";
 ordemCommand.cooldown = 5000;
 ordemCommand.cooldownType = "channel";
 ordemCommand.whisperable = true;
-ordemCommand.description = `Pesquise personagens e páginas do wiki de Ordem Paranormal (https://ordemparanormal.fandom.com/) e receba o link direto para a página`;
+ordemCommand.description = `Pesquise personagens e páginas do wiki de Ordem Paranormal (https://ordemparanormal.fandom.com/) e receba o link direto para a página. Sem argumentos, retorna uma página aleatória da wiki`;
 ordemCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)
   .pop()}/${__filename.split(path.sep).pop()}`;
