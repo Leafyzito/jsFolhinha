@@ -660,7 +660,7 @@ const remindCommand = async (message) => {
 };
 
 remindCommand.commandName = "remind";
-remindCommand.aliases = ["remind", "lembrar"];
+remindCommand.aliases = ["remind", "lembrar", "lembrete", "reminder"];
 remindCommand.shortDescription = "Deixe um lembrete para algum usuário do chat";
 remindCommand.cooldown = 5000;
 remindCommand.cooldownType = "user";
