@@ -15,6 +15,17 @@ class ApiServer {
   }
 
   setupMiddleware() {
+    // Public read API — allow browser clients (overlays, localhost dev, etc.)
+    this.app.use((req, res, next) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, HEAD, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+      if (req.method === "OPTIONS") {
+        return res.sendStatus(204);
+      }
+      next();
+    });
+
     // Apply rate limiting to all routes
     this.app.use(this.rateLimiter.createMiddleware());
   }
@@ -62,7 +73,11 @@ class ApiServer {
     });
 
     this.app.get("/plus", async (req, res) => {
-      let dev = await fb.db.get("users", { userid: process.env.DEV_USERID }, true);
+      let dev = await fb.db.get(
+        "users",
+        { userid: process.env.DEV_USERID },
+        true
+      );
       if (dev && !Array.isArray(dev)) {
         dev = [dev];
       }
@@ -74,10 +89,15 @@ class ApiServer {
         }));
       }
 
-      const adminUserIds = process.env.ADMIN_USERIDS && process.env.ADMIN_USERIDS.startsWith("[")
-        ? JSON.parse(process.env.ADMIN_USERIDS)
-        : process.env.ADMIN_USERIDS.split(",");
-      let admins = await fb.db.get("users", { userid: { $in: adminUserIds } }, true);
+      const adminUserIds =
+        process.env.ADMIN_USERIDS && process.env.ADMIN_USERIDS.startsWith("[")
+          ? JSON.parse(process.env.ADMIN_USERIDS)
+          : process.env.ADMIN_USERIDS.split(",");
+      let admins = await fb.db.get(
+        "users",
+        { userid: { $in: adminUserIds } },
+        true
+      );
       if (admins && !Array.isArray(admins)) {
         admins = [admins];
       }
@@ -102,7 +122,11 @@ class ApiServer {
         }));
       }
 
-      let supporters = await fb.db.get("users", { isSupporter: true, isPlus: false }, true);
+      let supporters = await fb.db.get(
+        "users",
+        { isSupporter: true, isPlus: false },
+        true
+      );
       if (supporters && !Array.isArray(supporters)) {
         supporters = [supporters];
       }
