@@ -1,6 +1,7 @@
 const express = require("express");
 const { createRateLimiter } = require("./rateLimit/index.js");
 const { getWrapped } = require("./wrapped.js");
+const { PLUS_BADGES } = require("./plus-badges.js");
 class ApiServer {
   constructor() {
     this.app = express();
@@ -113,7 +114,13 @@ class ApiServer {
         }));
       }
 
-      res.status(200).json({ dev: devUsers, admins: adminUsers, plus: plusUsers, supporters: supporterUsers });
+      res.status(200).json({
+        badges: PLUS_BADGES,
+        dev: devUsers,
+        admins: adminUsers,
+        plus: plusUsers,
+        supporters: supporterUsers,
+      });
     });
 
     this.app.get("/wrapped/:username", async (req, res) => {
