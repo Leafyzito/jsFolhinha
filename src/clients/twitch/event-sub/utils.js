@@ -115,10 +115,73 @@ async function replaceMessagePlaceholders(
   return message;
 }
 
+const SUBSCRIPTION_THANK_DEDUP_MS = 60_000;
+const SUBSCRIBE_EVENT_DELAY_MS = 2_000;
+
+const recentSubscriptionThanks = new Map();
+const pendingSubscribeThanks = new Map();
+
+function pruneExpiredSubscriptionThanks(now = Date.now()) {
+  for (const [key, expiresAt] of recentSubscriptionThanks) {
+    if (expiresAt <= now) {
+      recentSubscriptionThanks.delete(key);
+    }
+  }
+}
+
+function getSubscriptionThankKey(broadcasterId, userId) {
+  return `${broadcasterId}:${userId}`;
+}
+
+function getGiftThankKey(broadcasterId, gifterUserId) {
+  return `${broadcasterId}:gift:${gifterUserId}`;
+}
+
+function wasSubscriptionRecentlyThanked(key) {
+  const expiresAt = recentSubscriptionThanks.get(key);
+  return expiresAt !== undefined && expiresAt > Date.now();
+}
+
+function markSubscriptionThanked(key) {
+  recentSubscriptionThanks.set(key, Date.now() + SUBSCRIPTION_THANK_DEDUP_MS);
+  if (recentSubscriptionThanks.size > 500) {
+    pruneExpiredSubscriptionThanks();
+  }
+}
+
+function cancelPendingSubscribeThank(thankKey) {
+  const timeoutId = pendingSubscribeThanks.get(thankKey);
+  if (timeoutId) {
+    clearTimeout(timeoutId);
+    pendingSubscribeThanks.delete(thankKey);
+  }
+}
+
+function scheduleSubscribeThank(thankKey, callback) {
+  cancelPendingSubscribeThank(thankKey);
+
+  const timeoutId = setTimeout(() => {
+    pendingSubscribeThanks.delete(thankKey);
+    if (wasSubscriptionRecentlyThanked(thankKey)) {
+      return;
+    }
+    markSubscriptionThanked(thankKey);
+    callback();
+  }, SUBSCRIBE_EVENT_DELAY_MS);
+
+  pendingSubscribeThanks.set(thankKey, timeoutId);
+}
+
 module.exports = {
   getBroadcasterToken,
   hasScope,
   isChannelLive,
   getAllLiveChannels,
   replaceMessagePlaceholders,
+  getSubscriptionThankKey,
+  getGiftThankKey,
+  wasSubscriptionRecentlyThanked,
+  markSubscriptionThanked,
+  cancelPendingSubscribeThank,
+  scheduleSubscribeThank,
 };
