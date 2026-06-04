@@ -1,9 +1,9 @@
 const setPlusCommand = async (message) => {
   const userToSet = message.args[1]?.replace(/^@/, "").toLowerCase() || null;
   const amount = message.args[2]?.replace(/^@/, "").toLowerCase() || null;
-  if (!userToSet || !amount) {
+  if (!userToSet) {
     return {
-      reply: `Use o formato ${message.prefix}setplus <usuário> <amount>`,
+      reply: `Use o formato ${message.prefix}setplus <usuário> [amount]`,
     };
   }
 
@@ -14,18 +14,16 @@ const setPlusCommand = async (message) => {
     };
   }
 
-  await fb.db.update(
-    "users",
-    { userid: userInfo.id },
-    {
-      $set: {
-        isSupporter: true,
-        isPlus: true,
-        lastSupportDate: Math.floor(Date.now() / 1000),
-        totalDonated: amount,
-      },
-    }
-  );
+  const update = {
+    isSupporter: true,
+    isPlus: true,
+    lastSupportDate: Math.floor(Date.now() / 1000),
+  };
+  if (amount) {
+    update.totalDonated = amount;
+  }
+
+  await fb.db.update("users", { userid: userInfo.id }, { $set: update });
 
   return {
     reply: `${userToSet} agora é Plus! ⭐`,
@@ -41,6 +39,6 @@ setPlusCommand.cooldownType = "user";
 setPlusCommand.permissions = ["admin"];
 setPlusCommand.whisperable = true;
 setPlusCommand.flags = ["dev"];
-setPlusCommand.description = `Coloca o status Plus em um usuário (que apoiou o projeto com mais de R$10) e define o valor do apoio`;
+setPlusCommand.description = `Coloca o status Plus em um usuário (que apoiou o projeto com mais de R$10). Opcionalmente define o valor do apoio`;
 
 module.exports = { setPlusCommand };
