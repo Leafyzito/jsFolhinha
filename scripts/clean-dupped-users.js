@@ -11,6 +11,16 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
+function getOldestRegistry(registries) {
+  return registries.reduce((oldest, current) =>
+    oldest._id < current._id ? oldest : current
+  );
+}
+
+function formatRegistry(r) {
+  return `${r._id} (currAlias: ${r.currAlias}, lsDate: ${r.lsDate})`;
+}
+
 // Promise-based function to ask for confirmation
 function askForConfirmation() {
   return new Promise((resolve) => {
@@ -51,20 +61,12 @@ async function main() {
         .collection("users")
         .find({ userid: userId })
         .toArray();
-      const oldestRegistry = registries.reduce((oldest, current) => {
-        return oldest.lsDate < current.lsDate ? oldest : current;
-      });
+      const oldestRegistry = getOldestRegistry(registries);
       const registriesToDelete = registries.filter(
         (r) => r._id !== oldestRegistry._id
       );
       console.log(
-        `Will delete ${
-          registries.length - 1
-        } registries for user ${userId} (keeping id: ${
-          oldestRegistry._id
-        } (lsDate: ${oldestRegistry.lsDate}), deleting ids: ${registriesToDelete
-          .map((r) => `${r._id} (lsDate: ${r.lsDate})`)
-          .join(", ")})`
+        `Will delete ${registries.length - 1} registries for user ${userId} (currAlias: ${oldestRegistry.currAlias}) — keeping: ${formatRegistry(oldestRegistry)}, deleting: ${registriesToDelete.map(formatRegistry).join(", ")}`
       );
     }
 
@@ -78,13 +80,9 @@ async function main() {
           .collection("users")
           .find({ userid: userId })
           .toArray();
-        const oldestRegistry = registries.reduce((oldest, current) => {
-          return oldest.lsDate < current.lsDate ? oldest : current;
-        });
+        const oldestRegistry = getOldestRegistry(registries);
         console.log(
-          `Deleting ${
-            registries.length - 1
-          } registries for user ${userId} (keeping id: ${oldestRegistry._id})`
+          `Deleting ${registries.length - 1} registries for user ${userId} (currAlias: ${oldestRegistry.currAlias}, keeping id: ${oldestRegistry._id})`
         );
         await db
           .collection("users")
