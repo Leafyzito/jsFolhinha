@@ -2,37 +2,33 @@ const path = require("path");
 
 async function getLastUpdateDate() {
   const response = await fb.got(
-    "https://leafyrino.leafyzito.dev/api/last-updated",
+    "https://leafyrino.leafyzito.dev/api/last-updated"
   );
   return response.date;
 }
 
-async function getLastUpdate() {
-  const response = await fb.got(
-    "https://leafyrino.leafyzito.dev/features.json",
-  );
-  return response.features[0];
-}
+// async function getLastUpdate() {
+//   const response = await fb.got(
+//     "https://leafyrino.leafyzito.dev/features.json"
+//   );
+//   return response.features[0];
+// }
 
-function formatFeatureText(feature, lang = "pt") {
-  let text = feature?.text?.[lang] ?? feature?.text?.en ?? "";
-  if (feature?.link?.text && text.includes("{link}")) {
-    text = text.replace(/\{link\}/g, feature.link.text);
-  }
-  return text;
-}
+// function formatFeatureText(feature, lang = "pt") {
+//   let text = feature?.text?.[lang] ?? feature?.text?.en ?? "";
+//   if (feature?.link?.text && text.includes("{link}")) {
+//     text = text.replace(/\{link\}/g, feature.link.text);
+//   }
+//   return text;
+// }
 
 const leafyrinoCommand = async () => {
-  const [lastUpdateDate, lastUpdate] = await Promise.all([
-    getLastUpdateDate(),
-    getLastUpdate(),
-  ]);
+  const lastUpdateDate = await getLastUpdateDate();
   const lastUpdateDateFormatted = new Date(lastUpdateDate).toLocaleDateString(
-    "pt-BR",
+    "pt-BR"
   );
-  const featureText = formatFeatureText(lastUpdate);
   return {
-    reply: `🔗 https://leafyrino.leafyzito.dev ● Última atualização: ${featureText} (${lastUpdateDateFormatted})`,
+    reply: `🔗 https://leafyrino.leafyzito.dev ● Última atualização: ${lastUpdateDateFormatted}`,
   };
 };
 
