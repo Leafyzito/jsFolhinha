@@ -60,8 +60,8 @@ async function initializeApp() {
 
     console.info("* Utilities initialized");
 
-    await fb.emotes.getGlobalEmotes();
-    console.info("* Global emotes initialized");
+    // await fb.emotes.getGlobalEmotes();
+    // console.info("* Global emotes initialized");
 
     // Initialize Auth Provider
     fb.authProvider =

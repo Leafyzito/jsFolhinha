@@ -107,20 +107,29 @@ class Emotes {
     return response.map((emote) => emote.code);
   }
 
+  // api is down
   async getGlobalEmotes() {
     const url = "https://emotes.adamcy.pl/v1/global/emotes/all";
     const response = await fb.got(url, { timeout: 5000 });
-    if (!response || response.error) return [];
+    if (!response || response.error) {
+      this.globalEmotes = [];
+      return [];
+    }
     this.globalEmotes = response.map((emote) => emote.code);
     return this.globalEmotes;
   }
 
   async getEmotes(channelName) {
-    // const ttv = await this.get7tv(channelId).catch(() => []);
-    // const bttv = await this.getBttv(channelId).catch(() => []);
-    // const ffz = await this.getFfz(channelId).catch(() => []);
-    const emotes = await this.getServiceEmotes(channelName);
-
+    const channelId = (await fb.api.helix.getUserByUsername(channelName))?.id;
+    if (!channelId) {
+      return [];
+    }
+    const [ttv, bttv, ffz] = await Promise.all([
+      this.get7tv(channelId),
+      this.getBttv(channelId),
+      this.getFfz(channelId),
+    ]);
+    const emotes = ttv.concat(bttv).concat(ffz);
     const channelEmotes = emotes.concat(this.globalEmotes);
     this.cachedEmotes[channelName] = channelEmotes;
     return channelEmotes;
