@@ -144,13 +144,14 @@ async function subscribeToChannel(
         );
 
         if (hasSubscriptionScope) {
-          listener.onChannelSubscription(broadcasterId, (event) => {
-            handleChannelSubscription(event, { source: "subscribe" });
-          });
+          // // Subscribe to new subscriptions
+          // listener.onChannelSubscription(broadcasterId, (event) => {
+          //   handleChannelSubscription(event);
+          // });
 
-          // Resubs and sub shares (when users type a message in chat)
+          // Subscribe to subscription shares (when users share their subscriptions)
           listener.onChannelSubscriptionMessage(broadcasterId, (event) => {
-            handleChannelSubscription(event, { source: "message" });
+            handleChannelSubscription(event);
           });
 
           // Subscribe to gifted subscriptions
@@ -171,9 +172,7 @@ async function subscribeToChannel(
     }
 
     subscribedChannels.add(broadcasterId);
-    console.info(
-      `* Subscribed to EventSub events for channel ${broadcasterId}`
-    );
+    console.info(`* Subscribed to EventSub events for channel ${broadcasterId}`);
   } catch (error) {
     console.error(
       `Error subscribing to EventSub events for ${broadcasterId}:`,
