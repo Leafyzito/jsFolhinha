@@ -42,6 +42,36 @@ class HelixApi {
     }
   }
 
+  async _getUserAccessToken(userId) {
+    try {
+      if (
+        !fb ||
+        !fb.authProvider ||
+        !fb.authProvider.provider ||
+        !userId
+      ) {
+        return null;
+      }
+
+      const tokenData =
+        await fb.authProvider.provider.getAccessTokenForUser(userId);
+
+      if (!tokenData || !tokenData.accessToken) {
+        console.error(
+          `HelixApi: Failed to get access token for userId: ${userId}`
+        );
+        return null;
+      }
+
+      return tokenData.accessToken;
+    } catch (error) {
+      console.error(
+        `HelixApi: Error getting user access token for ${userId}: ${error.message}`
+      );
+      return null;
+    }
+  }
+
   async getUserByUsername(username) {
     username = username.toLowerCase();
 
@@ -503,6 +533,68 @@ class HelixApi {
     }
 
     return allUsers;
+  }
+
+  async getBroadcasterSubscriptions(broadcasterId) {
+    const token = await this._getUserAccessToken(broadcasterId);
+    if (!token) {
+      const message = `Helix API (getBroadcasterSubscriptions): No access token for broadcaster ${broadcasterId}`;
+      console.error(message);
+      if (fb.discord && fb.discord.logError) {
+        fb.discord.logError(message);
+      }
+      return null;
+    }
+
+    const headers = {
+      "Client-ID": process.env.BOT_CLIENT_ID,
+      Authorization: `Bearer ${token}`,
+    };
+
+    const subscribers = [];
+    let url = `${this.baseUrl}/subscriptions?broadcaster_id=${broadcasterId}&first=100`;
+    let hasMorePages = true;
+
+    while (hasMorePages) {
+      try {
+        const response = await fb.got(url, { headers });
+
+        if (!response) {
+          const message = `Helix API (getBroadcasterSubscriptions): Request failed for broadcaster ${broadcasterId}`;
+          console.error(message);
+          if (fb.discord && fb.discord.logError) {
+            fb.discord.logError(message);
+          }
+          return null;
+        }
+
+        const data = response.data || [];
+        for (const sub of data) {
+          if (sub.user_id) {
+            subscribers.push({
+              userId: sub.user_id,
+              login: sub.user_login || sub.user_name || sub.user_id,
+            });
+          }
+        }
+
+        const pagination = response.pagination || {};
+        if (pagination.cursor) {
+          url = `${this.baseUrl}/subscriptions?broadcaster_id=${broadcasterId}&first=100&after=${pagination.cursor}`;
+        } else {
+          hasMorePages = false;
+        }
+      } catch (error) {
+        const message = `Helix API (getBroadcasterSubscriptions): ${error.message}`;
+        console.error(message);
+        if (fb.discord && fb.discord.logError) {
+          fb.discord.logError(message);
+        }
+        return null;
+      }
+    }
+
+    return subscribers;
   }
 
   async createClip(channelId) {
