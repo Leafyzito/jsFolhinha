@@ -6,8 +6,6 @@ const handleModeratorRemove = require("./events/moderator-remove");
 const handleVipAdd = require("./events/vip-add");
 const handleVipRemove = require("./events/vip-remove");
 const handleChannelFollow = require("./events/channel-follow");
-const handleChannelSubscription = require("./events/channel-subscription");
-const handleChannelSubscriptionGift = require("./events/channel-subscription-gift");
 const handleUserUpdate = require("./events/user-update");
 
 const { getBroadcasterToken, hasScope } = require("./utils");
@@ -132,36 +130,6 @@ async function subscribeToChannel(
       } catch (error) {
         console.error(
           `Error subscribing to follower events for ${broadcasterId}:`,
-          error
-        );
-      }
-
-      // Subscribe to subscription events (requires channel:read:subscriptions scope)
-      try {
-        const hasSubscriptionScope = await hasScope(
-          broadcasterId,
-          "channel:read:subscriptions"
-        );
-
-        if (hasSubscriptionScope) {
-          // // Subscribe to new subscriptions
-          // listener.onChannelSubscription(broadcasterId, (event) => {
-          //   handleChannelSubscription(event);
-          // });
-
-          // Subscribe to subscription shares (when users share their subscriptions)
-          listener.onChannelSubscriptionMessage(broadcasterId, (event) => {
-            handleChannelSubscription(event);
-          });
-
-          // Subscribe to gifted subscriptions
-          listener.onChannelSubscriptionGift(broadcasterId, (event) => {
-            handleChannelSubscriptionGift(event);
-          });
-        }
-      } catch (error) {
-        console.error(
-          `Error subscribing to subscription events for ${broadcasterId}:`,
           error
         );
       }

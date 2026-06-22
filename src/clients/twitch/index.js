@@ -11,6 +11,7 @@ const onJoinHandler = require("./events/join.js");
 const onMessageHandler = require("./events/message.js");
 const onTimeout = require("./events/timeout.js");
 const onWhisperHandler = require("./events/whisper.js");
+const { registerSubNoticeHandlers } = require("./events/sub-notice.js");
 
 class TwitchClient {
   constructor() {
@@ -129,6 +130,7 @@ class TwitchClient {
     this.anonClient.onTimeout(onTimeout);
     this.anonClient.onBan((channel, user) => onTimeout(channel, user, null));
     this.anonClient.onMessage(onMessageHandler);
+    registerSubNoticeHandlers(this.anonClient);
 
     // main client whisper (since anon can't receive whispers)
     // this.client.onWhisper(onWhisperHandler);
