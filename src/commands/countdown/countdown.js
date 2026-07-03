@@ -5,9 +5,9 @@ const countdownCommand = async (message) => {
     time = parseInt(time);
   }
 
-  if (time < 1) {
+  if (time < 3) {
     return {
-      reply: `O limite mínimo de segundos para a contagem regressiva é `,
+      reply: `O limite mínimo de segundos para a contagem regressiva é 3`,
     };
   }
 
