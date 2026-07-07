@@ -14,7 +14,7 @@ const getRandomCharada = (channelName) => {
   // Get available charada keys (IDs) that haven't been used
   const availableCharadaKeys = Object.keys(charadasData).filter(
     (key) =>
-      !usedCharadas[channelName] || !usedCharadas[channelName].includes(key),
+      !usedCharadas[channelName] || !usedCharadas[channelName].includes(key)
   );
 
   // Select a random charada key
@@ -34,12 +34,17 @@ const getRandomCharada = (channelName) => {
 
 const charadaCommand = async (message) => {
   const charada = getRandomCharada(message.channelName);
+  const thinkingEmote = await fb.emotes.getEmoteFromList(
+    message.channelName,
+    ["hmm", "think"],
+    "🤔"
+  );
 
   await fb.log.reply(
     message,
-    `${message.displayName} iniciou uma charada! 🤔 ${fb.utils.capitalize(
-      charada.pergunta,
-    )}`,
+    `${message.displayName} iniciou uma charada! ${thinkingEmote} ${fb.utils.capitalize(
+      charada.pergunta
+    )}`
   );
 
   const check = {
@@ -51,7 +56,7 @@ const charadaCommand = async (message) => {
     const emote = await fb.emotes.getEmoteFromList(
       message.channelName,
       fb.emotes.sadEmotes,
-      ":(",
+      ":("
     );
     return {
       reply: `Ninguém respondeu a charada a tempo! ${emote} A resposta era: ${charada.resposta[0]}`,
@@ -62,7 +67,7 @@ const charadaCommand = async (message) => {
   const emote = await fb.emotes.getEmoteFromList(
     message.channelName,
     ["nerd", "nerdge", "catnerd", "dognerd", "giganerd"],
-    "🤓",
+    "🤓"
   );
   return {
     reply: `${responseMsg.senderUsername} acertou a resposta! ${emote}`,
