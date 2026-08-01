@@ -15,6 +15,9 @@ async function initializeUtilities() {
   const db = new MongoUtils();
   const log = new Logger();
 
+  // Wait for Redis/local cache clear so startup queries don't hit stale partial sets
+  await db.cacheReady;
+
   return { utils, emotes, db, log };
 }
 async function initializeAuthProvider() {
@@ -158,10 +161,15 @@ async function getChannelsToJoin() {
   }
 
   try {
-    const configs = await fb.db.get("config", { state: "active" });
-    const channelIdsToJoin = Array.isArray(configs)
-      ? configs.map((channel) => channel.channelId)
-      : [];
+    // forceDb: cache may only hold a subset of configs (lazy-loaded per channel),
+    // so a cache hit for { state: "active" } can return a partial list.
+    const configsRaw = await fb.db.get("config", { state: "active" }, true);
+    const configs = Array.isArray(configsRaw)
+      ? configsRaw
+      : configsRaw
+        ? [configsRaw]
+        : [];
+    const channelIdsToJoin = configs.map((channel) => channel.channelId);
 
     if (!channelIdsToJoin || channelIdsToJoin.length === 0) {
       await restartProcess("Failed to get channelIdsToJoin");
@@ -172,6 +180,12 @@ async function getChannelsToJoin() {
     // Get channel names from user IDs using the helix API
     const channelsToJoin =
       await fb.api.helix.getManyUsersByUserIDs(channelIdsToJoin);
+
+    if (channelsToJoin.length < channelIdsToJoin.length) {
+      console.warn(
+        `* getChannelsToJoin: Helix returned ${channelsToJoin.length}/${channelIdsToJoin.length} users (missing/banned accounts or chunk failures)`
+      );
+    }
 
     return channelsToJoin || [];
   } catch (error) {

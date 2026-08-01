@@ -43,8 +43,8 @@ class MongoUtils {
       shouldUseRedis
     );
 
-    // Initialize cache containers
-    this.initializeCacheContainers();
+    // Await this before any db.get that must see a cleared cache
+    this.cacheReady = this.initializeCacheContainers();
   }
 
   async ensureConnection() {
