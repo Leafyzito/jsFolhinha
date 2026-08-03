@@ -1,5 +1,6 @@
 const {
   handleExistingConfigUsernameChange,
+  normalizeUserDoc,
 } = require("../../../../handlers/listener/update-user");
 
 module.exports = async function handleUserUpdate(event) {
@@ -11,9 +12,12 @@ module.exports = async function handleUserUpdate(event) {
       (event.userDisplayName ? event.userDisplayName.toLowerCase() : "unknown");
 
     // Get user by userId from DB
-    const knownUser = await fb.db.get("users", {
-      userid: userId,
-    });
+    const knownUser = normalizeUserDoc(
+      await fb.db.get("users", {
+        userid: userId,
+      }),
+      userLogin
+    );
 
     if (knownUser) {
       // Only update if their currAlias is not up to date
@@ -27,7 +31,7 @@ module.exports = async function handleUserUpdate(event) {
           { userid: userId },
           {
             $set: { currAlias: userLogin },
-            $push: { aliases: userLogin },
+            $addToSet: { aliases: userLogin },
           }
         );
         // Update broadcaster config if applicable

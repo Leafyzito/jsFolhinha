@@ -49,64 +49,104 @@ async function handleExistingConfigUsernameChange(userId, newUsername) {
   }
 }
 
+const normalizeUserDoc = (result, preferredAlias = null) => {
+  if (!result) {
+    return null;
+  }
+  // fb.db.get returns an array when multiple docs match (e.g. duplicates)
+  if (!Array.isArray(result)) {
+    return result;
+  }
+  if (result.length === 0) {
+    return null;
+  }
+
+  const preferred = preferredAlias?.toLowerCase();
+  if (preferred) {
+    const match = result.find(
+      (u) => u?.currAlias?.toLowerCase() === preferred
+    );
+    if (match) {
+      return match;
+    }
+  }
+
+  return result.find((u) => u?.currAlias) || result[0] || null;
+};
+
 const updateUserListener = async (message) => {
   if (message.senderUsername === process.env.BOT_USERNAME) {
     return;
   }
 
   // Check if user is already known in the database
-  const knownUser = await fb.db.get("users", {
-    userid: message.senderUserID,
-  });
+  const knownUser = normalizeUserDoc(
+    await fb.db.get("users", {
+      userid: message.senderUserID,
+    }),
+    message.senderUsername
+  );
 
-  const currentAlias = knownUser?.currAlias?.toLowerCase();
+  if (!knownUser) {
+    // New user - create in database
+    fb.discord.log(
+      `* NEW USER: #${message.channelName}/${message.senderUsername}`
+    );
+
+    fb.db.insertTemplate("users", { message }).catch((err) => {
+      fb.discord.importantLog(
+        `Failed to insert new user ${message.senderUsername} (${message.senderUserID}): ${err.message}`
+      );
+      console.error("insert new user error:", err);
+    });
+    return;
+  }
+
+  const currentAlias = knownUser.currAlias?.toLowerCase();
   const senderUsername = message.senderUsername?.toLowerCase();
 
-  if (knownUser && currentAlias && currentAlias === senderUsername) {
+  if (currentAlias === senderUsername) {
     // User is known and username hasn't changed, just update last seen
     return await updateLastSeen(message);
   }
 
-  if (knownUser) {
-    // Username changed or currAlias was missing, update aliases
-    fb.discord.log(
-      `* Updating user aliases: #${message.channelName}/${knownUser.currAlias ?? "(none)"} -> ${message.senderUsername}`
-    );
-
+  if (!currentAlias) {
+    // Heal incomplete docs without treating it as a nick change
     await fb.db.update(
       "users",
       { userid: message.senderUserID },
       {
         $set: { currAlias: message.senderUsername },
-        $push: { aliases: message.senderUsername },
+        $addToSet: { aliases: message.senderUsername },
       }
     );
-
-    // Handle broadcaster username change if applicable
-    await handleExistingConfigUsernameChange(
-      message.senderUserID,
-      message.senderUsername
-    );
-
-    await updateLastSeen(message);
-    return;
+    return await updateLastSeen(message);
   }
 
-  // New user - create in database
+  // Username has changed, update aliases and handle channel config if applicable
   fb.discord.log(
-    `* NEW USER: #${message.channelName}/${message.senderUsername}`
+    `* Updating user aliases: #${message.channelName}/${knownUser.currAlias} -> ${message.senderUsername}`
   );
-  // console.log(`NEW USER: #${message.channelName}/${message.senderUsername}`);
 
-  fb.db.insertTemplate("users", { message }).catch((err) => {
-    fb.discord.importantLog(
-      `Failed to insert new user ${message.senderUsername} (${message.senderUserID}): ${err.message}`
-    );
-    console.error("insert new user error:", err);
-  });
+  await fb.db.update(
+    "users",
+    { userid: message.senderUserID },
+    {
+      $set: { currAlias: message.senderUsername },
+      $addToSet: { aliases: message.senderUsername },
+    }
+  );
+
+  await handleExistingConfigUsernameChange(
+    message.senderUserID,
+    message.senderUsername
+  );
+
+  await updateLastSeen(message);
 };
 
 module.exports = {
   updateUserListener,
   handleExistingConfigUsernameChange,
+  normalizeUserDoc,
 };
