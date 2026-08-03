@@ -23,7 +23,9 @@ async function handleExistingConfigUsernameChange(userId, newUsername) {
     fb.discord.log(
       `* Updating channel config for ${oldUsername} -> ${newUsername}`
     );
-    console.info(`Updating channel config for ${oldUsername} -> ${newUsername}`);
+    console.info(
+      `Updating channel config for ${oldUsername} -> ${newUsername}`
+    );
 
     await fb.db.update(
       "config",
@@ -57,21 +59,18 @@ const updateUserListener = async (message) => {
     userid: message.senderUserID,
   });
 
-  if (
-    knownUser &&
-    knownUser.currAlias.toLowerCase() === message.senderUsername.toLowerCase()
-  ) {
+  const currentAlias = knownUser?.currAlias?.toLowerCase();
+  const senderUsername = message.senderUsername?.toLowerCase();
+
+  if (knownUser && currentAlias && currentAlias === senderUsername) {
     // User is known and username hasn't changed, just update last seen
     return await updateLastSeen(message);
   }
 
-  if (
-    knownUser &&
-    knownUser.currAlias.toLowerCase() !== message.senderUsername.toLowerCase()
-  ) {
-    // Username has changed, update aliases and handle channel config updates if applicable
+  if (knownUser) {
+    // Username changed or currAlias was missing, update aliases
     fb.discord.log(
-      `* Updating user aliases: #${message.channelName}/${knownUser.currAlias} -> ${message.senderUsername}`
+      `* Updating user aliases: #${message.channelName}/${knownUser.currAlias ?? "(none)"} -> ${message.senderUsername}`
     );
 
     await fb.db.update(
