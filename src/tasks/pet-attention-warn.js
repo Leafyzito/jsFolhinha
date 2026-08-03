@@ -1,7 +1,10 @@
 async function petAttentionTask() {
   const pets = await fb.db.get("pet", { is_alive: true }, true);
   for (const pet of pets) {
-    const channelName = (await fb.api.helix.getUserByID(pet.channelId)).login;
+    const channelName = (await fb.api.helix.getUserByID(pet.channelId))?.login;
+    if (!channelName) {
+      continue;
+    }
     const channelConfig = await fb.db.get("config", {
       channelId: pet.channelId,
     });
