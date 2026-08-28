@@ -8,30 +8,41 @@ class CobaltApi {
     };
   }
 
+  toMediaBuffer(data) {
+    if (Buffer.isBuffer(data) && data.length > 0) {
+      return data;
+    }
+    return null;
+  }
+
+  async fetchCobaltMedia(url, { downloadMode } = {}) {
+    const payload = { url };
+    if (downloadMode) {
+      payload.downloadMode = downloadMode;
+    }
+
+    const response = await fb.got(this.baseUrl, {
+      method: "POST",
+      headers: this.headers,
+      json: payload,
+    });
+
+    if (!response?.url) {
+      return null;
+    }
+
+    const mediaResponse = await fb.got(response.url);
+    return this.toMediaBuffer(mediaResponse);
+  }
+
   async downloadVideo(url) {
     try {
-      const payload = { url };
-      const response = await fb.got(this.baseUrl, {
-        method: "POST",
-        headers: this.headers,
-        json: payload,
-      });
-
-      if (!response) {
-        fb.discord.logError(`Cobalt API returned null for video download`);
-        return null;
-      }
-
-      const resData = response;
-      const resUrl = resData.url;
-
-      // Download the video content
-      const videoResponse = await fb.got(resUrl);
+      const videoResponse = await this.fetchCobaltMedia(url);
       if (!videoResponse) {
+        fb.discord.logError(`Cobalt API returned no video content`);
         return null;
       }
 
-      // Upload to feridinha
       const fileName = `video_${Date.now()}.mp4`;
       const feridinhaUrl = await fb.api.feridinha.uploadVideo(
         videoResponse,
@@ -39,10 +50,8 @@ class CobaltApi {
       );
 
       if (!feridinhaUrl) {
-        console.warn(
-          "Failed to upload to feridinha, falling back to original URL"
-        );
-        return resUrl;
+        fb.discord.logError(`Failed to upload video to feridinha`);
+        return null;
       }
 
       return feridinhaUrl;
@@ -54,31 +63,14 @@ class CobaltApi {
 
   async downloadAudio(url) {
     try {
-      const payload = {
-        url,
+      const audioResponse = await this.fetchCobaltMedia(url, {
         downloadMode: "audio",
-      };
-      const response = await fb.got(this.baseUrl, {
-        method: "POST",
-        headers: this.headers,
-        json: payload,
       });
-
-      if (!response) {
-        fb.discord.logError(`Cobalt API returned null for audio download`);
-        return null;
-      }
-
-      const resData = response;
-      const resUrl = resData.url;
-
-      // Download the audio content
-      const audioResponse = await fb.got(resUrl);
       if (!audioResponse) {
+        fb.discord.logError(`Cobalt API returned no audio content`);
         return null;
       }
 
-      // Upload to feridinha
       const fileName = `audio_${Date.now()}.mp3`;
       const feridinhaUrl = await fb.api.feridinha.uploadAudio(
         audioResponse,
@@ -86,10 +78,8 @@ class CobaltApi {
       );
 
       if (!feridinhaUrl) {
-        console.warn(
-          "Failed to upload to feridinha, falling back to original URL"
-        );
-        return resUrl;
+        fb.discord.logError(`Failed to upload audio to feridinha`);
+        return null;
       }
 
       return feridinhaUrl;
