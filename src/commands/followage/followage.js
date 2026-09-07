@@ -1,69 +1,78 @@
 const path = require("path");
-async function getFA(user, channel) {
-  const data = await fb.api.ivr.getFollowAge(user, channel);
+// async function getFA(user, channel) {
+//   const data = await fb.api.ivr.getFollowAge(user, channel);
 
-  if (!data) {
-    return `O canal ${channel} não existe`;
-  }
+//   if (!data) {
+//     return `O canal ${channel} não existe`;
+//   }
 
-  const followDate = data.followedAt;
+//   const followDate = data.followedAt;
 
-  if (followDate == null) {
-    return `${user} não segue ${channel}`;
-  }
+//   if (followDate == null) {
+//     return `${user} não segue ${channel}`;
+//   }
 
-  const relativeTimeFollow = fb.utils.relativeTime(followDate, true, true);
-  const formattedFollowDate = new Date(followDate)
-    .toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    })
-    .replace(/\//g, "-"); // replace / with -
+//   const relativeTimeFollow = fb.utils.relativeTime(followDate, true, true);
+//   const formattedFollowDate = new Date(followDate)
+//     .toLocaleDateString("pt-BR", {
+//       day: "2-digit",
+//       month: "2-digit",
+//       year: "numeric",
+//     })
+//     .replace(/\//g, "-"); // replace / with -
 
-  return { relativeTimeFollow, formattedFollowDate };
-}
+//   return { relativeTimeFollow, formattedFollowDate };
+// }
 
 const followAgeCommand = async (message) => {
-  let faTarget = message.senderUsername;
-  let faChannelTarget = message.channelName;
-
-  if (message.args.length === 2) {
-    faChannelTarget = message.args[1].replace(/^@/, "");
-  } else if (message.args.length === 3) {
-    faTarget = message.args[1].replace(/^@/, "");
-    faChannelTarget = message.args[2].replace(/^@/, "");
-  }
-
-  if (faTarget === faChannelTarget) {
-    return {
-      reply: "Stare ?",
-    };
-  }
-
-  const faResult = await getFA(faTarget, faChannelTarget);
-
-  if (typeof faResult === "string" && faResult.includes("não existe")) {
-    return {
-      reply: faResult,
-    };
-  }
-
-  if (typeof faResult === "string" && faResult.includes("não segue")) {
-    return {
-      reply: faResult,
-    };
-  }
-
-  const faMessage = `${
-    faTarget === message.senderUsername ? "Você" : `${faTarget}`
-  } segue ${faChannelTarget} há ${faResult.relativeTimeFollow} (${
-    faResult.formattedFollowDate
-  })`;
-
+  const emote = await fb.emotes.getEmoteFromList(
+    message.channelName,
+    fb.emotes.sadEmotes,
+    ":("
+  );
   return {
-    reply: faMessage,
+    reply: `A Twitch desabilitou a habilidade de pegar o follow age ${emote}`,
   };
+
+  // let faTarget = message.senderUsername;
+  // let faChannelTarget = message.channelName;
+
+  // if (message.args.length === 2) {
+  //   faChannelTarget = message.args[1].replace(/^@/, "");
+  // } else if (message.args.length === 3) {
+  //   faTarget = message.args[1].replace(/^@/, "");
+  //   faChannelTarget = message.args[2].replace(/^@/, "");
+  // }
+
+  // if (faTarget === faChannelTarget) {
+  //   return {
+  //     reply: "Stare ?",
+  //   };
+  // }
+
+  // const faResult = await getFA(faTarget, faChannelTarget);
+
+  // if (typeof faResult === "string" && faResult.includes("não existe")) {
+  //   return {
+  //     reply: faResult,
+  //   };
+  // }
+
+  // if (typeof faResult === "string" && faResult.includes("não segue")) {
+  //   return {
+  //     reply: faResult,
+  //   };
+  // }
+
+  // const faMessage = `${
+  //   faTarget === message.senderUsername ? "Você" : `${faTarget}`
+  // } segue ${faChannelTarget} há ${faResult.relativeTimeFollow} (${
+  //   faResult.formattedFollowDate
+  // })`;
+
+  // return {
+  //   reply: faMessage,
+  // };
 };
 
 followAgeCommand.commandName = "followage";
