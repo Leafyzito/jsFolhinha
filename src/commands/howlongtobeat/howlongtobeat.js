@@ -120,22 +120,20 @@ async function fetchToken(initUrl, force = false) {
     return null;
   }
 
-  const { token, hpKey, hpVal } = response;
+  const { token } = response;
 
-  if (!token || !hpKey || hpVal == null) {
+  if (!token) {
     return null;
   }
 
-  cachedToken = { token, hpKey, hpVal };
+  cachedToken = { token };
   cachedTokenAt = Date.now();
-  console.debug(
-    `[HLTB] Updated token cache${force ? " (forced)" : ""} (hpKey: ${hpKey})`
-  );
+  console.debug(`[HLTB] Updated token cache${force ? " (forced)" : ""}`);
   return cachedToken;
 }
 
 async function hltbSearchRequest(query, endpoints, tokenData) {
-  const { token, hpKey, hpVal } = tokenData;
+  const { token } = tokenData;
 
   return fb.got(endpoints.searchUrl, {
     method: "POST",
@@ -143,8 +141,6 @@ async function hltbSearchRequest(query, endpoints, tokenData) {
       ...hltbHeaders(),
       "Content-Type": "application/json",
       "x-auth-token": token,
-      "x-hp-key": hpKey,
-      "x-hp-val": String(hpVal),
     },
     json: {
       searchType: "games",
@@ -174,7 +170,6 @@ async function hltbSearchRequest(query, endpoints, tokenData) {
         randomizer: 0,
       },
       useCache: true,
-      [hpKey]: hpVal,
     },
   });
 }
