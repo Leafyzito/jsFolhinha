@@ -1,35 +1,15 @@
 const path = require("path");
 async function getCat() {
-  const api_url = "https://www.googleapis.com/customsearch/v1";
-  const query = "cute funny cat pinterest";
-  const start_index = fb.utils.randomInt(1, 10);
-  const random_num = fb.utils.randomInt(0, 9);
-
-  // Build query string with parameters
-  const queryParams = new URLSearchParams({
-    key: process.env.GOOGLE_SEARCH_API_KEY,
-    cx: process.env.GOOGLE_SEARCH_ENGINE_ID,
-    q: query,
-    searchType: "image",
-    start: start_index.toString(),
-  });
-
-  try {
-    const response = await fb.got(`${api_url}?${queryParams.toString()}`);
-    if (!response) {
-      return null;
-    }
-    const data = response;
-    if (data.items == null) {
-      return null;
-    }
-    const image_link = data.items[random_num].link;
-    const shortenedUrl = await fb.api.chuw.shortenUrl(image_link);
-    return shortenedUrl;
-  } catch (error) {
-    console.error("Error fetching cat image:", error);
+  const images = await fb.api.google.searchImages(
+    "cute funny cat pinterest",
+    fb.utils.randomInt(1, 10)
+  );
+  if (!images) {
     return null;
   }
+
+  const imageLink = images[fb.utils.randomInt(0, images.length - 1)];
+  return fb.api.chuw.shortenUrl(imageLink);
 }
 
 const gatoCommand = async () => {

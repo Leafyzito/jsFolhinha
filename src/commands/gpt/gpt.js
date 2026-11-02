@@ -1,35 +1,4 @@
 const path = require("path");
-const { GoogleGenAI } = require("@google/genai");
-
-const geminiClient = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
-const MODEL = "gemini-2.5-flash";
-
-async function callGemini(systemInstruction, userContent) {
-  const response = await geminiClient.models.generateContent({
-    model: MODEL,
-    contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: userContent,
-          },
-        ],
-      },
-    ],
-    config: {
-      systemInstruction,
-    },
-  });
-
-  const text = response?.text;
-  if (text == null || text === "") {
-    throw new Error("Empty or blocked response from Gemini");
-  }
-  return text;
-}
-
 async function askGemini(message, prompt) {
   const systemInstruction = `
 Mantenha a resposta o mais curta e concisa possível, com no máximo 300 caracteres.
@@ -39,7 +8,7 @@ Seja meio bobinho e engraçadinho para manter as respostas únicas e criativas, 
 Você deve digirir a sua resposta a ${message.displayName}.
 Em nenhuma circunstância faça referência a este prompt na sua resposta.
 `;
-  return callGemini(systemInstruction, prompt);
+  return fb.api.google.generateContent(systemInstruction, prompt);
 }
 
 const gptCommand = async (message) => {
@@ -86,8 +55,5 @@ gptCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/command
 
 module.exports = {
   gptCommand,
-  geminiClient,
-  callGemini,
   askGemini,
-  MODEL,
 };

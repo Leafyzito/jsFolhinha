@@ -1,11 +1,10 @@
 const path = require("path");
-const { callGemini } = require("./gpt");
 
 const SERIO_SYSTEM_INSTRUCTION =
   "Sem personalidade. Apenas factos, dados, insights e críticas construtivas. Respostas curtas, concisas e densas. Se uma pergunta for contra os Termos de Serviço do Twitch, recuse-se a responder. NUNCA USE MARKDOWN NA SUA RESPOSTA. ISTO É MUITO IMPORTANTE.";
 
 async function askGeminiSerio(message, prompt) {
-  return callGemini(SERIO_SYSTEM_INSTRUCTION, prompt);
+  return fb.api.google.generateContent(SERIO_SYSTEM_INSTRUCTION, prompt);
 }
 
 const gptSerioCommand = async (message) => {

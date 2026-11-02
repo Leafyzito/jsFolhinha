@@ -1,5 +1,4 @@
 const path = require("path");
-const { callGemini } = require("../gpt/gpt");
 
 const DEFAULT_LOG_AMOUNT = 50;
 
@@ -44,7 +43,10 @@ const chatSummaryCommand = async (message) => {
 
   const userContent = buildUserContent(message.channelName, logsResult.text);
 
-  const summary = await callGemini(CHAT_SUMMARY_SYSTEM, userContent);
+  const summary = await fb.api.google.generateContent(
+    CHAT_SUMMARY_SYSTEM,
+    userContent
+  );
 
   if (summary.length > 490) {
     const longResponse = await fb.utils.manageLongResponse(summary);

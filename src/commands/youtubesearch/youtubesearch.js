@@ -27,79 +27,33 @@ function parseVideoDuration(string) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
-async function searchYtVideos(query, maxResults = 5) {
-  // console.log(process.env.GOOGLE_YOUTUBE_SEARCH_API_KEY);
-  try {
-    const searchParams = new URLSearchParams({
-      key: process.env.GOOGLE_YOUTUBE_SEARCH_API_KEY,
-      q: query,
-      type: "video",
-      part: "snippet",
-      maxResults: maxResults,
-      sort: "relevance",
-    });
-
-    const data = await fb.got(
-      `https://www.googleapis.com/youtube/v3/search?${searchParams}`
-    );
-
-    if (!data) {
-      throw new Error("YouTube API Error: Failed to fetch data");
-    }
-
-    const videoList = data.items.map((item) => ({
-      id: item.id.videoId,
-      title: item.snippet.title,
-    }));
-
-    return videoList.length > 0 ? videoList[0] : null;
-  } catch (error) {
-    throw new Error(`Failed to search YouTube: ${error.message}`);
-  }
-}
-
-async function getYtVideoDetails(videoId) {
-  const searchParams = new URLSearchParams({
-    key: process.env.GOOGLE_YOUTUBE_SEARCH_API_KEY,
-    id: videoId,
-    part: "snippet,statistics,contentDetails",
-  });
-
-  const data = await fb.got(
-    `https://www.googleapis.com/youtube/v3/videos?${searchParams}`
-  );
-
-  if (!data || !data.items || data.items.length === 0) {
-    return null;
-  }
-
-  const videoDetails = {
-    id: data.items[0].id,
-    title: data.items[0].snippet.title,
-    link: `https://youtu.be/${data.items[0].id}`,
-    author: data.items[0].snippet.channelTitle,
-    publishedAt: new Date(data.items[0].snippet.publishedAt).toLocaleDateString(
+function formatVideoDetails(video) {
+  return {
+    id: video.id,
+    title: video.snippet.title,
+    link: `https://youtu.be/${video.id}`,
+    author: video.snippet.channelTitle,
+    publishedAt: new Date(video.snippet.publishedAt).toLocaleDateString(
       "en-GB"
     ),
     duration:
-      data.items[0].contentDetails.duration == "P0D"
+      video.contentDetails.duration == "P0D"
         ? ""
-        : parseVideoDuration(data.items[0].contentDetails.duration),
-    views: Number(data.items[0].statistics.viewCount).toLocaleString("fr-FR"),
+        : parseVideoDuration(video.contentDetails.duration),
+    views: Number(video.statistics.viewCount).toLocaleString("fr-FR"),
   };
-  return videoDetails;
 }
 
 async function getVideo(query) {
-  const video = await searchYtVideos(query);
+  const video = await fb.api.google.searchYoutubeVideo(query);
   if (video === null) {
     return null;
   }
-  const videoDetails = await getYtVideoDetails(video.id);
+  const videoDetails = await fb.api.google.getYoutubeVideo(video.id);
   if (videoDetails === null) {
     return null;
   }
-  return videoDetails;
+  return formatVideoDetails(videoDetails);
 }
 
 const youtubeSearchCommand = async (message) => {
