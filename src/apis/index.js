@@ -8,6 +8,7 @@ const FeridinhaApi = require("./feridinha");
 const TwitchClipperApi = require("./clipper");
 const CobaltApi = require("./cobalt");
 const LinearApi = require("./linear");
+const GoogleApi = require("./google");
 
 const allApis = {
   helix: HelixApi,
@@ -20,6 +21,7 @@ const allApis = {
   clipper: TwitchClipperApi,
   cobalt: CobaltApi,
   linear: LinearApi,
+  google: GoogleApi,
 };
 
 module.exports = allApis;

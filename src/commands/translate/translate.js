@@ -5,37 +5,6 @@ function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
-async function translateText(targetLanguage, textToTranslate) {
-  const params = new URLSearchParams({
-    client: "gtx",
-    dt: "t",
-    ie: "UTF-8",
-    oe: "UTF-8",
-    sl: "auto",
-    tl: targetLanguage,
-    q: textToTranslate,
-  });
-
-  const data = await fb.got(
-    `https://translate.googleapis.com/translate_a/single?${params}`,
-    {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-        Accept: "application/json",
-      },
-    }
-  );
-
-  if (!data) {
-    return null;
-  }
-  const translatedText = data[0].map((segment) => segment[0]).join("");
-  const fromLanguage = data[2];
-  const toLanguage = data[3];
-  const confidence = Math.round(data[6] * 100);
-  return { translatedText, fromLanguage, toLanguage, confidence };
-}
-
 function isLanguageSupported(language) {
   // Handle direct language codes (e.g. "pt")
   if (Object.values(LANGUAGE_MAPPINGS).includes(language)) {
@@ -81,10 +50,15 @@ const translateCommand = async (message) => {
   }
 
   const textToTranslate = args.slice(1).join(" ");
-  const translatedText = await translateText(
+  const translatedText = await fb.api.google.translate(
     targetLanguageCode,
     textToTranslate
   );
+  if (!translatedText) {
+    return {
+      reply: `Erro ao traduzir o texto. Tente novamente mais tarde.`,
+    };
+  }
   const translateFrom = translatedText.fromLanguage;
 
   // match language to language code from json file
@@ -145,5 +119,4 @@ translateCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/c
 
 module.exports = {
   translateCommand,
-  translateText,
 };

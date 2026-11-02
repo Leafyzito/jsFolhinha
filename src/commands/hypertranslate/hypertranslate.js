@@ -1,39 +1,6 @@
 const path = require("path");
 const { LANGUAGE_MAPPINGS } = require("../translate/langs.js");
 
-async function translateText(targetLanguage, textToTranslate) {
-  console.debug(`translating to: ${targetLanguage} - text: ${textToTranslate}`);
-  const params = new URLSearchParams({
-    client: "gtx",
-    dt: "t",
-    ie: "UTF-8",
-    oe: "UTF-8",
-    sl: "auto",
-    tl: targetLanguage,
-    q: textToTranslate,
-  });
-
-  const data = await fb.got(
-    `https://translate.googleapis.com/translate_a/single?${params}`,
-    {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-        Accept: "application/json",
-      },
-    }
-  );
-
-  if (!data) {
-    return null;
-  }
-
-  const translatedText = data[0][0][0];
-  const fromLanguage = data[2];
-  const toLanguage = data[3];
-  const confidence = Math.round(data[6] * 100);
-  return { translatedText, fromLanguage, toLanguage, confidence };
-}
-
 async function hypertranslateText(textToTranslate, numTranslations) {
   let currentText = textToTranslate;
   const listOfTranslations = [];
@@ -52,7 +19,10 @@ async function hypertranslateText(textToTranslate, numTranslations) {
 
     listOfTranslations.push(languageName);
 
-    const translation = await translateText(randomLangCode, currentText);
+    const translation = await fb.api.google.translate(
+      randomLangCode,
+      currentText
+    );
     if (!translation) {
       return null;
     }
@@ -62,7 +32,7 @@ async function hypertranslateText(textToTranslate, numTranslations) {
   }
 
   // Final translation back to pt
-  const finalTranslation = await translateText("pt", currentText);
+  const finalTranslation = await fb.api.google.translate("pt", currentText);
   if (!finalTranslation) {
     return null;
   }
