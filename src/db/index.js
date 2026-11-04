@@ -153,9 +153,10 @@ class MongoUtils {
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
 
-    await collection.updateOne(query, update);
-
-    const updatedDoc = await collection.findOne(query);
+    // re-reading by query misses the doc if the update changed a queried field
+    const updatedDoc = await collection.findOneAndUpdate(query, update, {
+      returnDocument: "after",
+    });
 
     if (updatedDoc) {
       await this.setCache(collectionName, updatedDoc._id, updatedDoc);
@@ -169,9 +170,14 @@ class MongoUtils {
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
 
+    // grab ids first, the update can change fields the query matches on
+    const matchedIds = await collection.distinct("_id", query);
+
     await collection.updateMany(query, update);
 
-    const updatedDocs = await collection.find(query).toArray();
+    const updatedDocs = await collection
+      .find({ $or: [{ _id: { $in: matchedIds } }, query] })
+      .toArray();
 
     for (const doc of updatedDocs) {
       await this.setCache(collectionName, doc._id, doc);

@@ -148,6 +148,18 @@
       "bsonType": ["int", "long", "double", "string"],
       "description": "Cumulative donated amount as recorded by !setplus"
     },
+    "plusMonths": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Total months subbed to leafyzito (ivr cumulative, not streak). Kept when a sub lapses"
+    },
+    "plusBadge": {
+      "bsonType": "string",
+      "description": "Plus tier badge id (sub, sub3m, sub6m, sub12m, sub24m) derived from plusMonths; served by /plus"
+    },
+    "plusTierCheckedAt": {
+      "bsonType": ["int", "long", "double"],
+      "description": "Unix seconds of the last successful ivr subage lookup, set by sync-plus-users"
+    },
     "msgCount": {
       "bsonType": "object",
       "description": "Legacy per-channel message counters carried over from the Python bot. Not written by this repo.",

@@ -1,7 +1,7 @@
 const express = require("express");
 const { createRateLimiter } = require("./rateLimit/index.js");
 const { getWrapped } = require("./wrapped.js");
-const { PLUS_BADGES } = require("./plus-badges.js");
+const { PLUS_BADGES, DEFAULT_PLUS_BADGE } = require("./plus-badges.js");
 class ApiServer {
   constructor() {
     this.app = express();
@@ -119,6 +119,7 @@ class ApiServer {
           userid: user.userid,
           currAlias: user.currAlias,
           isFounder: !!user.plusFounder,
+          badge: user.plusBadge || DEFAULT_PLUS_BADGE,
         }));
       }
 
