@@ -3,21 +3,21 @@ const cacheStatsCommand = async () => {
     const cacheStats = fb.db.cacheStats();
 
     // Calculate summary stats
+    let totalCached = 0;
     let totalHits = 0;
     let totalMisses = 0;
-    const perCollection = [];
 
-    for (const [name, stats] of Object.entries(cacheStats)) {
+    for (const stats of Object.values(cacheStats)) {
+      totalCached += stats.size;
       totalHits += stats.hits;
       totalMisses += stats.misses;
-      perCollection.push(`${name} ${stats.size}`);
     }
 
     const total = totalHits + totalMisses;
     const hitRatio =
       total > 0 ? `${((totalHits / total) * 100).toFixed(2)}%` : "0%";
 
-    let reply = `📊 Cache ● Hits/Misses: ${totalHits}/${totalMisses} ● Hit Ratio: ${hitRatio} ● ${perCollection.join(", ")}`;
+    let reply = `📊 Cache: ${totalCached} entries ● Hits/Misses: ${totalHits}/${totalMisses} ● Hit Ratio: ${hitRatio}`;
 
     // Truncate if over 500 characters
     if (reply.length > 500) {
