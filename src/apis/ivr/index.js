@@ -119,8 +119,11 @@ class IvrApi {
     };
   }
 
-  async getSubAge(user, channel) {
-    const data = await fb.got(`${this.baseUrl}/subage/${user}/${channel}`);
+  async getSubAge(user, channel, options = {}) {
+    const data = await fb.got(
+      `${this.baseUrl}/subage/${user}/${channel}`,
+      options
+    );
 
     if (data === null || data == [] || data.length === 0) {
       return null;
