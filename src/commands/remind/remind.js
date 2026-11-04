@@ -38,6 +38,9 @@ async function newRemind(
       fb.reminderJobs = {};
     }
     fb.reminderJobs[newRemindId] = job;
+  } else {
+    // lets the reminder listener look this user up when they next chat
+    fb.pendingReminderUsers?.add(targetId);
   }
 
   return newRemindId;

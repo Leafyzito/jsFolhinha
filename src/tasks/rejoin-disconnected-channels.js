@@ -6,8 +6,8 @@ async function rejoinDisconnectedChannels() {
   //   [...fb.twitch.anonClient.currentChannels].map(normalizeLogin)
   // );
 
-  // forceDb so we don't treat a partial Redis cache as the full active set
-  const configsRaw = await fb.db.get("config", { state: "active" }, true);
+  // config is fully in memory, so this is the complete active set
+  const configsRaw = await fb.db.get("config", { state: "active" });
   const channelsToJoin = Array.isArray(configsRaw)
     ? configsRaw
     : configsRaw

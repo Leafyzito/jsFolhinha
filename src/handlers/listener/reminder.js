@@ -231,6 +231,21 @@ const scheduleFutureReminder = async (reminder) => {
 // MARKER: load reminders
 // Main function to load and process reminders
 const loadReminders = async () => {
+  // only the bot creates unread reminders (the website just marks them read), so this set can't miss one
+  const pendingImmediate = await fb.db.get(
+    "remind",
+    { beenRead: false, remindAt: null },
+    true,
+  );
+  fb.pendingReminderUsers = new Set(
+    (Array.isArray(pendingImmediate)
+      ? pendingImmediate
+      : pendingImmediate
+        ? [pendingImmediate]
+        : []
+    ).map((reminder) => reminder.receiverId),
+  );
+
   if (process.env.ENV !== "prod") {
     return;
   }
@@ -342,6 +357,14 @@ const reminderListener = async (message) => {
     return;
   }
 
+  // Skip the db lookup for users with no unread reminders (still null during startup)
+  if (
+    fb.pendingReminderUsers &&
+    !fb.pendingReminderUsers.has(message.senderUserID)
+  ) {
+    return;
+  }
+
   processingReminder.push(message.senderUsername);
 
   try {
@@ -353,6 +376,8 @@ const reminderListener = async (message) => {
     );
 
     if (!reminders) {
+      // e.g. read or cancelled on the website
+      fb.pendingReminderUsers?.delete(message.senderUserID);
       processingReminder = processingReminder.filter(
         (user) => user !== message.senderUsername,
       );

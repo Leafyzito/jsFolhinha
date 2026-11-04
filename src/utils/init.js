@@ -15,8 +15,8 @@ async function initializeUtilities() {
   const db = new MongoUtils();
   const log = new Logger();
 
-  // Wait for Redis/local cache clear so startup queries don't hit stale partial sets
-  await db.cacheReady;
+  // full collections must be in memory before anything queries them
+  await db.ready;
 
   return { utils, emotes, db, log };
 }
