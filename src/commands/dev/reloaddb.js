@@ -1,6 +1,6 @@
 const reloadDbCommand = async () => {
   try {
-    fb.db.clearCache();
+    await fb.db.reloadCache();
 
     return {
       reply: `Base de dados recarregada 👍`,
@@ -21,6 +21,6 @@ reloadDbCommand.cooldownType = "user";
 reloadDbCommand.permissions = ["admin"];
 reloadDbCommand.whisperable = false;
 reloadDbCommand.flags = ["dev"];
-reloadDbCommand.description = `Limpa o cache local do banco de dados`;
+reloadDbCommand.description = `Recarrega as coleções guardadas em memória e limpa as restantes caches`;
 
 module.exports = { reloadDbCommand };

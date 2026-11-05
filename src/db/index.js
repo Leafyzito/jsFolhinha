@@ -1,82 +1,112 @@
 const { MongoClient } = require("mongodb");
-const RedisClient = require("./redis");
 const { getInsertTemplate } = require("./insert-templates");
+const { FullCollection, KeyedCollection } = require("./memory-cache");
+const ChangeSync = require("./change-sync");
 
 const mongoUri = process.env.MONGO_URI;
 const clientMongo = new MongoClient(mongoUri);
 const db = clientMongo.db("folhinha");
 
-// Check if Redis environment variables are provided
-// Only use Redis if both REDIS_HOST and REDIS_PORT are set and non-empty
-const redisHostRaw = process.env.REDIS_HOST;
-const redisPortRaw = process.env.REDIS_PORT;
-const redisHost = redisHostRaw?.trim();
-const redisPort = redisPortRaw?.trim();
-const shouldUseRedis = !!(
-  redisHost &&
-  redisPort &&
-  redisHost.length > 0 &&
-  redisPort.length > 0
-);
+const KEYED_MAX_ENTRIES = 20_000;
 
-// Debug: Log Redis configuration status
-if (!shouldUseRedis) {
-  console.warn(
-    `* Redis disabled: REDIS_HOST=${
-      redisHostRaw === undefined ? "undefined" : `"${redisHostRaw}"`
-    }, REDIS_PORT=${
-      redisPortRaw === undefined ? "undefined" : `"${redisPortRaw}"`
-    }`
-  );
+// full: whole collection in memory. synced ones are also written by the website, the change stream keeps them fresh
+// keyed: lru by lookup key, only for collections the bot alone writes
+// anything not listed always goes to mongo
+const CACHE_POLICIES = {
+  config: { mode: "full", keys: ["channelId"], synced: true },
+  customcommands: { mode: "full", keys: ["channelId", "name"], synced: true },
+  auth: { mode: "full", keys: ["user_id"], synced: true },
+  bans: { mode: "full", keys: ["userId"] },
+  pet: { mode: "full", keys: ["channelId"] },
+  users: { mode: "keyed", keys: ["userid"] },
+  cookie: { mode: "keyed", keys: ["userId"] },
+  dungeon: { mode: "keyed", keys: ["userId"] },
+  afk: { mode: "keyed", keys: ["channel", "user"] },
+};
+
+// mongo shape callers expect: one doc, an array when several match, or null
+function toResult(docs) {
+  if (!docs || docs.length === 0) {
+    return null;
+  }
+  return docs.length === 1 ? docs[0] : docs;
 }
 
 class MongoUtils {
   constructor() {
     this.client = clientMongo;
     this.db = db;
-    this.isConnected = false;
+    this.connectPromise = null;
 
-    // Initialize Redis client (or local cache if env vars are missing)
-    this.redis = new RedisClient(
-      redisHost || "localhost",
-      redisPort || "6379",
-      shouldUseRedis
+    this.caches = {};
+    for (const [name, policy] of Object.entries(CACHE_POLICIES)) {
+      this.caches[name] =
+        policy.mode === "full"
+          ? new FullCollection(name, policy.keys)
+          : new KeyedCollection(name, policy.keys, KEYED_MAX_ENTRIES);
+    }
+
+    const syncedCollections = Object.fromEntries(
+      Object.entries(CACHE_POLICIES)
+        .filter(([, policy]) => policy.synced)
+        .map(([name]) => [name, this.caches[name]])
+    );
+    this.changeSync = new ChangeSync(db, syncedCollections, () =>
+      this.loadFullCollections(Object.keys(syncedCollections))
     );
 
-    // Await this before any db.get that must see a cleared cache
-    this.cacheReady = this.initializeCacheContainers();
+    // await this before any db.get, full collections aren't loaded until then
+    this.ready = this.initialize();
   }
 
   async ensureConnection() {
-    if (!this.isConnected) {
-      await this.client.connect();
-      this.isConnected = true;
+    if (!this.connectPromise) {
+      this.connectPromise = this.client.connect().catch((err) => {
+        // let the next call retry
+        this.connectPromise = null;
+        throw err;
+      });
     }
+    await this.connectPromise;
   }
 
-  async initializeCacheContainers() {
-    try {
-      await this.ensureConnection();
-      const collections = await this.db.listCollections().toArray();
-      await this.redis.initializeCacheContainers(collections);
-    } catch (err) {
-      console.error("Failed to initialize cache containers:", err);
-    }
+  async initialize() {
+    await this.ensureConnection();
+
+    const unsynced = Object.entries(CACHE_POLICIES)
+      .filter(([, policy]) => policy.mode === "full" && !policy.synced)
+      .map(([name]) => name);
+    await this.loadFullCollections(unsynced);
+
+    // loads the synced collections, then follows their changes
+    await this.changeSync.start();
+    console.info("* In-memory db cache ready");
+  }
+
+  // resolves to the cluster time from before the load, so the change stream can replay anything we missed
+  async loadFullCollections(names) {
+    await this.ensureConnection();
+    const hello = await this.db.admin().command({ hello: 1 });
+
+    await Promise.all(
+      names.map(async (name) => {
+        const docs = await this.db.collection(name).find({}).toArray();
+        this.caches[name].load(docs);
+        console.info(`* Loaded ${docs.length} docs from ${name} into memory`);
+      })
+    );
+
+    return hello.operationTime ?? null;
   }
 
   async insert(collectionName, data) {
-    // Insert into DB first to get _id
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
     const result = await collection.insertOne(data);
 
-    // Add _id to data object
-    const dataWithId = { ...data, _id: result.insertedId };
+    this.caches[collectionName]?.upsert({ ...data, _id: result.insertedId });
 
-    // Update cache with document containing _id
-    await this.setCache(collectionName, result.insertedId, dataWithId);
-
-    // Return the result so we can access insertedId
+    // return the result so we can access insertedId
     return result;
   }
 
@@ -91,61 +121,53 @@ class MongoUtils {
     return { result, doc };
   }
 
-  async setCache(collectionName, documentId, document) {
-    await this.redis.setCache(collectionName, documentId, document);
-  }
-
-  async getCache(collectionName, documentId) {
-    return await this.redis.getCache(collectionName, documentId);
-  }
-
-  async deleteCache(collectionName, documentId) {
-    await this.redis.deleteCache(collectionName, documentId);
-  }
-
   async get(collectionName, query, forceDb = false) {
-    if (!forceDb) {
-      // Search cache for matching documents
-      const matches = await this.redis.searchCache(collectionName, query);
+    const cache = this.caches[collectionName];
 
-      if (matches.length > 0) {
-        await this.redis.incrementStat(collectionName, "hits");
-        return matches.length === 1 ? matches[0] : matches;
+    if (cache && !forceDb) {
+      const cached = cache.find(query);
+      if (cached !== undefined) {
+        cache.counters.hits++;
+        return toResult(cached);
       }
 
-      // Manually track cache miss
-      await this.redis.incrementStat(collectionName, "misses");
-      // If not in cache, fetch from DB and update cache (lazy loading)
-      return await this.fetchFromDbAndCache(collectionName, query);
+      if (cache instanceof KeyedCollection) {
+        const key = cache.lookupKey(query);
+        if (key !== null) {
+          cache.counters.misses++;
+          return toResult(await this.fetchKeyed(cache, key, query));
+        }
+      }
     }
 
-    // If forceDb=true, fetch from DB and update cache
-    return await this.fetchFromDbAndCache(collectionName, query);
-  }
-
-  async fetchFromDbAndCache(collectionName, query) {
     try {
       await this.ensureConnection();
       const collection = this.db.collection(collectionName);
-      const results = await collection.find(query).toArray();
-
-      // Cache each document using its _id as key
-      for (const doc of results) {
-        await this.setCache(collectionName, doc._id, doc);
-      }
-
-      // Return single item directly if only one result, otherwise return array
-      // Return null if no results found
-      if (results.length === 0) {
-        return null;
-      }
-      return results.length === 1 ? results[0] : results;
+      return toResult(await collection.find(query).toArray());
     } catch (err) {
       console.error(
         `Failed to fetch from DB for collection ${collectionName}:`,
         err
       );
       return null;
+    }
+  }
+
+  // fetches every doc under the key so later queries with extra fields (e.g. is_afk) are answered from memory too
+  async fetchKeyed(cache, key, query) {
+    const token = cache.beginFetch(key);
+    try {
+      await this.ensureConnection();
+      const docs = await this.db
+        .collection(cache.name)
+        .find(cache.keyQuery(query))
+        .toArray();
+      cache.endFetch(token, docs);
+      return cache.find(query) ?? [];
+    } catch (err) {
+      cache.abortFetch(token);
+      console.error(`Failed to fetch from DB for collection ${cache.name}:`, err);
+      return [];
     }
   }
 
@@ -159,7 +181,7 @@ class MongoUtils {
     });
 
     if (updatedDoc) {
-      await this.setCache(collectionName, updatedDoc._id, updatedDoc);
+      this.caches[collectionName]?.upsert(updatedDoc);
       return updatedDoc;
     }
 
@@ -179,56 +201,34 @@ class MongoUtils {
       .find({ $or: [{ _id: { $in: matchedIds } }, query] })
       .toArray();
 
-    for (const doc of updatedDocs) {
-      await this.setCache(collectionName, doc._id, doc);
+    const cache = this.caches[collectionName];
+    if (cache) {
+      for (const doc of updatedDocs) {
+        cache.upsert(doc);
+      }
     }
 
     return updatedDocs;
   }
 
   async delete(collectionName, query) {
-    const docToDelete = await this.get(collectionName, query);
-    if (!docToDelete) {
+    await this.ensureConnection();
+    const collection = this.db.collection(collectionName);
+    const deletedDoc = await collection.findOneAndDelete(query);
+    if (!deletedDoc) {
       return;
     }
 
-    // Remove from cache immediately
-    await this.deleteCache(collectionName, docToDelete._id);
-
-    // Delete from DB asynchronously
-    this.ensureConnection().then(() => {
-      const collection = this.db.collection(collectionName);
-      collection.deleteOne(query).catch(async (err) => {
-        console.error("Failed to delete from DB:", err);
-        // Rollback cache on error
-        await this.setCache(collectionName, docToDelete._id, docToDelete);
-      });
-    });
+    const cache = this.caches[collectionName];
+    if (cache instanceof FullCollection) {
+      cache.remove(deletedDoc._id);
+    } else if (cache) {
+      cache.remove(deletedDoc);
+    }
   }
 
-  async count(collectionName, query = {}, skipCache = false) {
-    if (skipCache) {
-      await this.ensureConnection();
-      const collection = this.db.collection(collectionName);
-      return await collection.countDocuments(query);
-    }
-
-    // If no query, return cache size (only cached documents)
-    if (!query || Object.keys(query).length === 0) {
-      return await this.getCacheSize(collectionName);
-    }
-
-    // Check cache first using the helper function
-    const matches = await this.redis.searchCache(collectionName, query);
-    const count = matches.length;
-
-    // If we have cached results, return them
-    if (count > 0) {
-      return count;
-    }
-
-    // If cache is empty and we have a query, fetch from DB
-    // This ensures we get accurate counts even when cache is empty
+  // always counts in mongo, the keyed caches only hold part of a collection
+  async count(collectionName, query = {}) {
     try {
       await this.ensureConnection();
       const collection = this.db.collection(collectionName);
@@ -237,10 +237,6 @@ class MongoUtils {
       console.error(`Failed to count documents in ${collectionName}:`, err);
       return 0;
     }
-  }
-
-  async getCacheSize(collectionName) {
-    return await this.redis.getCacheSize(collectionName);
   }
 
   async aggregate(collectionName, pipeline) {
@@ -255,76 +251,35 @@ class MongoUtils {
     }
   }
 
-  // Utility methods for cache management
-  async preloadCollection(collectionName, query = {}) {
-    try {
-      console.info(`Preloading collection: ${collectionName}`);
-      const results = await this.fetchFromDbAndCache(collectionName, query);
-      const size = await this.getCacheSize(collectionName);
-      console.info(`Preloaded ${size} documents from ${collectionName}`);
-      return results;
-    } catch (err) {
-      console.error(`Failed to preload collection ${collectionName}:`, err);
-      return null;
-    }
+  cacheStats() {
+    return Object.fromEntries(
+      Object.entries(this.caches).map(([name, cache]) => [
+        name,
+        {
+          mode: CACHE_POLICIES[name].mode,
+          size: cache.size,
+          hits: cache.counters.hits,
+          misses: cache.counters.misses,
+        },
+      ])
+    );
   }
 
-  async preloadDocument(collectionName, documentId) {
-    try {
-      // Check if already in cache
-      const cached = await this.getCache(collectionName, documentId);
-      if (cached) {
-        return cached;
+  // reloads full collections and drops the keyed caches, e.g. after editing the db by hand
+  async reloadCache() {
+    for (const cache of Object.values(this.caches)) {
+      if (cache instanceof KeyedCollection) {
+        cache.clear();
       }
-
-      // Fetch specific document from DB
-      await this.ensureConnection();
-      const collection = this.db.collection(collectionName);
-      const doc = await collection.findOne({ _id: documentId });
-
-      if (doc) {
-        await this.setCache(collectionName, documentId, doc);
-        return doc;
-      }
-
-      return null;
-    } catch (err) {
-      console.error(
-        `Failed to preload document ${documentId} from ${collectionName}:`,
-        err
-      );
-      return null;
     }
-  }
 
-  async clearCache(collectionName = null) {
-    await this.redis.clearCache(collectionName);
-  }
+    const unsynced = Object.entries(CACHE_POLICIES)
+      .filter(([, policy]) => policy.mode === "full" && !policy.synced)
+      .map(([name]) => name);
 
-  async getCacheStats(collectionName = null) {
-    if (collectionName) {
-      return await this.redis.getCacheStats(collectionName);
-    } else {
-      await this.ensureConnection();
-      const collections = await this.db.listCollections().toArray();
-      return await this.redis.getCacheStats(null, collections);
-    }
-  }
-
-  // Method to check if a document is cached
-  async isCached(collectionName, documentId) {
-    return await this.redis.isCached(collectionName, documentId);
-  }
-
-  // Method to get cache hit ratio
-  async getCacheHitRatio(collectionName = null) {
-    if (collectionName) {
-      return await this.redis.getCacheHitRatio(collectionName);
-    } else {
-      await this.ensureConnection();
-      const collections = await this.db.listCollections().toArray();
-      return await this.redis.getCacheHitRatio(null, collections);
-    }
+    await this.changeSync.stop();
+    await this.loadFullCollections(unsynced);
+    await this.changeSync.start();
   }
 }
 

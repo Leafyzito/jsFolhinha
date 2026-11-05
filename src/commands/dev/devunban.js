@@ -54,18 +54,14 @@ const unbanDevCommand = async (message) => {
   }
 
   // Remove command from banned commands
-  await fb.db.update(
+  const updatedBanRecord = await fb.db.update(
     "bans",
     { userId: targetUserId },
     { $pull: { bannedCommands: commandToUnban } }
   );
 
   // If no more banned commands, remove the entire ban record
-  const updatedBanRecord = await fb.db.get("bans", { userId: targetUserId });
-  if (
-    updatedBanRecord.length > 0 &&
-    updatedBanRecord[0].bannedCommands.length === 0
-  ) {
+  if (updatedBanRecord && updatedBanRecord.bannedCommands.length === 0) {
     await fb.db.delete("bans", { userId: targetUserId });
   }
 

@@ -35,6 +35,7 @@ fb.twitch = null;
 fb.discord = null;
 fb.clickhouse = null;
 fb.notifiedUsers = new Set(); // Cache to track users who have been notified about reminders
+fb.pendingReminderUsers = null; // Users that may have unread reminders, null until loaded
 fb.commandsList = null;
 
 // FB UTILITY FUNCTIONS
