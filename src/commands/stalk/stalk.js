@@ -43,11 +43,9 @@ const stalkCommand = async (message) => {
 
   let lsChannel = userInfo.lsChannel;
   const lsChannelId = (await fb.api.helix.getUserByUsername(lsChannel))?.id;
-  const lsChannelInfo = await fb.db.get("users", { userid: lsChannelId });
   if (
-    lsChannelInfo &&
-    lsChannelInfo.optoutOwnChannel &&
-    lsChannel != message.channelName
+    lsChannel != message.channelName &&
+    (await fb.utils.isOptedOut(lsChannelId, "ownchannel", message.senderUserID))
   ) {
     lsChannel = "***";
   }

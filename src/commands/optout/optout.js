@@ -2,6 +2,8 @@ const path = require("path");
 const { commandsList } = require("../commandsList");
 
 const CHANNEL_TARGETS = ["channel", "canal"];
+// not a command name, so no command can ever clash with it
+const OWN_CHANNEL_OPTOUT = "ownchannel";
 
 async function toggleOwnChannel(message, doOptout) {
   if (!message.isStreamer) {
@@ -17,7 +19,14 @@ async function toggleOwnChannel(message, doOptout) {
     };
   }
 
-  if (Boolean(channelInfo.optoutOwnChannel) === doOptout) {
+  const optouts = channelInfo.optouts ?? [];
+  if (optouts.includes("all")) {
+    return {
+      reply: `Você optou por não ser alvo de nenhum comando, o que já censura o canal. Use ${message.prefix}optin all para voltar a ser alvo de todos`,
+    };
+  }
+
+  if (optouts.includes(OWN_CHANNEL_OPTOUT) === doOptout) {
     return {
       reply: `O canal já ${doOptout ? "" : "não "}está sendo censurado em comandos stalk`,
     };
@@ -26,7 +35,9 @@ async function toggleOwnChannel(message, doOptout) {
   await fb.db.update(
     "users",
     { userid: message.channelID },
-    { $set: { optoutOwnChannel: doOptout } }
+    doOptout
+      ? { $addToSet: { optouts: OWN_CHANNEL_OPTOUT } }
+      : { $pull: { optouts: OWN_CHANNEL_OPTOUT } }
   );
 
   return {
@@ -142,7 +153,7 @@ Object.defineProperty(optoutCommand, "description", {
 
 !optout <comando> - Impede que outras pessoas usem o comando em você
 !optin <comando> - Volta a permitir que outras pessoas usem o comando em você
-!optout all - Impede que outras pessoas usem qualquer comando com optout em você
+!optout all - Impede que outras pessoas usem qualquer comando com optout em você e censura o seu canal em comandos stalk
 !optin all - Volta a permitir todos os comandos, incluindo os que tinha optado individualmente
 !optout channel - Censura o nome do seu canal no uso de comandos stalk (apenas o streamer)
 !optin channel - Deixa de censurar o nome do seu canal no uso de comandos stalk

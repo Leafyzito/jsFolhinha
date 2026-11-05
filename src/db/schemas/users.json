@@ -13,7 +13,6 @@
     "lsMessage",
     "lsDate",
     "optouts",
-    "optoutOwnChannel",
     "blocks",
     "connections"
   ],
@@ -55,12 +54,8 @@
     },
     "optouts": {
       "bsonType": "array",
-      "description": "commandNames of optoutable commands the user can't be targeted by (!optout / !optin). Checked with fb.utils.isOptedOut",
+      "description": "commandNames of optoutable commands the user can't be targeted by (!optout / !optin), plus \"all\" for every one of them and \"ownchannel\" to hide their channel name in !stalk. Checked with fb.utils.isOptedOut",
       "items": { "bsonType": "string" }
-    },
-    "optoutOwnChannel": {
-      "bsonType": "bool",
-      "description": "When true, !lastseen/!stalk hide that this user is the broadcaster"
     },
     "blocks": {
       "bsonType": "object",

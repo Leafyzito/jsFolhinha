@@ -29,7 +29,6 @@ module.exports = function buildUsersTemplate(params) {
     lsDate: now,
     firstSeen: now,
     optouts: [],
-    optoutOwnChannel: false,
     isPlus: false,
     isSupporter: false,
     lastSupportDate: null,
