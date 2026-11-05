@@ -21,6 +21,15 @@ const logsCommand = async (message) => {
       ? message.args[1]?.replace(/^@/, "")
       : message.args[2]?.replace(/^@/, "") || null;
 
+  if (targetUser) {
+    const targetUserId = (await fb.api.helix.getUserByUsername(targetUser))?.id;
+    if (await fb.utils.isOptedOut(targetUserId, "logs", message.senderUserID)) {
+      return {
+        reply: fb.utils.optoutReply,
+      };
+    }
+  }
+
   const logsLink = await getLogsLink(targetChannel, targetUser);
 
   return {
@@ -34,6 +43,7 @@ logsCommand.shortDescription = "Veja os logs do chat";
 logsCommand.cooldown = 5000;
 logsCommand.cooldownType = "channel";
 logsCommand.whisperable = false;
+logsCommand.optoutable = true;
 logsCommand.description = `Obtenha um link para os logs de chat de um determinado par de canal e usuário. Usa a API best-logs do @ZonianMidian para pesquisar todas as instâncias conhecidas e o frontend do @Supelle para visualização dos logs
 
 • Exemplo: !logs - Mostra os logs do canal atual

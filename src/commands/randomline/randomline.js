@@ -34,6 +34,12 @@ const randomLineCommand = async (message) => {
       ? (await fb.api.helix.getUserByUsername(targetUser))?.id
       : null;
 
+  if (await fb.utils.isOptedOut(targetId, "randomline", message.senderUserID)) {
+    return {
+      reply: fb.utils.optoutReply,
+    };
+  }
+
   const randomLine = await getRandomLine(targetId, message.channelID);
   if (!randomLine) {
     return {
@@ -57,6 +63,7 @@ randomLineCommand.shortDescription =
 randomLineCommand.cooldown = 5000;
 randomLineCommand.cooldownType = "channel";
 randomLineCommand.whisperable = false;
+randomLineCommand.optoutable = true;
 randomLineCommand.description = `Receba uma mensagem aleatória de um usuário fornecido ou, caso nenhum seja fornecido, da pessoa que executou o comando
 
 • Exemplo: !randomline - O bot vai mostrar uma mensagem aleatória do chat onde o comando foi executado

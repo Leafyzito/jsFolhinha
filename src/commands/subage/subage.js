@@ -71,6 +71,13 @@ const subAgeCommand = async (message) => {
   } else if (args.length === 3) {
     saTarget = args[1].replace(/^@/, "");
     saChannelTarget = args[2].replace(/^@/, "");
+
+    const saTargetId = (await fb.api.helix.getUserByUsername(saTarget))?.id;
+    if (await fb.utils.isOptedOut(saTargetId, "subage", message.senderUserID)) {
+      return {
+        reply: fb.utils.optoutReply,
+      };
+    }
   }
 
   const saResult = await getSubAge(saTarget, saChannelTarget);
@@ -93,6 +100,7 @@ subAgeCommand.shortDescription =
 subAgeCommand.cooldown = 5000;
 subAgeCommand.cooldownType = "channel";
 subAgeCommand.whisperable = false;
+subAgeCommand.optoutable = true;
 subAgeCommand.description = `Mostra há quanto tempo um usuário é sub de um canal, tendo várias formas de o fazer:
 
 Apenas !subage: O bot vai responder com a quantidade de tempo que o usuário que executou o comando é sub do canal no qual o comando foi executado

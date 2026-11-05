@@ -153,6 +153,11 @@ const letterboxdCommand = async (message) => {
     whoLabel = "Você";
   } else {
     const twitchUser = await fb.api.helix.getUserByUsername(lbTarget);
+    if (await fb.utils.isOptedOut(twitchUser?.id, "letterboxd", message.senderUserID)) {
+      return {
+        reply: fb.utils.optoutReply,
+      };
+    }
     let savedLetterboxd = null;
     if (twitchUser?.id) {
       const userDoc = await fb.db.get("users", { userid: twitchUser.id });
@@ -198,6 +203,7 @@ letterboxdCommand.shortDescription =
 letterboxdCommand.cooldown = 5000;
 letterboxdCommand.cooldownType = "channel";
 letterboxdCommand.whisperable = true;
+letterboxdCommand.optoutable = true;
 letterboxdCommand.description = `Mostre o último filme visto registrado no Letterboxd.
 
 Configure a sua conta com !letterboxd set usuario_do_letterboxd

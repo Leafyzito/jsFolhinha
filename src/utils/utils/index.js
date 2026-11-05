@@ -154,6 +154,34 @@ class Utils {
     return Math.floor(date.getTime() / 1000);
   }
 
+  optoutReply = "Esse usuário optou por não ser alvo deste comando 🚫";
+
+  // "optout" if the target opted out of any of the commands, "blocked" if they blocked the invoker from one, else false
+  async isOptedOut(targetUserId, commandNames, invokerUserId = null) {
+    if (!targetUserId || targetUserId === invokerUserId) {
+      return false;
+    }
+
+    const userInfo = await fb.db.get("users", { userid: targetUserId });
+    if (!userInfo) {
+      return false;
+    }
+
+    const names = [].concat(commandNames, "all");
+    if (names.some((name) => userInfo.optouts?.includes(name))) {
+      return "optout";
+    }
+
+    if (
+      invokerUserId &&
+      names.some((name) => userInfo.blocks?.[name]?.includes(invokerUserId))
+    ) {
+      return "blocked";
+    }
+
+    return false;
+  }
+
   // Centralized whisper waiting system
   whisperWaiters = new Map();
 

@@ -34,9 +34,9 @@ const lastSeenCommand = async (message) => {
     };
   }
 
-  if (userInfo.optoutLs) {
+  if (await fb.utils.isOptedOut(targetUserId, "lastseen")) {
     return {
-      reply: `Esse usuário optou por não ser alvo de comandos lastseen 🚫`,
+      reply: fb.utils.optoutReply,
     };
   }
 
@@ -55,6 +55,7 @@ lastSeenCommand.shortDescription =
 lastSeenCommand.cooldown = 5000;
 lastSeenCommand.cooldownType = "channel";
 lastSeenCommand.whisperable = false;
+lastSeenCommand.optoutable = true;
 lastSeenCommand.description = `Pesquise há quanto tempo um usuário foi visto pela última vez em algum canal onde o Folhinha esteja presente
 
 Se quiser desabilitar a função de outras pessoas usarem este comando em você, use !optout lastseen`;

@@ -79,6 +79,12 @@ const banStatsCommand = async (message) => {
     };
   }
 
+  if (await fb.utils.isOptedOut(bansTargetId, "banstats", message.senderUserID)) {
+    return {
+      reply: fb.utils.optoutReply,
+    };
+  }
+
   const banStats = await getBanStats(bansTargetId);
 
   return {
@@ -99,6 +105,7 @@ banStatsCommand.shortDescription =
 banStatsCommand.cooldown = 5000;
 banStatsCommand.cooldownType = "channel";
 banStatsCommand.whisperable = true;
+banStatsCommand.optoutable = true;
 banStatsCommand.description = `Veja quantos bans e/ou timeouts você (ou um usuário fornecido) tem registrados em todos os canais onde o bot está`;
 banStatsCommand.code = `https://github.com/leafyzito/jsFolhinha/blob/main/src/commands/${__dirname
   .split(path.sep)

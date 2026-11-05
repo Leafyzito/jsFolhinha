@@ -162,6 +162,12 @@ const songCommand = async (message) => {
         ? (await fb.api.helix.getUserByUsername(statsTarget))?.id
         : message.senderUserID;
 
+    if (await fb.utils.isOptedOut(statsTargetId, "song", message.senderUserID)) {
+      return {
+        reply: fb.utils.optoutReply,
+      };
+    }
+
     const statsTargetDoc = await fb.db.get("users", {
       userid: statsTargetId,
     });
@@ -202,6 +208,12 @@ const songCommand = async (message) => {
     songTarget.toLowerCase() != message.senderUsername
       ? (await fb.api.helix.getUserByUsername(songTarget))?.id
       : message.senderUserID;
+
+  if (await fb.utils.isOptedOut(songTargetId, "song", message.senderUserID)) {
+    return {
+      reply: fb.utils.optoutReply,
+    };
+  }
 
   let fmUser = songTarget;
   let isStatsFm = false;
@@ -278,6 +290,7 @@ songCommand.shortDescription = "Veja qual música alguém está ouvindo";
 songCommand.cooldown = 5000;
 songCommand.cooldownType = "channel";
 songCommand.whisperable = true;
+songCommand.optoutable = true;
 songCommand.description = `Mostre qual música você está ouvindo ou veja qual música alguém está ouvindo, de acordo com o Last.fm ou Stats.fm
 
 Se você não tem a sua conta do Last.fm configurada, faça-o para poder usar este comando:
