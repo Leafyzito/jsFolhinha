@@ -99,6 +99,12 @@ const topArtistsCommand = async (message) => {
       ? (await fb.api.helix.getUserByUsername(artistTarget))?.id
       : message.senderUserID;
 
+  if (await fb.utils.isOptedOut(artistTargetId, "topartists", message.senderUserID)) {
+    return {
+      reply: fb.utils.optoutReply,
+    };
+  }
+
   let fmUser = artistTarget;
   let isStatsFm = false;
   if (artistTargetId) {
@@ -157,6 +163,7 @@ topArtistsCommand.shortDescription =
 topArtistsCommand.cooldown = 5000;
 topArtistsCommand.cooldownType = "channel";
 topArtistsCommand.whisperable = true;
+topArtistsCommand.optoutable = true;
 topArtistsCommand.description = `Mostre os 5 artistas mais ouvidos de alguém, de acordo com o Last.fm ou Stats.fm
 
 Pode especificar um período de tempo usando as seguintes flags:

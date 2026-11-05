@@ -101,6 +101,12 @@ const topSongsCommand = async (message) => {
       ? (await fb.api.helix.getUserByUsername(songTarget))?.id
       : message.senderUserID;
 
+  if (await fb.utils.isOptedOut(songTargetId, "topsongs", message.senderUserID)) {
+    return {
+      reply: fb.utils.optoutReply,
+    };
+  }
+
   let fmUser = songTarget;
   let isStatsFm = false;
   if (songTargetId) {
@@ -160,6 +166,7 @@ topSongsCommand.shortDescription = "Veja as 5 músicas mais ouvidas de alguém";
 topSongsCommand.cooldown = 5000;
 topSongsCommand.cooldownType = "channel";
 topSongsCommand.whisperable = true;
+topSongsCommand.optoutable = true;
 topSongsCommand.description = `Mostre as 5 músicas mais ouvidas de alguém, de acordo com o Last.fm ou Stats.fm
 
 Pode especificar um período de tempo usando as seguintes flags:

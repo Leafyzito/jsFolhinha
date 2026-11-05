@@ -34,9 +34,10 @@ const stalkCommand = async (message) => {
     };
   }
 
-  if (userInfo.optoutStalk) {
+  // stalk shows everything lastseen does, so a lastseen optout covers it too
+  if (await fb.utils.isOptedOut(targetUserId, ["stalk", "lastseen"])) {
     return {
-      reply: `Esse usuário optou por não ser alvo de comandos stalk 🚫`,
+      reply: fb.utils.optoutReply,
     };
   }
 
@@ -67,6 +68,7 @@ stalkCommand.shortDescription =
 stalkCommand.cooldown = 5000;
 stalkCommand.cooldownType = "channel";
 stalkCommand.whisperable = false;
+stalkCommand.optoutable = true;
 stalkCommand.description = `Pesquise há quanto tempo um usuário foi visto pela última vez, em algum canal onde o Folhinha esteja presente, em qual canal e o conteúdo da mensagem
 
 Se quiser desabilitar a função de outras pessoas usarem este comando em você, use !optout stalk`;

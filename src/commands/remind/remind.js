@@ -62,24 +62,6 @@ const formatTimeParts = (totalSeconds) => {
   return timeParts.join(" ");
 };
 
-// Helper function to check if user can receive reminders
-const canUserReceiveReminders = async (targetUserId, senderUserID) => {
-  const targetUserInfo = await fb.db.get("users", { userid: targetUserId });
-  if (!targetUserInfo) return { canReceive: true }; // Default to true if user not found
-
-  if (targetUserInfo.optoutRemind) {
-    return { canReceive: false, reason: "optout" };
-  }
-
-  if (targetUserInfo.blocks && targetUserInfo.blocks.remind) {
-    if (targetUserInfo.blocks.remind.includes(senderUserID)) {
-      return { canReceive: false, reason: "blocked" };
-    }
-  }
-
-  return { canReceive: true };
-};
-
 // Helper function to create scheduled reminder job
 const createScheduledReminderJob = (
   remindAt,
@@ -375,7 +357,7 @@ const remindCommand = async (message) => {
     await fb.db.update(
       "users",
       { userid: message.senderUserID },
-      { $push: { "blocks.remind": targetUserId } }
+      { $addToSet: { "blocks.remind": targetUserId } }
     );
 
     return {
@@ -563,16 +545,13 @@ const remindCommand = async (message) => {
     if (seenUserIds.has(targetUserId)) continue;
     seenUserIds.add(targetUserId);
 
-    const userCheck = await canUserReceiveReminders(
+    const optedOut = await fb.utils.isOptedOut(
       targetUserId,
+      "remind",
       message.senderUserID
     );
-    if (!userCheck.canReceive) {
-      if (userCheck.reason === "optout") {
-        failures.push({ user: raw, reason: "optout" });
-      } else if (userCheck.reason === "blocked") {
-        failures.push({ user: raw, reason: "blocked" });
-      }
+    if (optedOut) {
+      failures.push({ user: raw, reason: optedOut });
       continue;
     }
 
@@ -668,6 +647,7 @@ remindCommand.shortDescription = "Deixe um lembrete para algum usuário do chat"
 remindCommand.cooldown = 5000;
 remindCommand.cooldownType = "user";
 remindCommand.whisperable = false;
+remindCommand.optoutable = true;
 remindCommand.description = `Use este comando para deixar um lembrete para a próxima vez que um usuário falar no chat
 
 Pode deixar um lembrete para si mesmo ou para outra pessoa

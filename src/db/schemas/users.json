@@ -12,9 +12,7 @@
     "lsChannel",
     "lsMessage",
     "lsDate",
-    "optoutLs",
-    "optoutStalk",
-    "optoutRemind",
+    "optouts",
     "optoutOwnChannel",
     "blocks",
     "connections"
@@ -55,17 +53,10 @@
       "bsonType": ["int", "long", "double"],
       "description": "Unix seconds of first message (added on newer docs)"
     },
-    "optoutLs": {
-      "bsonType": "bool",
-      "description": "When true, !lastseen <user> refuses to reveal this user"
-    },
-    "optoutStalk": {
-      "bsonType": "bool",
-      "description": "When true, !stalk refuses to reveal this user"
-    },
-    "optoutRemind": {
-      "bsonType": "bool",
-      "description": "When true, this user cannot be a reminder recipient"
+    "optouts": {
+      "bsonType": "array",
+      "description": "commandNames of optoutable commands the user can't be targeted by (!optout / !optin). Checked with fb.utils.isOptedOut",
+      "items": { "bsonType": "string" }
     },
     "optoutOwnChannel": {
       "bsonType": "bool",
@@ -73,7 +64,7 @@
     },
     "blocks": {
       "bsonType": "object",
-      "description": "Per-feature block lists controlled by the user",
+      "description": "Per-command block lists controlled by the user, keyed by commandName. Checked with fb.utils.isOptedOut",
       "properties": {
         "remind": {
           "bsonType": "array",

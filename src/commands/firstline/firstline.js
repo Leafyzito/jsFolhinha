@@ -58,6 +58,12 @@ const firstLineCommand = async (message) => {
       ? (await fb.api.helix.getUserByUsername(targetUser))?.id
       : message.senderUserID;
 
+  if (await fb.utils.isOptedOut(targetId, "firstline", message.senderUserID)) {
+    return {
+      reply: fb.utils.optoutReply,
+    };
+  }
+
   const firstLine = await getFirstLine(message.channelID, targetId);
   if (!firstLine) {
     return {
@@ -80,6 +86,7 @@ firstLineCommand.shortDescription = "Veja a primeira mensagem de um usuário";
 firstLineCommand.cooldown = 5000;
 firstLineCommand.cooldownType = "channel";
 firstLineCommand.whisperable = false;
+firstLineCommand.optoutable = true;
 firstLineCommand.description = `Receba a primeira mensagem de um usuário fornecido ou, caso nenhum seja fornecido, da pessoa que executou o comando
 
 • Exemplo: !firstline - O bot vai mostrar a primeira mensagem de quem executou o comando no chat onde o comando foi executado

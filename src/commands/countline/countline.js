@@ -133,6 +133,12 @@ const countlineCommand = async (message) => {
       clTargetID = message.senderUserID;
     }
 
+    if (await fb.utils.isOptedOut(clTargetID, "countline", message.senderUserID)) {
+      return {
+        reply: fb.utils.optoutReply,
+      };
+    }
+
     // Get user message count
     const userMessageCount = await fb.clickhouse.query(
       `
@@ -184,6 +190,7 @@ countlineCommand.shortDescription =
 countlineCommand.cooldown = 5000;
 countlineCommand.cooldownType = "channel";
 countlineCommand.whisperable = false;
+countlineCommand.optoutable = true;
 countlineCommand.description = `Veja quantas mensagem você ou algum usuário já mandou no chat no qual o comando foi realizado
 
 Pode também utilizar !countline top para ver o top 5 de pessoas que mais falaram no chat

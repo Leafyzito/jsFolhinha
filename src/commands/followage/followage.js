@@ -44,6 +44,8 @@ const followAgeCommand = async (message) => {
   //   faChannelTarget = message.args[2].replace(/^@/, "");
   // }
 
+  // TODO: check fb.utils.isOptedOut(faTargetId, "followage", message.senderUserID) when this comes back
+
   // if (faTarget === faChannelTarget) {
   //   return {
   //     reply: "Stare ?",
@@ -82,6 +84,7 @@ followAgeCommand.shortDescription =
 followAgeCommand.cooldown = 5000;
 followAgeCommand.cooldownType = "channel";
 followAgeCommand.whisperable = false;
+followAgeCommand.optoutable = true;
 followAgeCommand.description = `Mostra há quanto tempo um usuário segue um canal, tendo várias formas de o fazer:
 
 Apenas !followage: O bot vai responder com a quantidade de tempo que o usuário que executou o comando segue o canal no qual o comando foi executado

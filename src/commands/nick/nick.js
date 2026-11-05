@@ -52,6 +52,12 @@ const nicksCommand = async (message) => {
     };
   }
 
+  if (await fb.utils.isOptedOut(targetId, "nick", message.senderUserID)) {
+    return {
+      reply: fb.utils.optoutReply,
+    };
+  }
+
   const aliases = await getAllNicks(targetId);
   if (!aliases) {
     return {
@@ -80,6 +86,7 @@ nicksCommand.shortDescription = "Mostra o histórico de nicks de algum usuário"
 nicksCommand.cooldown = 5000;
 nicksCommand.cooldownType = "channel";
 nicksCommand.whisperable = true;
+nicksCommand.optoutable = true;
 nicksCommand.description = `Exibe o histórico de nicks de um usuário ou de quem executou o comando caso nenhum usuário seja fornecido
 
 • Exemplo: !nicks @leafyzito - O bot irá responder com o histórico de nicks de leafyzito
