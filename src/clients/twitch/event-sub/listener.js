@@ -1,6 +1,5 @@
 require("dotenv").config();
 const { EventSubMiddleware } = require("@twurple/eventsub-http");
-const { ApiClient } = require("@twurple/api");
 
 // Import EventSub modules
 const { STREAM_KEYS, getDesiredSubscriptions } = require("./subscriptions");
@@ -325,66 +324,28 @@ class EventSubListener {
    */
   async fetchModeratedChannels() {
     const botUserId = process.env.BOT_USERID;
-    if (!botUserId) {
-      console.warn("* Bot user ID not found, skipping moderated channels fetch");
-      return null;
-    }
-
     try {
-      const botHasModeratedChannelsScope = await hasScope(
-        botUserId,
-        "user:read:moderated_channels"
-      );
-
-      if (!botHasModeratedChannelsScope) {
+      if (
+        !botUserId ||
+        !(await hasScope(botUserId, "user:read:moderated_channels"))
+      ) {
         console.warn(
-          "* Bot does not have user:read:moderated_channels scope, skipping moderated channels fetch"
+          "* Bot can't read its moderated channels (missing BOT_USERID or user:read:moderated_channels), skipping mod status checks"
         );
         this.moderatedChannels = null;
         return null;
       }
 
-      // Create bot-specific ApiClient to use bot's token
-      const botApiClient = new ApiClient({
-        authProvider: fb.authProvider.provider,
-        userId: botUserId,
-      });
-
-      // Get all channels where the bot has moderator privileges
-      const moderatedChannelsSet = new Set();
-      let cursor = null;
-
-      do {
-        const result = await botApiClient.moderation.getModeratedChannels(
-          botUserId,
-          {
-            after: cursor,
-          }
-        );
-
-        if (result && result.data) {
-          for (const channel of result.data) {
-            // Extract broadcaster_id from channel object (API returns broadcaster_id)
-            // Check both snake_case (official API) and camelCase (library normalization)
-            const channelBroadcasterId =
-              channel.id || channel.broadcaster_id || channel.broadcasterId;
-
-            if (channelBroadcasterId) {
-              moderatedChannelsSet.add(String(channelBroadcasterId));
-            }
-          }
-        }
-
-        cursor = result?.cursor || null;
-      } while (cursor);
-
-      // Cache the result
-      this.moderatedChannels = moderatedChannelsSet;
+      // Runs with the bot's own token
+      const channels = await fb.api.twurple.moderation
+        .getModeratedChannelsPaginated(botUserId)
+        .getAll();
+      this.moderatedChannels = new Set(channels.map((channel) => channel.id));
       console.info(
-        `* Fetched and cached ${moderatedChannelsSet.size} moderated channels`
+        `* Fetched and cached ${this.moderatedChannels.size} moderated channels`
       );
 
-      return moderatedChannelsSet;
+      return this.moderatedChannels;
     } catch (error) {
       console.error("Error fetching moderated channels:", error);
       this.moderatedChannels = null;

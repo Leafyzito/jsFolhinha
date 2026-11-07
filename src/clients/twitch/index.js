@@ -157,6 +157,9 @@ class TwitchClient {
 
     // Subscribe to EventSub events for new channels
     if (fb.twitch && fb.twitch.eventSub) {
+      // The bot may have been modded since startup, e.g. right before being invited
+      await fb.twitch.eventSub.fetchModeratedChannels();
+
       for (const channelLogin of channels) {
         try {
           const channelInfo =

@@ -212,7 +212,10 @@ class Logger {
   ) {
     content = fb.utils.checkRegex(content, channel);
 
-    await this.manageChannelMsgCooldown(channel, skipCooldown);
+    // cooldowns and bot status are keyed by channel id, the other send paths already pass it
+    const channelId =
+      (await fb.db.get("config", { channel }))?.channelId ?? channel;
+    await this.manageChannelMsgCooldown(channelId, skipCooldown);
     const res = await fb.twitch.client
       .say(channel, null, content)
       .catch((err) =>
