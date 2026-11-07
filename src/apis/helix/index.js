@@ -382,14 +382,13 @@ class HelixApi {
         return false;
       }
 
-      let data = response;
-      if (!data || !data.data || data.data.length === 0) {
+      if (!response.data) {
         return false;
       }
 
-      data = data.data;
-
-      const streamerStatus = data && data.length > 0 ? data[0].type : "offline";
+      // Helix returns an empty list for offline streams
+      const streamerStatus =
+        response.data.length > 0 ? response.data[0].type : "offline";
 
       // Update the cache with the current status and timestamp
       this.streamerStatusCache[channelName] = {
