@@ -72,6 +72,7 @@ async function checkNewAuthUsers() {
           if (result.success) {
             console.info(`User ${userId} added to auth provider dynamically`);
             addedCount++;
+            await fb.twitch?.eventSub?.refreshChannelAuth(userId);
           } else {
             console.error(
               `Failed to add user ${userId} to auth provider: ${
@@ -81,16 +82,19 @@ async function checkNewAuthUsers() {
             errorCount++;
           }
         } else {
-          // User is already in provider - check for new scopes
+          // User is already in provider - check for new scopes or a new website login
+          // (a login with the same scopes still replaces a token that may have stopped refreshing)
           const dbScopes = token.scope;
-          if (hasNewScopes(dbScopes, providerScopes)) {
-            // Database has new scopes - update the user
+          if (
+            hasNewScopes(dbScopes, providerScopes) ||
+            fb.authProvider.hasNewerLogin(userId, token.last_updated)
+          ) {
+            // Database has a newer token - update the user
             const result = await fb.authProvider.addUserFromDb(userId);
             if (result.success) {
-              console.info(
-                `User ${userId} updated in auth provider with new scopes`
-              );
+              console.info(`User ${userId} updated in auth provider`);
               updatedCount++;
+              await fb.twitch?.eventSub?.refreshChannelAuth(userId);
             } else {
               console.error(
                 `Failed to update user ${userId} in auth provider: ${

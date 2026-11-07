@@ -1,19 +1,16 @@
-module.exports = async function handleStreamOnline(event, liveChannels) {
+module.exports = async function handleStreamOnline(event, liveStatus) {
   try {
     const broadcasterId = event.broadcasterId;
     const broadcasterName = event.broadcasterDisplayName;
-    const broadcasterLogin =
-      event.broadcasterUserLogin || broadcasterName.toLowerCase();
-    const startedAt = event.startedAt ? new Date(event.startedAt) : new Date();
+    const broadcasterLogin = event.broadcasterName;
 
-    // Store live status
-    liveChannels.set(broadcasterId, {
-      channelId: broadcasterId,
-      channelName: broadcasterLogin,
-      displayName: broadcasterName,
-      isLive: true,
-      startedAt: startedAt,
-    });
+    const wasLive = liveStatus.get(broadcasterId);
+    liveStatus.set(broadcasterId, true);
+
+    // Twitch can deliver an event twice, and the startup check may have seen this already
+    if (wasLive === true) {
+      return;
+    }
 
     // Check if offlineOnly is enabled and bot is not paused
     const channelConfig = await fb.db.get("config", {

@@ -27,7 +27,7 @@ async function petAttentionTask() {
     if (elapsedTime > 54_000 && warns === 0) {
       console.info(`* 1st warning for ${channelName}`);
 
-      if (await fb.api.helix.isStreamOnline(channelName)) {
+      if (await fb.utils.isChannelLive(pet.channelId, channelName)) {
         console.info(
           `* ${channelName} is paused or streaming, skipping and adding 10mins`
         );
@@ -57,7 +57,7 @@ async function petAttentionTask() {
 
       if (
         channelConfig.isPaused ||
-        (await fb.api.helix.isStreamOnline(channelName))
+        (await fb.utils.isChannelLive(pet.channelId, channelName))
       ) {
         console.info(
           `* ${channelName} is paused or streaming, skipping and adding 10mins`
@@ -88,7 +88,7 @@ async function petAttentionTask() {
 
       if (
         channelConfig.isPaused ||
-        (await fb.api.helix.isStreamOnline(channelName))
+        (await fb.utils.isChannelLive(pet.channelId, channelName))
       ) {
         console.info(
           `* ${channelName} is paused or streaming, skipping and adding 10mins`

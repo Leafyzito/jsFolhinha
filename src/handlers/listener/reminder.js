@@ -83,7 +83,7 @@ const sendReminderAndUpdate = async (reminder, finalRes) => {
     (channelData.disabledCommands &&
       channelData.disabledCommands.includes("remind")) ||
     (channelData.offlineOnly &&
-      (await fb.api.helix.isStreamOnline(channelName)));
+      (await fb.utils.isChannelLive(channelData.channelId, channelName)));
 
   if (shouldSendViaWhisper) {
     // Send in whisper if channel is paused, reminders are banned, or offline-only with stream online

@@ -31,37 +31,17 @@ async function hasScope(broadcasterId, requiredScope) {
 }
 
 /**
- * Check if a channel is live
- * Returns live data object if live, null otherwise
- * Can search by channelId or channelName (case-insensitive)
- * @param {Map} liveChannels - Map tracking live channels
- * @param {string} channelIdOrName - Channel ID or name to search for
- * @returns {Object|null} Live data object or null
+ * Check if the broadcaster has a usable authorization
+ * Rows from a fresh website login have no is_valid yet, so only an explicit false counts as invalid
+ * @param {string} broadcasterId - The broadcaster's user ID
+ * @returns {Promise<boolean>} True if the broadcaster has a usable authorization
  */
-function isChannelLive(liveChannels, channelIdOrName) {
-  // Try to find by channelId first
-  if (liveChannels.has(channelIdOrName)) {
-    return liveChannels.get(channelIdOrName);
+async function hasBroadcasterAuth(broadcasterId) {
+  const authRow = await fb.db.get("auth", { user_id: broadcasterId });
+  if (!authRow || authRow.is_valid === false) {
+    return false;
   }
-
-  // Try to find by channel name (case-insensitive)
-  const channelNameLower = channelIdOrName.toLowerCase();
-  for (const [, liveData] of liveChannels.entries()) {
-    if (liveData.channelName.toLowerCase() === channelNameLower) {
-      return liveData;
-    }
-  }
-
-  return null;
-}
-
-/**
- * Get all live channels
- * @param {Map} liveChannels - Map tracking live channels
- * @returns {Array} Array of live channel data objects
- */
-function getAllLiveChannels(liveChannels) {
-  return Array.from(liveChannels.values());
+  return await getBroadcasterToken(broadcasterId);
 }
 
 /**
@@ -118,7 +98,6 @@ async function replaceMessagePlaceholders(
 module.exports = {
   getBroadcasterToken,
   hasScope,
-  isChannelLive,
-  getAllLiveChannels,
+  hasBroadcasterAuth,
   replaceMessagePlaceholders,
 };
