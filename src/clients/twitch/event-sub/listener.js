@@ -7,7 +7,7 @@ const {
   checkInitialStatus: checkInitialStatusHandler,
 } = require("./initial-status-check");
 const LiveStatus = require("./live-status");
-const { hasScope } = require("./utils");
+const { getBroadcasterToken, hasScope } = require("./utils");
 const { getChannelsToJoin } = require("../../../utils/init");
 
 const HOST_NAME = "eventsub.folhinhabot.com";
@@ -296,7 +296,7 @@ class EventSubListener {
     }
   }
 
-  logSummary() {
+  async logSummary() {
     this.summaryLogged = true;
 
     let total = 0;
@@ -315,7 +315,42 @@ class EventSubListener {
     if (failed.length > 0) {
       summary += ` (${failed.slice(0, 3).join(", ")})`;
     }
-    fb.discord.importantLog(summary.substring(0, 1500));
+
+    try {
+      summary += `\n${await this.getBotStatusSummary()}`;
+    } catch (error) {
+      console.error("Error counting bot mod/VIP status:", error);
+    }
+
+    // Only goes to the important channel when something didn't go through
+    if (failed.length > 0 || verified < total) {
+      fb.discord.importantLog(summary.substring(0, 1500));
+    } else {
+      fb.discord.log(summary.substring(0, 1500));
+    }
+  }
+
+  // Counts the channels isBotMod/isBotVip answer for: joined, with the broadcaster logged in
+  async getBotStatusSummary() {
+    let authorized = 0;
+    let mod = 0;
+    let vip = 0;
+    for (const channelId of this.channels.keys()) {
+      if (!(await getBroadcasterToken(channelId))) {
+        continue;
+      }
+      authorized++;
+
+      const channelConfig = await fb.db.get("config", { channelId });
+      if (channelConfig?.botIsMod === true) {
+        mod++;
+      }
+      if (channelConfig?.botIsVip === true) {
+        vip++;
+      }
+    }
+
+    return `* Bot status: mod in ${mod}, VIP in ${vip} of ${authorized} authorized channels`;
   }
 
   /**
