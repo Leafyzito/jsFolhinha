@@ -316,17 +316,17 @@ class EventSubListener {
       summary += ` (${failed.slice(0, 3).join(", ")})`;
     }
 
-    try {
-      summary += `\n${await this.getBotStatusSummary()}`;
-    } catch (error) {
-      console.error("Error counting bot mod/VIP status:", error);
-    }
-
     // Only goes to the important channel when something didn't go through
     if (failed.length > 0 || verified < total) {
       fb.discord.importantLog(summary.substring(0, 1500));
     } else {
       fb.discord.log(summary.substring(0, 1500));
+    }
+
+    try {
+      fb.discord.log(await this.getBotStatusSummary());
+    } catch (error) {
+      console.error("Error counting bot mod/VIP status:", error);
     }
   }
 
