@@ -8,24 +8,10 @@ const handleVipRemove = require("./events/vip-remove");
 const handleChannelFollow = require("./events/channel-follow");
 const handleUserUpdate = require("./events/user-update");
 
-const { getBroadcasterToken, hasScope } = require("./utils");
+const { hasBroadcasterAuth, hasScope } = require("./utils");
 
 // A channel's live status is only trusted once both of these are verified
 const STREAM_KEYS = ["online", "offline"];
-
-/**
- * Check if we can subscribe to events that need the broadcaster's authorization
- * Rows from a fresh website login have no is_valid yet, so only an explicit false counts as invalid
- * @param {string} broadcasterId - The broadcaster's user ID
- * @returns {Promise<boolean>} True if the broadcaster has a usable authorization
- */
-async function hasBroadcasterAuth(broadcasterId) {
-  const authRow = await fb.db.get("auth", { user_id: broadcasterId });
-  if (!authRow || authRow.is_valid === false) {
-    return false;
-  }
-  return await getBroadcasterToken(broadcasterId);
-}
 
 /**
  * Get the subscriptions a channel should have

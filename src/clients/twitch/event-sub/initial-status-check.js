@@ -1,4 +1,4 @@
-const { getBroadcasterToken, hasScope } = require("./utils");
+const { hasBroadcasterAuth, hasScope } = require("./utils");
 
 /**
  * Check the bot's mod/VIP status in a channel and store what changed in its config
@@ -8,7 +8,8 @@ const { getBroadcasterToken, hasScope } = require("./utils");
  */
 async function checkInitialStatus(broadcasterId, moderatedChannels) {
   try {
-    if (!(await getBroadcasterToken(broadcasterId))) {
+    // A token flagged invalid only fails its refresh again, the stored status stays until they log in
+    if (!(await hasBroadcasterAuth(broadcasterId))) {
       return;
     }
 

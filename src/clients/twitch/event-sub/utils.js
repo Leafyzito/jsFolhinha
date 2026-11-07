@@ -31,6 +31,20 @@ async function hasScope(broadcasterId, requiredScope) {
 }
 
 /**
+ * Check if the broadcaster has a usable authorization
+ * Rows from a fresh website login have no is_valid yet, so only an explicit false counts as invalid
+ * @param {string} broadcasterId - The broadcaster's user ID
+ * @returns {Promise<boolean>} True if the broadcaster has a usable authorization
+ */
+async function hasBroadcasterAuth(broadcasterId) {
+  const authRow = await fb.db.get("auth", { user_id: broadcasterId });
+  if (!authRow || authRow.is_valid === false) {
+    return false;
+  }
+  return await getBroadcasterToken(broadcasterId);
+}
+
+/**
  * Helper function to replace placeholders in custom thank you messages
  * @param {string} messageTemplate - The message template with placeholders
  * @param {Object} replacements - Object containing replacement values
@@ -84,5 +98,6 @@ async function replaceMessagePlaceholders(
 module.exports = {
   getBroadcasterToken,
   hasScope,
+  hasBroadcasterAuth,
   replaceMessagePlaceholders,
 };
