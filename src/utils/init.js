@@ -62,56 +62,23 @@ async function initializeClickHouse() {
   return clickhouse;
 }
 
+// Started later by main.js, Twitch needs the api server up to verify webhooks
 async function initializeEventSubListener() {
-  const EventSubListener = require("../clients/twitch/event-sub/listener");
-  const eventSub = new EventSubListener();
-  await eventSub.init();
-
-  // Fetch moderated channels cache once before checking initial status for all channels
-  await eventSub.fetchModeratedChannels();
-
-  // Check initial status and subscribe to events for all connected channels
-  const channelsToJoin = await getChannelsToJoin();
-  await Promise.all(
-    channelsToJoin.map(async (channel) => {
-      const broadcasterId = channel.id;
-      try {
-        // Check initial mod/VIP status (will use cached moderated channels if available)
-        await eventSub.checkInitialStatus(broadcasterId);
-        // Subscribe to events
-        await eventSub.subscribeToChannel(broadcasterId);
-      } catch (error) {
-        console.error(
-          `Error setting up EventSub for channel ${channel.login} (${broadcasterId}):`,
-          error
-        );
-      }
-    })
-  );
-
-  // Populate liveChannels with current stream status on startup
-  try {
-    const userIds = channelsToJoin.map((channel) => channel.id);
-    if (userIds.length > 0) {
-      const liveStreams = await fb.api.helix.getStreamsByUserIds(userIds);
-      for (const stream of liveStreams) {
-        const channelAuth = await fb.db.get("auth", {
-          user_id: stream.channelId,
-        });
-        if (channelAuth) {
-          eventSub.liveChannels.set(stream.channelId, stream);
-        }
-      }
-      console.info(
-        `* Populated liveChannels with ${eventSub.liveChannels.size} currently live streams`
-      );
-    }
-  } catch (error) {
-    console.error(`Error populating liveChannels on startup: ${error.message}`);
-    // Don't fail initialization - EventSub will catch up with real-time events
+  // Webhooks belong to the client ID, which dev shares with prod
+  if (process.env.ENV !== "prod") {
+    console.info("* Skipping EventSub outside of prod");
+    return null;
   }
 
-  return eventSub;
+  try {
+    const EventSubListener = require("../clients/twitch/event-sub/listener");
+    return new EventSubListener();
+  } catch (error) {
+    // Commands keep working without events, live status falls back to Helix
+    console.error("Error creating EventSub listener:", error);
+    fb.discord.importantLog(`* Running without EventSub: ${error.message}`);
+    return null;
+  }
 }
 
 async function restartProcess(reason) {
@@ -224,6 +191,7 @@ async function getTokenData() {
       obtainmentTimestamp: token.created_at
         ? Math.floor(new Date(token.created_at).getTime() / 1000)
         : null,
+      lastUpdated: token.last_updated,
     }));
   } catch (error) {
     console.error("Error fetching token data from database:", error);

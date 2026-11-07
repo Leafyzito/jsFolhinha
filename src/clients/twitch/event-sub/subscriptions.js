@@ -10,176 +10,129 @@ const handleUserUpdate = require("./events/user-update");
 
 const { getBroadcasterToken, hasScope } = require("./utils");
 
+// A channel's live status is only trusted once both of these are verified
+const STREAM_KEYS = ["online", "offline"];
+
 /**
- * Subscribe to EventSub events for a broadcaster
- * @param {Object} listener - The EventSubWsListener instance
- * @param {Set} subscribedChannels - Set tracking subscribed channels
- * @param {Map} liveChannels - Map tracking live channels
+ * Check if we can subscribe to events that need the broadcaster's authorization
+ * Rows from a fresh website login have no is_valid yet, so only an explicit false counts as invalid
  * @param {string} broadcasterId - The broadcaster's user ID
+ * @returns {Promise<boolean>} True if the broadcaster has a usable authorization
  */
-async function subscribeToChannel(
-  listener,
-  subscribedChannels,
-  liveChannels,
-  broadcasterId
-) {
-  if (subscribedChannels.has(broadcasterId)) {
-    return; // Already subscribed
+async function hasBroadcasterAuth(broadcasterId) {
+  const authRow = await fb.db.get("auth", { user_id: broadcasterId });
+  if (!authRow || authRow.is_valid === false) {
+    return false;
   }
-
-  try {
-    // Check if auth row exists in database before attempting subscriptions
-    const authRow = await fb.db.get("auth", {
-      user_id: broadcasterId,
-      is_valid: true,
-    });
-    if (!authRow) {
-      console.warn(
-        `* Skipping EventSub subscriptions for ${broadcasterId}: no valid auth row in database`
-      );
-      return; // Skip all subscriptions if no auth row exists
-    }
-
-    // Check if broadcaster token is available before subscribing to events
-    const broadcasterToken = await getBroadcasterToken(broadcasterId);
-
-    if (broadcasterToken) {
-      // Subscribe to stream online event (requires broadcaster token)
-      listener.onStreamOnline(broadcasterId, (event) => {
-        handleStreamOnline(event, liveChannels);
-      });
-
-      // Subscribe to stream offline event (requires broadcaster token)
-      listener.onStreamOffline(broadcasterId, (event) => {
-        handleStreamOffline(event, liveChannels);
-      });
-
-      // Subscribe to user update event (requires broadcaster token)
-      listener.onUserUpdate(broadcasterId, (event) => {
-        handleUserUpdate(event);
-      });
-
-      // Subscribe to moderator events (requires moderation:read scope)
-      const hasModScope = await hasScope(broadcasterId, "moderation:read");
-      if (hasModScope) {
-        try {
-          listener.onChannelModeratorAdd(broadcasterId, (event) => {
-            handleModeratorAdd(event);
-          });
-
-          listener.onChannelModeratorRemove(broadcasterId, (event) => {
-            handleModeratorRemove(event);
-          });
-        } catch (error) {
-          console.error(
-            `Error subscribing to moderator events for ${broadcasterId}:`,
-            error
-          );
-        }
-      }
-
-      // Subscribe to VIP events (requires channel:manage:vips scope)
-      const hasVipManageScope = await hasScope(
-        broadcasterId,
-        "channel:manage:vips"
-      );
-      if (hasVipManageScope) {
-        try {
-          listener.onChannelVipAdd(broadcasterId, (event) => {
-            handleVipAdd(event);
-          });
-
-          listener.onChannelVipRemove(broadcasterId, (event) => {
-            handleVipRemove(event);
-          });
-        } catch (error) {
-          console.error(
-            `Error subscribing to VIP events for ${broadcasterId}:`,
-            error
-          );
-        }
-      }
-
-      // Subscribe to follower events (requires moderator:read:followers scope)
-      try {
-        const hasFollowerScope = await hasScope(
-          broadcasterId,
-          "moderator:read:followers"
-        );
-
-        if (hasFollowerScope) {
-          // If broadcaster authorized the app, use broadcaster's ID for both fields
-          // (streamers are moderators of their own channel)
-          listener.onChannelFollow(broadcasterId, broadcasterId, (event) => {
-            handleChannelFollow(event);
-          });
-        } else {
-          // Otherwise, check if bot is a moderator and use bot's user ID
-          const channelConfig = await fb.db.get("config", {
-            channelId: broadcasterId,
-          });
-          const botIsMod = channelConfig?.botIsMod === true;
-          const botUserId = process.env.BOT_USERID;
-
-          if (botIsMod && botUserId) {
-            listener.onChannelFollow(broadcasterId, botUserId, (event) => {
-              handleChannelFollow(event);
-            });
-          }
-        }
-      } catch (error) {
-        console.error(
-          `Error subscribing to follower events for ${broadcasterId}:`,
-          error
-        );
-      }
-    } else {
-      console.warn(
-        `* Skipping EventSub subscriptions for ${broadcasterId}: broadcaster token not available`
-      );
-    }
-
-    subscribedChannels.add(broadcasterId);
-    console.info(`* Subscribed to EventSub events for channel ${broadcasterId}`);
-  } catch (error) {
-    console.error(
-      `Error subscribing to EventSub events for ${broadcasterId}:`,
-      error
-    );
-    if (fb.discord && fb.discord.logError) {
-      fb.discord.logError(
-        `EventSub subscription failed for ${broadcasterId}: ${error.message}`
-      );
-    }
-  }
+  return await getBroadcasterToken(broadcasterId);
 }
 
 /**
- * Unsubscribe from EventSub events for a broadcaster
- * @param {Set} subscribedChannels - Set tracking subscribed channels
+ * Get the subscriptions a channel should have
+ * @param {Object} listener - The EventSubMiddleware instance
+ * @param {Object} liveStatus - The LiveStatus instance
  * @param {string} broadcasterId - The broadcaster's user ID
+ * @param {boolean} authRevoked - Whether Twitch told us the broadcaster revoked our access
+ * @returns {Promise<Map<string, Function>>} Map of subscription key to the function that creates it
  */
-async function unsubscribeFromChannel(subscribedChannels, broadcasterId) {
-  if (!subscribedChannels.has(broadcasterId)) {
-    return; // Not subscribed
+async function getDesiredSubscriptions(
+  listener,
+  liveStatus,
+  broadcasterId,
+  authRevoked
+) {
+  // Stream events require no authorization, every channel gets them
+  const desired = new Map([
+    [
+      "online",
+      () =>
+        listener.onStreamOnline(broadcasterId, (event) =>
+          handleStreamOnline(event, liveStatus)
+        ),
+    ],
+    [
+      "offline",
+      () =>
+        listener.onStreamOffline(broadcasterId, (event) =>
+          handleStreamOffline(event, liveStatus)
+        ),
+    ],
+  ]);
+
+  if (authRevoked || !(await hasBroadcasterAuth(broadcasterId))) {
+    return desired;
   }
 
-  try {
-    // Note: EventSubWsListener doesn't have explicit unsubscribe methods
-    // The subscriptions are tied to the broadcasterId, so we just remove from tracking
-    subscribedChannels.delete(broadcasterId);
-    console.info(
-      `* Unsubscribed from EventSub events for channel ${broadcasterId}`
+  desired.set("user", () =>
+    listener.onUserUpdate(broadcasterId, (event) => handleUserUpdate(event))
+  );
+
+  // Moderator events (requires moderation:read scope)
+  if (await hasScope(broadcasterId, "moderation:read")) {
+    desired.set("modAdd", () =>
+      listener.onChannelModeratorAdd(broadcasterId, (event) =>
+        handleModeratorAdd(event)
+      )
     );
-  } catch (error) {
-    console.error(
-      `Error unsubscribing from EventSub events for ${broadcasterId}:`,
-      error
+    desired.set("modRemove", () =>
+      listener.onChannelModeratorRemove(broadcasterId, (event) =>
+        handleModeratorRemove(event)
+      )
     );
   }
+
+  // VIP events (requires channel:manage:vips scope)
+  if (await hasScope(broadcasterId, "channel:manage:vips")) {
+    desired.set("vipAdd", () =>
+      listener.onChannelVipAdd(broadcasterId, (event) => handleVipAdd(event))
+    );
+    desired.set("vipRemove", () =>
+      listener.onChannelVipRemove(broadcasterId, (event) =>
+        handleVipRemove(event)
+      )
+    );
+  }
+
+  // Follower events (requires moderator:read:followers scope)
+  const moderatorId = await getFollowModerator(broadcasterId);
+  if (moderatorId) {
+    // Keyed by moderator so a scope change swaps the subscription for the right one
+    desired.set(`follow:${moderatorId}`, () =>
+      listener.onChannelFollow(broadcasterId, moderatorId, (event) =>
+        handleChannelFollow(event)
+      )
+    );
+  }
+
+  return desired;
+}
+
+/**
+ * Get who can read a channel's followers, the broadcaster or the bot if it's a moderator there
+ * @param {string} broadcasterId - The broadcaster's user ID
+ * @returns {Promise<string|null>} User ID of the moderator, null if nobody can
+ */
+async function getFollowModerator(broadcasterId) {
+  // Streamers are moderators of their own channel
+  if (await hasScope(broadcasterId, "moderator:read:followers")) {
+    return broadcasterId;
+  }
+
+  const channelConfig = await fb.db.get("config", {
+    channelId: broadcasterId,
+  });
+  const botUserId = process.env.BOT_USERID;
+  if (
+    channelConfig?.botIsMod === true &&
+    (await hasScope(botUserId, "moderator:read:followers"))
+  ) {
+    return botUserId;
+  }
+
+  return null;
 }
 
 module.exports = {
-  subscribeToChannel,
-  unsubscribeFromChannel,
+  STREAM_KEYS,
+  getDesiredSubscriptions,
 };

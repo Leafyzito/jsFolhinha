@@ -162,16 +162,11 @@ class TwitchClient {
           const channelInfo =
             await fb.api.helix.getUserByUsername(channelLogin);
           if (channelInfo && channelInfo.id) {
-            await fb.twitch.eventSub.subscribeToChannel(channelInfo.id);
+            // The follow subscription depends on the mod status this sets
             await fb.twitch.eventSub.checkInitialStatus(channelInfo.id);
+            await fb.twitch.eventSub.subscribeToChannel(channelInfo.id);
           }
         } catch (error) {
-          // Suppress expected "no token found" errors for channels without auth
-          if (error.message && error.message.includes("no token was found")) {
-            // Expected error for channels without broadcaster authentication
-            continue;
-          }
-          // Log other errors
           console.error(
             `Error subscribing to EventSub for channel ${channelLogin}:`,
             error

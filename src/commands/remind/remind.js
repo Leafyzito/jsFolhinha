@@ -118,7 +118,7 @@ const createScheduledReminderJob = (
         (channelData.disabledCommands &&
           channelData.disabledCommands.includes("remind")) ||
         (channelData.offlineOnly &&
-          (await fb.api.helix.isStreamOnline(channelName)));
+          (await fb.utils.isChannelLive(channelData.channelId, channelName)));
 
       if (shouldSendViaWhisper) {
         await fb.log.whisper(targetUserId, finalRes);

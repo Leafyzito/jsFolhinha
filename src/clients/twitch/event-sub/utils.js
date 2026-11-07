@@ -31,40 +31,6 @@ async function hasScope(broadcasterId, requiredScope) {
 }
 
 /**
- * Check if a channel is live
- * Returns live data object if live, null otherwise
- * Can search by channelId or channelName (case-insensitive)
- * @param {Map} liveChannels - Map tracking live channels
- * @param {string} channelIdOrName - Channel ID or name to search for
- * @returns {Object|null} Live data object or null
- */
-function isChannelLive(liveChannels, channelIdOrName) {
-  // Try to find by channelId first
-  if (liveChannels.has(channelIdOrName)) {
-    return liveChannels.get(channelIdOrName);
-  }
-
-  // Try to find by channel name (case-insensitive)
-  const channelNameLower = channelIdOrName.toLowerCase();
-  for (const [, liveData] of liveChannels.entries()) {
-    if (liveData.channelName.toLowerCase() === channelNameLower) {
-      return liveData;
-    }
-  }
-
-  return null;
-}
-
-/**
- * Get all live channels
- * @param {Map} liveChannels - Map tracking live channels
- * @returns {Array} Array of live channel data objects
- */
-function getAllLiveChannels(liveChannels) {
-  return Array.from(liveChannels.values());
-}
-
-/**
  * Helper function to replace placeholders in custom thank you messages
  * @param {string} messageTemplate - The message template with placeholders
  * @param {Object} replacements - Object containing replacement values
@@ -118,7 +84,5 @@ async function replaceMessagePlaceholders(
 module.exports = {
   getBroadcasterToken,
   hasScope,
-  isChannelLive,
-  getAllLiveChannels,
   replaceMessagePlaceholders,
 };

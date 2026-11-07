@@ -3,9 +3,7 @@ const { replaceMessagePlaceholders } = require("../utils");
 module.exports = async function handleChannelFollow(event) {
   try {
     const broadcasterId = event.broadcasterId;
-    const broadcasterName = event.broadcasterDisplayName || "Unknown";
-    const broadcasterLogin =
-      event.broadcasterUserLogin || broadcasterName.toLowerCase();
+    const broadcasterLogin = event.broadcasterName;
     const userDisplayName = event.userDisplayName || "Unknown";
 
     // Check if we should send a thanking message

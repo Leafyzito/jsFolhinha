@@ -15,6 +15,8 @@ class ApiServer {
   }
 
   setupMiddleware() {
+    fb.twitch?.eventSub?.mount(this.app);
+
     // Public read API — allow browser clients (overlays, localhost dev, etc.)
     this.app.use((req, res, next) => {
       res.setHeader("Access-Control-Allow-Origin", "*");
@@ -171,14 +173,17 @@ class ApiServer {
   }
 
   start() {
-    this.server = this.app.listen(this.port, "0.0.0.0", () => {
-      console.info(`* API server running on port ${this.port}`);
-      console.info(`* API endpoint: http://0.0.0.0:${this.port}/`);
-    });
-
     // Graceful shutdown
     process.on("SIGTERM", () => this.shutdown());
     process.on("SIGINT", () => this.shutdown());
+
+    return new Promise((resolve) => {
+      this.server = this.app.listen(this.port, "0.0.0.0", () => {
+        console.info(`* API server running on port ${this.port}`);
+        console.info(`* API endpoint: http://0.0.0.0:${this.port}/`);
+        resolve();
+      });
+    });
   }
 
   shutdown() {
