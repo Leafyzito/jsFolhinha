@@ -3,6 +3,7 @@ const { commandsList } = require("../../commands/commandsList");
 const {
   expandCustomCommandResponse,
 } = require("../../utils/expand-custom-command-response");
+const metrics = require("../../metrics");
 
 async function checkCommandExecution(command, message) {
   if (
@@ -17,6 +18,7 @@ async function checkCommandExecution(command, message) {
 
   // check if command is whisperable
   if (message.isWhisper && !commandsList[command].whisperable) {
+    metrics.commandsBlocked.inc({ reason: "whisper" });
     return false;
   }
 
@@ -26,6 +28,7 @@ async function checkCommandExecution(command, message) {
 async function checkCustomCommandExecution(customCommand, message) {
   // Custom commands are not whisperable (MVP)
   if (message.isWhisper) {
+    metrics.commandsBlocked.inc({ reason: "whisper" });
     return false;
   }
 
@@ -66,9 +69,14 @@ async function commandHandler(message) {
     }
 
     fb.totalCommandsUsed++;
+    metrics.commands.inc({
+      command: message.command.commandName,
+      custom: "false",
+    });
     try {
       commandResult = await commandsList[command](message);
     } catch (err) {
+      metrics.commandErrors.inc({ command: message.command.commandName });
       fb.discord.logError(
         `Error in command in #${message.channelName}/${message.senderUsername} - ${command}: ${err}`
       );
@@ -113,6 +121,7 @@ async function commandHandler(message) {
     }
 
     fb.totalCommandsUsed++;
+    metrics.commands.inc({ command, custom: "true" });
     const rawResponse =
       typeof custom.response === "string" ? custom.response : "";
     commandResult = {
@@ -135,6 +144,10 @@ async function commandHandler(message) {
 
   message.notes = commandResult.notes;
   message.responseTime = performance.now() - message.internalTimestamp;
+  metrics.commandDuration.observe(
+    { command: message.command.commandName },
+    message.responseTime / 1000
+  );
 
   switch (commandResult.replyType) {
     case "reply":

@@ -1,5 +1,6 @@
 const { commandHandler, listenerHandler } = require("../../../handlers");
 const { sanitizeText } = require("../../../utils/sanitize-text");
+const { chatMessages } = require("../../../metrics");
 
 // const duplicateMessages = [];
 // function handleDuplicateMessages(message) {
@@ -27,6 +28,7 @@ const { sanitizeText } = require("../../../utils/sanitize-text");
 // }
 
 module.exports = async function onMessage(channel, username, text, message) {
+  chatMessages.inc({ channel: channel.toLowerCase() });
   message.messageText = text;
   // Check if this message matches any waiting criteria first
 

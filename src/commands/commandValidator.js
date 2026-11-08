@@ -1,3 +1,11 @@
+const metrics = require("../metrics");
+
+// stops a command, counting why
+function blocked(reason) {
+  metrics.commandsBlocked.inc({ reason });
+  return false;
+}
+
 // Define variables to store the last execution time for each user and channel
 const userCooldowns = {};
 const channelCooldowns = {};
@@ -85,7 +93,7 @@ async function checkUserPermissions(message, requiredPermissions) {
 async function validateCommandExecution(cooldownDuration, type, message) {
   const isCooldownOver = manageCooldown(cooldownDuration, type, message);
   if (!isCooldownOver) {
-    return false;
+    return blocked("cooldown");
   }
 
   // Check command permissions
@@ -101,7 +109,7 @@ async function validateCommandExecution(cooldownDuration, type, message) {
         message,
         `⚠️ Este comando é reservado para ${command.permissions.join(", ")}`
       );
-      return false;
+      return blocked("permission");
     }
   }
 
@@ -120,14 +128,14 @@ async function validateCommandExecution(cooldownDuration, type, message) {
         message,
         `⚠️ Este comando requer que o streamer logue no site https://folhinhabot.com`
       );
-      return false;
+      return blocked("streamer_not_logged_in");
     }
     if (isBotMod === false) {
       fb.log.logAndReply(
         message,
         `⚠️ Eu preciso ter cargo de moderador para executar este comando`
       );
-      return false;
+      return blocked("bot_not_mod");
     }
     return true;
   }
@@ -142,14 +150,14 @@ async function validateCommandExecution(cooldownDuration, type, message) {
         message,
         `⚠️ Este comando requer que o streamer logue no site https://folhinhabot.com`
       );
-      return false;
+      return blocked("streamer_not_logged_in");
     }
     if (isBotVip === false) {
       fb.log.logAndReply(
         message,
         `⚠️ Eu preciso ter cargo de VIP para executar este comando`
       );
-      return false;
+      return blocked("bot_not_vip");
     }
     return true;
   }
@@ -190,12 +198,12 @@ async function validateCommandExecution(cooldownDuration, type, message) {
         (banRecord.bannedCommands.includes("all") ||
           banRecord.bannedCommands.includes(message.command.commandName))
       ) {
-        return false;
+        return blocked("banned");
       }
     }
   }
   if (currChannelConfigs && currChannelConfigs.isPaused) {
-    return false;
+    return blocked("paused");
   }
   if (currChannelConfigs && currChannelConfigs.offlineOnly) {
     const isLive = await fb.utils.isChannelLive(
@@ -203,7 +211,7 @@ async function validateCommandExecution(cooldownDuration, type, message) {
       message.channelName
     );
     if (isLive) {
-      return false;
+      return blocked("offline_only");
     }
   }
   if (
@@ -211,7 +219,7 @@ async function validateCommandExecution(cooldownDuration, type, message) {
     currChannelConfigs.disabledCommands.includes(message.command.commandName)
   ) {
     fb.log.logAndReply(message, `⚠️ Esse comando foi desativado neste chat`);
-    return false;
+    return blocked("disabled");
   }
   if (
     currChannelConfigs &&
@@ -221,7 +229,7 @@ async function validateCommandExecution(cooldownDuration, type, message) {
       message,
       `⚠️ Esse comando foi desativado neste chat pelo dev`
     );
-    return false;
+    return blocked("dev_disabled");
   }
 
   return true;

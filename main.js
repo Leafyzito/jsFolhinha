@@ -3,6 +3,7 @@ require("./utils/logger");
 require("dotenv").config();
 
 // IMPORTS
+const { startMetricsServer } = require("./src/metrics");
 const { fetchData } = require("./src/utils/got-wrapper");
 const { loadCommands } = require("./src/commands/commandsList");
 const { loadReminders } = require("./src/handlers/listener/reminder");
@@ -50,6 +51,9 @@ fb.markReady = () => {
 async function initializeApp() {
   try {
     console.info("* Starting application initialization...");
+
+    // only when METRICS_PORT is set, so prometheus also sees a slow or stuck startup
+    startMetricsServer();
 
     // Initialize all utility instances first
     const { utils, emotes, db, log } =

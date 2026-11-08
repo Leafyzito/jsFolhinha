@@ -1,3 +1,5 @@
+const metrics = require("../metrics");
+
 class Logger {
   constructor() {
     this.channelMsgCooldowns = new Map(); // Track last message timestamp per channel
@@ -9,6 +11,8 @@ class Logger {
       return;
     }
 
+    const endWait = metrics.replyWait.startTimer();
+
     // Parallelize bot status checks for better performance
     const [isBotMod, isBotVip] = await Promise.all([
       fb.utils.isBotMod(channel),
@@ -16,6 +20,7 @@ class Logger {
     ]);
 
     if (isBotMod || isBotVip) {
+      endWait({ privileged: "true" });
       return;
     }
 
@@ -31,6 +36,7 @@ class Logger {
     }
 
     this.channelMsgCooldowns.set(channel, Date.now());
+    endWait({ privileged: "false" });
   }
 
   // handle send errors
@@ -46,6 +52,7 @@ class Logger {
 
     // Handle identical message error - no retries needed
     if (err.message.includes("identical to the previous one")) {
+      metrics.sendFailures.inc({ type: "identical" });
       console.warn("sending identical message error, ending here");
       return;
     }
@@ -54,6 +61,7 @@ class Logger {
     if (retryCount >= 3) {
       // send whisper to user as last resort
       if (lastResortWhisperTarget) {
+        metrics.sendFailures.inc({ type: "whisper_fallback" });
         console.warn("Max retries reached, whispering response to user");
         fb.discord.log(
           `* Dropped message in #${channel}, whispering response to ${lastResortWhisperTarget}: ${content}`
@@ -61,6 +69,7 @@ class Logger {
         fb.api.helix.whisper(lastResortWhisperTarget, content);
         return;
       }
+      metrics.sendFailures.inc({ type: "dropped" });
       console.warn("Max retries reached, dropping message");
       fb.discord.log(`* Dropped message in #${channel}: ${content}`);
       return;
@@ -75,6 +84,9 @@ class Logger {
       : "waiting for response";
 
     if (isRetryableError) {
+      metrics.sendFailures.inc({
+        type: err.message.includes("too quickly") ? "rate_limited" : "timeout",
+      });
       console.warn(`${errorType} error, retrying (${retryCount + 1}/3)`);
       setTimeout(() => {
         retryMethod(channel, content, retryCount + 1, lastResortWhisperTarget);
@@ -83,6 +95,7 @@ class Logger {
     }
 
     // Handle any other errors
+    metrics.sendFailures.inc({ type: "other" });
     console.error("send error: ", err);
   }
 
