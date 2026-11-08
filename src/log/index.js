@@ -177,7 +177,7 @@ class Logger {
       );
 
     // Log asynchronously (non-blocking) after sending response
-    this.createCommandLog(message, response, res.sentVia).catch((err) => {
+    this.createCommandLog(message, response, res?.sentVia).catch((err) => {
       console.error("Failed to create command log:", err);
     });
   }
@@ -201,7 +201,7 @@ class Logger {
       );
 
     // Log asynchronously (non-blocking) after sending response
-    this.createCommandLog(message, "/me " + response, res.sentVia).catch(
+    this.createCommandLog(message, "/me " + response, res?.sentVia).catch(
       (err) => {
         console.error("Failed to create command log:", err);
       }
@@ -243,7 +243,7 @@ class Logger {
         )
       );
 
-    fb.discord.logSend(channel, content, res.sentVia);
+    fb.discord.logSend(channel, content, res?.sentVia);
   }
 
   async reply(message, response, retryCount = 0) {
@@ -264,7 +264,7 @@ class Logger {
         )
       );
 
-    fb.discord.logSend(message.channelName, response, res.sentVia);
+    fb.discord.logSend(message.channelName, response, res?.sentVia);
   }
 
   async whisper(targetUserId, content, retryCount = 0) {
