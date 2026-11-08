@@ -1,5 +1,6 @@
 // prometheus metrics, served on their own port so they never reach the public api server
 // counters are updated where things happen, gauges are read from memory when prometheus scrapes
+const diagnosticsChannel = require("diagnostics_channel");
 const http = require("http");
 const client = require("prom-client");
 
@@ -52,6 +53,10 @@ const KNOWN_HOSTS = new Set([
   "emotes.adamcy.pl",
   "api.twitch.tv",
   "id.twitch.tv",
+  "discord.com",
+  "api.stats.fm",
+  "amp.shazam.com",
+  "www.shazam.com",
   "gql.twitch.tv",
   "clips.twitch.tv",
   "api.ivr.fi",
@@ -96,10 +101,41 @@ const KNOWN_HOSTS = new Set([
 function hostLabel(url) {
   try {
     const host = new URL(String(url)).hostname.toLowerCase();
+    // the clickhouse host comes from .env, so it can't be in the list
+    if (host === process.env.CLICKHOUSE_HOST?.toLowerCase()) {
+      return "clickhouse";
+    }
     return KNOWN_HOSTS.has(host) ? host : "other";
   } catch {
     return "other";
   }
+}
+
+const KNOWN_METHODS = new Set([
+  "GET",
+  "POST",
+  "PUT",
+  "PATCH",
+  "DELETE",
+  "HEAD",
+  "OPTIONS",
+]);
+
+function httpOutcome(statusCode) {
+  if (statusCode >= 200 && statusCode <= 299) {
+    return "ok";
+  }
+  if (statusCode >= 500) {
+    return "http_5xx";
+  }
+  return statusCode >= 400 ? "http_4xx" : "http_other";
+}
+
+// got and node-fetch time out with TimeoutError/ETIMEDOUT, fetch with TimeoutError, undici with UND_ERR_*_TIMEOUT
+function errorOutcome(err) {
+  return err?.name === "TimeoutError" || /TIMEDOUT|TIMEOUT/.test(err?.code)
+    ? "timeout"
+    : "error";
 }
 
 const commands = counter(
@@ -136,14 +172,57 @@ const sendFailures = counter(
 );
 const httpRequests = counter(
   "http_requests_total",
-  "Outgoing http requests made through fb.got",
-  ["host", "outcome"]
+  "Outgoing http requests from any client (fb.got, twurple, discord.js, fetch...), retries counted per attempt",
+  ["host", "method", "outcome"]
 );
 const httpDuration = histogram(
   "http_request_duration_seconds",
-  "Outgoing http request time",
+  "Outgoing http request time, until the response headers arrive",
   ["host", "outcome"],
   [0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 30]
+);
+
+// every outgoing request goes through node's http client (got, node-fetch, twurple, clickhouse)
+// or undici (fetch, discord.js), and both publish to diagnostics channels, so no library is missed
+const requestStarts = new WeakMap();
+
+function requestStarted({ request }) {
+  requestStarts.set(request, performance.now());
+}
+
+function requestEnded(request, url, outcome) {
+  const start = requestStarts.get(request);
+  if (start === undefined) {
+    return;
+  }
+  requestStarts.delete(request);
+  const host = hostLabel(url);
+  const method = String(request.method).toUpperCase();
+  httpRequests.inc({
+    host,
+    method: KNOWN_METHODS.has(method) ? method : "other",
+    outcome,
+  });
+  httpDuration.observe({ host, outcome }, (performance.now() - start) / 1000);
+}
+
+const httpUrl = (request) => `${request.protocol}//${request.host}`;
+
+diagnosticsChannel.subscribe("http.client.request.start", requestStarted);
+diagnosticsChannel.subscribe(
+  "http.client.response.finish",
+  ({ request, response }) =>
+    requestEnded(request, httpUrl(request), httpOutcome(response.statusCode))
+);
+diagnosticsChannel.subscribe("http.client.request.error", ({ request, error }) =>
+  requestEnded(request, httpUrl(request), errorOutcome(error))
+);
+diagnosticsChannel.subscribe("undici:request:create", requestStarted);
+diagnosticsChannel.subscribe("undici:request:headers", ({ request, response }) =>
+  requestEnded(request, request.origin, httpOutcome(response.statusCode))
+);
+diagnosticsChannel.subscribe("undici:request:error", ({ request, error }) =>
+  requestEnded(request, request.origin, errorOutcome(error))
 );
 const dbOps = counter(
   "db_ops_total",
@@ -407,7 +486,6 @@ function startMetricsServer() {
 module.exports = {
   register,
   startMetricsServer,
-  hostLabel,
   timeDbOp,
   runTask,
   commands,
@@ -416,8 +494,6 @@ module.exports = {
   commandsBlocked,
   replyWait,
   sendFailures,
-  httpRequests,
-  httpDuration,
   dbCacheHits,
   dbCacheMisses,
   changeStreamRestarts,
