@@ -1,22 +1,10 @@
 const got = require("got");
-const metrics = require("../metrics");
 
 const DEFAULT_USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
 
-function httpOutcome(statusCode) {
-  if (statusCode >= 200 && statusCode <= 299) {
-    return "ok";
-  }
-  if (statusCode >= 500) {
-    return "http_5xx";
-  }
-  return statusCode >= 400 ? "http_4xx" : "http_other";
-}
-
+// requests are counted for metrics in src/metrics, for every http client at once
 async function fetchData(url, options = {}) {
-  const host = metrics.hostLabel(url);
-  const endRequest = metrics.httpDuration.startTimer({ host });
   try {
     const {
       forcedUserAgent,
@@ -45,10 +33,6 @@ async function fetchData(url, options = {}) {
       headers: requestHeaders,
     });
 
-    const outcome = httpOutcome(statusCode);
-    endRequest({ outcome });
-    metrics.httpRequests.inc({ host, outcome });
-
     if (!options.returnErrorBody && (statusCode < 200 || statusCode > 299)) {
       return null;
     }
@@ -74,12 +58,6 @@ async function fetchData(url, options = {}) {
     // fallback → return raw buffer (useful for images, pdfs, etc.)
     return rawBody;
   } catch (err) {
-    // got errors (timeouts, dns, resets) end up here, a bad json body too
-    if (!(err instanceof SyntaxError)) {
-      const outcome = err.name === "TimeoutError" ? "timeout" : "error";
-      endRequest({ outcome });
-      metrics.httpRequests.inc({ host, outcome });
-    }
     console.error(`Request error for url ${url}:`, err.message);
     return null;
   }
