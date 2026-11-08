@@ -2,6 +2,7 @@ const { MongoClient } = require("mongodb");
 const { getInsertTemplate } = require("./insert-templates");
 const { FullCollection, KeyedCollection } = require("./memory-cache");
 const ChangeSync = require("./change-sync");
+const { timeDbOp, dbCacheHits, dbCacheMisses } = require("../metrics");
 
 const mongoUri = process.env.MONGO_URI;
 const clientMongo = new MongoClient(mongoUri);
@@ -102,7 +103,9 @@ class MongoUtils {
   async insert(collectionName, data) {
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
-    const result = await collection.insertOne(data);
+    const result = await timeDbOp(collectionName, "insert", () =>
+      collection.insertOne(data)
+    );
 
     this.caches[collectionName]?.upsert({ ...data, _id: result.insertedId });
 
@@ -128,6 +131,7 @@ class MongoUtils {
       const cached = cache.find(query);
       if (cached !== undefined) {
         cache.counters.hits++;
+        dbCacheHits.inc({ collection: collectionName });
         return toResult(cached);
       }
 
@@ -135,6 +139,7 @@ class MongoUtils {
         const key = cache.lookupKey(query);
         if (key !== null) {
           cache.counters.misses++;
+          dbCacheMisses.inc({ collection: collectionName });
           return toResult(await this.fetchKeyed(cache, key, query));
         }
       }
@@ -143,7 +148,11 @@ class MongoUtils {
     try {
       await this.ensureConnection();
       const collection = this.db.collection(collectionName);
-      return toResult(await collection.find(query).toArray());
+      return toResult(
+        await timeDbOp(collectionName, "find", () =>
+          collection.find(query).toArray()
+        )
+      );
     } catch (err) {
       console.error(
         `Failed to fetch from DB for collection ${collectionName}:`,
@@ -158,10 +167,9 @@ class MongoUtils {
     const token = cache.beginFetch(key);
     try {
       await this.ensureConnection();
-      const docs = await this.db
-        .collection(cache.name)
-        .find(cache.keyQuery(query))
-        .toArray();
+      const docs = await timeDbOp(cache.name, "fetchKeyed", () =>
+        this.db.collection(cache.name).find(cache.keyQuery(query)).toArray()
+      );
       cache.endFetch(token, docs);
       return cache.find(query) ?? [];
     } catch (err) {
@@ -176,9 +184,11 @@ class MongoUtils {
     const collection = this.db.collection(collectionName);
 
     // re-reading by query misses the doc if the update changed a queried field
-    const updatedDoc = await collection.findOneAndUpdate(query, update, {
-      returnDocument: "after",
-    });
+    const updatedDoc = await timeDbOp(collectionName, "update", () =>
+      collection.findOneAndUpdate(query, update, {
+        returnDocument: "after",
+      })
+    );
 
     if (updatedDoc) {
       this.caches[collectionName]?.upsert(updatedDoc);
@@ -192,14 +202,21 @@ class MongoUtils {
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
 
-    // grab ids first, the update can change fields the query matches on
-    const matchedIds = await collection.distinct("_id", query);
+    // three round trips, timed as one op
+    const updatedDocs = await timeDbOp(
+      collectionName,
+      "updateMany",
+      async () => {
+        // grab ids first, the update can change fields the query matches on
+        const matchedIds = await collection.distinct("_id", query);
 
-    await collection.updateMany(query, update);
+        await collection.updateMany(query, update);
 
-    const updatedDocs = await collection
-      .find({ $or: [{ _id: { $in: matchedIds } }, query] })
-      .toArray();
+        return collection
+          .find({ $or: [{ _id: { $in: matchedIds } }, query] })
+          .toArray();
+      }
+    );
 
     const cache = this.caches[collectionName];
     if (cache) {
@@ -214,7 +231,9 @@ class MongoUtils {
   async delete(collectionName, query) {
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
-    const deletedDoc = await collection.findOneAndDelete(query);
+    const deletedDoc = await timeDbOp(collectionName, "delete", () =>
+      collection.findOneAndDelete(query)
+    );
     if (!deletedDoc) {
       return;
     }
@@ -232,7 +251,9 @@ class MongoUtils {
     try {
       await this.ensureConnection();
       const collection = this.db.collection(collectionName);
-      return await collection.countDocuments(query);
+      return await timeDbOp(collectionName, "count", () =>
+        collection.countDocuments(query)
+      );
     } catch (err) {
       console.error(`Failed to count documents in ${collectionName}:`, err);
       return 0;
@@ -243,7 +264,9 @@ class MongoUtils {
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
     try {
-      const results = await collection.aggregate(pipeline).toArray();
+      const results = await timeDbOp(collectionName, "aggregate", () =>
+        collection.aggregate(pipeline).toArray()
+      );
       return results;
     } catch (err) {
       console.error(`Failed to aggregate documents in ${collectionName}:`, err);

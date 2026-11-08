@@ -4,29 +4,36 @@ const rejoinDisconnectedChannels = require("./rejoin-disconnected-channels");
 const updateDiscordPresence = require("./update-discord-presence");
 const checkNewAuthUsers = require("./check-new-auth-users");
 const syncPlusUsers = require("./sync-plus-users");
+const { runTask } = require("../metrics");
 
 function startPetTask() {
-  setInterval(() => petAttentionTask(), 60_000);
+  setInterval(() => runTask("pet", petAttentionTask), 60_000);
 }
 
 function startFetchPendingJoinsTask() {
-  setInterval(() => fetchPendingJoins(), 10_000);
+  setInterval(() => runTask("pending_joins", fetchPendingJoins), 10_000);
 }
 
 function startRejoinDisconnectedChannelsTask() {
-  setInterval(() => rejoinDisconnectedChannels(), 30_000);
+  setInterval(
+    () => runTask("rejoin", rejoinDisconnectedChannels),
+    30_000
+  );
 }
 
 function startDiscordPresenceTask() {
-  setInterval(() => updateDiscordPresence(), 60_000);
+  setInterval(
+    () => runTask("discord_presence", updateDiscordPresence),
+    60_000
+  );
 }
 
 function startCheckNewAuthUsersTask() {
-  setInterval(() => checkNewAuthUsers(), 30_000);
+  setInterval(() => runTask("new_auth_users", checkNewAuthUsers), 30_000);
 }
 
 function startSyncPlusUsersTask() {
-  setInterval(() => syncPlusUsers(), 60_000);
+  setInterval(() => runTask("plus_sync", syncPlusUsers), 60_000);
 }
 
 module.exports = {

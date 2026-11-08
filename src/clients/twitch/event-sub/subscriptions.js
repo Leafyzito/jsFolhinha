@@ -9,6 +9,15 @@ const handleChannelFollow = require("./events/channel-follow");
 const handleUserUpdate = require("./events/user-update");
 
 const { hasBroadcasterAuth, hasScope } = require("./utils");
+const { eventsubNotifications } = require("../../../metrics");
+
+// counts each notification by its eventsub type before handling it
+function counted(type, handler) {
+  return (event) => {
+    eventsubNotifications.inc({ type });
+    return handler(event);
+  };
+}
 
 // A channel's live status is only trusted once both of these are verified
 const STREAM_KEYS = ["online", "offline"];
@@ -32,15 +41,21 @@ async function getDesiredSubscriptions(
     [
       "online",
       () =>
-        listener.onStreamOnline(broadcasterId, (event) =>
-          handleStreamOnline(event, liveStatus)
+        listener.onStreamOnline(
+          broadcasterId,
+          counted("stream.online", (event) =>
+            handleStreamOnline(event, liveStatus)
+          )
         ),
     ],
     [
       "offline",
       () =>
-        listener.onStreamOffline(broadcasterId, (event) =>
-          handleStreamOffline(event, liveStatus)
+        listener.onStreamOffline(
+          broadcasterId,
+          counted("stream.offline", (event) =>
+            handleStreamOffline(event, liveStatus)
+          )
         ),
     ],
   ]);
@@ -50,19 +65,24 @@ async function getDesiredSubscriptions(
   }
 
   desired.set("user", () =>
-    listener.onUserUpdate(broadcasterId, (event) => handleUserUpdate(event))
+    listener.onUserUpdate(
+      broadcasterId,
+      counted("user.update", handleUserUpdate)
+    )
   );
 
   // Moderator events (requires moderation:read scope)
   if (await hasScope(broadcasterId, "moderation:read")) {
     desired.set("modAdd", () =>
-      listener.onChannelModeratorAdd(broadcasterId, (event) =>
-        handleModeratorAdd(event)
+      listener.onChannelModeratorAdd(
+        broadcasterId,
+        counted("channel.moderator.add", handleModeratorAdd)
       )
     );
     desired.set("modRemove", () =>
-      listener.onChannelModeratorRemove(broadcasterId, (event) =>
-        handleModeratorRemove(event)
+      listener.onChannelModeratorRemove(
+        broadcasterId,
+        counted("channel.moderator.remove", handleModeratorRemove)
       )
     );
   }
@@ -70,11 +90,15 @@ async function getDesiredSubscriptions(
   // VIP events (requires channel:manage:vips scope)
   if (await hasScope(broadcasterId, "channel:manage:vips")) {
     desired.set("vipAdd", () =>
-      listener.onChannelVipAdd(broadcasterId, (event) => handleVipAdd(event))
+      listener.onChannelVipAdd(
+        broadcasterId,
+        counted("channel.vip.add", handleVipAdd)
+      )
     );
     desired.set("vipRemove", () =>
-      listener.onChannelVipRemove(broadcasterId, (event) =>
-        handleVipRemove(event)
+      listener.onChannelVipRemove(
+        broadcasterId,
+        counted("channel.vip.remove", handleVipRemove)
       )
     );
   }
@@ -84,8 +108,10 @@ async function getDesiredSubscriptions(
   if (moderatorId) {
     // Keyed by moderator so a scope change swaps the subscription for the right one
     desired.set(`follow:${moderatorId}`, () =>
-      listener.onChannelFollow(broadcasterId, moderatorId, (event) =>
-        handleChannelFollow(event)
+      listener.onChannelFollow(
+        broadcasterId,
+        moderatorId,
+        counted("channel.follow", handleChannelFollow)
       )
     );
   }

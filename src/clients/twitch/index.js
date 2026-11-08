@@ -12,6 +12,7 @@ const onMessageHandler = require("./events/message.js");
 const onTimeout = require("./events/timeout.js");
 const onWhisperHandler = require("./events/whisper.js");
 const { registerSubNoticeHandlers } = require("./events/sub-notice.js");
+const metrics = require("../../metrics");
 
 class TwitchClient {
   constructor() {
@@ -126,6 +127,8 @@ class TwitchClient {
   registerEvents() {
     // anon client events (read-only)
     this.anonClient.onConnect(onReadyHandler);
+    this.anonClient.onConnect(() => metrics.ircConnects.inc());
+    this.anonClient.onDisconnect(() => metrics.ircDisconnects.inc());
     this.anonClient.onJoin(onJoinHandler);
     this.anonClient.onTimeout(onTimeout);
     this.anonClient.onBan((channel, user) => onTimeout(channel, user, null));

@@ -9,6 +9,7 @@ const {
 const LiveStatus = require("./live-status");
 const { getBroadcasterToken, hasScope } = require("./utils");
 const { getChannelsToJoin } = require("../../../utils/init");
+const metrics = require("../../../metrics");
 
 const HOST_NAME = "eventsub.folhinhabot.com";
 const PATH_PREFIX = "/eventsub";
@@ -187,6 +188,7 @@ class EventSubListener {
 
   // Dropped so a later sync (new token, rejoin, restart) can create it again
   handleSubscriptionFailure(subscription, reason) {
+    metrics.eventsubSubscriptionFailures.inc();
     this.forgetSubscription(subscription);
     subscription.stop();
 
@@ -201,6 +203,7 @@ class EventSubListener {
   }
 
   handleRevocation(subscription, status) {
+    metrics.eventsubRevocations.inc({ status });
     const channelId = this.forgetSubscription(subscription);
     console.warn(
       `* EventSub subscription ${subscription.id} revoked: ${status}`
