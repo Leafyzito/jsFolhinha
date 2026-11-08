@@ -156,6 +156,14 @@ class Utils {
 
   optoutReply = "Esse usuário optou por não ser alvo deste comando 🚫";
 
+  // EventSub knows the channels it tracks, Helix answers for the rest
+  async isChannelLive(channelId, channelName) {
+    return (
+      fb.twitch?.eventSub?.getLiveStatus(channelId) ??
+      (await fb.api.helix.isStreamOnline(channelName))
+    );
+  }
+
   // "optout" if the target opted out of any of the commands, "blocked" if they blocked the invoker from one, else false
   async isOptedOut(targetUserId, commandNames, invokerUserId = null) {
     if (!targetUserId || targetUserId === invokerUserId) {

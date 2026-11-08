@@ -299,51 +299,46 @@ class HelixApi {
 
     // Process each chunk
     for (const chunk of chunks) {
-      try {
-        // Build query string with multiple user_id parameters
-        const userParams = chunk.map((id) => `user_id=${id}`).join("&");
-        let url = `${this.baseUrl}/streams?${userParams}&first=100`;
+      // Build query string with multiple user_id parameters
+      const userParams = chunk.map((id) => `user_id=${id}`).join("&");
+      let url = `${this.baseUrl}/streams?${userParams}&first=100`;
 
-        // Handle pagination for this chunk
-        let hasMorePages = true;
-        while (hasMorePages) {
-          const response = await fb.got(url, { headers });
+      // Handle pagination for this chunk
+      let hasMorePages = true;
+      while (hasMorePages) {
+        const response = await fb.got(url, { headers });
 
-          if (!response) {
-            console.error(
-              `Helix API (getStreamsByUserIds): Request failed for chunk`
-            );
-            break;
-          }
+        // Throw so a failed chunk can't pass for all those channels being offline
+        if (!response) {
+          throw new Error(
+            "Helix API (getStreamsByUserIds): Request failed for chunk"
+          );
+        }
 
-          const data = response.data || [];
-          const pagination = response.pagination || {};
+        const data = response.data || [];
+        const pagination = response.pagination || {};
 
-          // Process streams from this page
-          for (const stream of data) {
-            if (stream.type === "live") {
-              allStreams.push({
-                channelId: stream.user_id,
-                channelName: stream.user_login,
-                displayName: stream.user_name,
-                isLive: true,
-                startedAt: stream.started_at
-                  ? new Date(stream.started_at)
-                  : new Date(),
-              });
-            }
-          }
-
-          // Check if there are more pages
-          if (pagination.cursor) {
-            url = `${this.baseUrl}/streams?${userParams}&first=100&after=${pagination.cursor}`;
-          } else {
-            hasMorePages = false;
+        // Process streams from this page
+        for (const stream of data) {
+          if (stream.type === "live") {
+            allStreams.push({
+              channelId: stream.user_id,
+              channelName: stream.user_login,
+              displayName: stream.user_name,
+              isLive: true,
+              startedAt: stream.started_at
+                ? new Date(stream.started_at)
+                : new Date(),
+            });
           }
         }
-      } catch (error) {
-        console.error(`Error fetching streams for chunk: ${error.message}`);
-        // Continue with other chunks even if one fails
+
+        // Check if there are more pages
+        if (pagination.cursor) {
+          url = `${this.baseUrl}/streams?${userParams}&first=100&after=${pagination.cursor}`;
+        } else {
+          hasMorePages = false;
+        }
       }
     }
 

@@ -21,7 +21,7 @@
     "@twurple/api": "^7.4.0",
     "@twurple/auth": "^7.4.0",
     "@twurple/chat": "^7.4.0",
-    "@twurple/eventsub-ws": "^7.4.0",
+    "@twurple/eventsub-http": "7.4.0",
     "cross-env": "^7.0.3",
     "dayjs": "^1.11.13",
     "discord.js": "^14.26.4",

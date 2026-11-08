@@ -43,7 +43,7 @@ const talkieCommand = async (message) => {
         message.command?.commandName || "talkie"
       ) &&
       !targetConfigs?.isPaused &&
-      !(await fb.api.helix.isStreamOnline(targetChannel))
+      !(await fb.utils.isChannelLive(targetConfigs?.channelId, targetChannel))
     ) {
       found = true;
       break;

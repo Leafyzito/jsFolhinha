@@ -86,7 +86,6 @@ async function initializeApp() {
 
     fb.twitch.eventSub =
       await require("./src/utils/init").initializeEventSubListener();
-    console.info("* EventSub listener initialized");
 
     fb.clickhouse = await require("./src/utils/init").initializeClickHouse();
     console.info("* ClickHouse client initialized");
@@ -103,14 +102,17 @@ async function initializeApp() {
     fb.markReady = true;
     console.info("* fb object is now ready");
 
-    // Start recurring tasks
-    const { startAllTasks } = require("./src/tasks/index");
-    startAllTasks();
-
     // Start api server
     const apiServer = require("./src/utils/api-server");
     fb.apiServer = new apiServer();
-    fb.apiServer.start();
+    await fb.apiServer.start();
+
+    // Start EventSub, Twitch verifies its webhooks against the api server
+    await fb.twitch.eventSub?.start();
+
+    // Start recurring tasks
+    const { startAllTasks } = require("./src/tasks/index");
+    startAllTasks();
 
     fb.totalCommandsUsed = await fb.db.count("commandlog", {}, true);
 

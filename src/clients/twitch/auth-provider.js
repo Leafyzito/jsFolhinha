@@ -10,6 +10,18 @@ class AuthProvider {
       clientId: process.env.BOT_CLIENT_ID,
       clientSecret: process.env.BOT_CLIENT_SECRET,
     });
+
+    // Website login time (last_updated) of the token we loaded for each user, null if the row had none
+    this.loginTimes = new Map();
+  }
+
+  // True if the website stored a newer login than the token we have, so ours may be dead
+  hasNewerLogin(userId, lastUpdated) {
+    if (!lastUpdated) {
+      return false;
+    }
+    const loadedLogin = this.loginTimes.get(userId);
+    return loadedLogin == null || new Date(lastUpdated).getTime() > loadedLogin;
   }
 
   async init() {
@@ -40,6 +52,7 @@ class AuthProvider {
         scope,
         expiresIn,
         obtainmentTimestamp,
+        lastUpdated,
       } = tokenData;
 
       // Check if user is already added
@@ -63,6 +76,10 @@ class AuthProvider {
       const intents = [`${username}User`]; // [`${username}User`] // if username is available
       userId == process.env.BOT_USERID ? intents.push("chat") : null;
       this.provider.addUser(userId, newTokenData, intents); // no userId: await this.provider.addUserForToken(tokenData);
+      this.loginTimes.set(
+        userId,
+        lastUpdated ? new Date(lastUpdated).getTime() : null
+      );
 
       return { success: true, userId };
     } catch (error) {
@@ -102,6 +119,7 @@ class AuthProvider {
         obtainmentTimestamp: authToken.created_at
           ? Math.floor(new Date(authToken.created_at).getTime() / 1000)
           : null,
+        lastUpdated: authToken.last_updated,
       };
 
       return await this.addSingleUser(tokenData);

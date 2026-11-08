@@ -1,12 +1,16 @@
-module.exports = async function handleStreamOffline(event, liveChannels) {
+module.exports = async function handleStreamOffline(event, liveStatus) {
   try {
     const broadcasterId = event.broadcasterId;
     const broadcasterName = event.broadcasterDisplayName;
-    const broadcasterLogin =
-      event.broadcasterUserLogin || broadcasterName.toLowerCase();
+    const broadcasterLogin = event.broadcasterName;
 
-    // Remove live status
-    liveChannels.delete(broadcasterId);
+    const wasLive = liveStatus.get(broadcasterId);
+    liveStatus.set(broadcasterId, false);
+
+    // Twitch can deliver an event twice, and the startup check may have seen this already
+    if (wasLive === false) {
+      return;
+    }
 
     // Check if offlineOnly is enabled and bot is not paused
     const channelConfig = await fb.db.get("config", {
