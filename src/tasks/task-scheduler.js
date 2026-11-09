@@ -42,8 +42,11 @@ function startSyncPlusUsersTask() {
   setInterval(() => fb.metrics.runTask("plus_sync", syncPlusUsers), 60_000);
 }
 
+// runs once right away so the gauge exists soon after a restart
 function startCountCookiesTask() {
-  setInterval(() => fb.metrics.runTask("count_cookies", countCookies), 60_000);
+  const run = () => fb.metrics.runTask("count_cookies", countCookies);
+  run();
+  setInterval(run, 60_000);
 }
 
 module.exports = {

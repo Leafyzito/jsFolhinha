@@ -295,12 +295,17 @@ const taskLastSuccess = new client.Gauge({
   labelNames: ["task"],
   registers: [register],
 });
-// mongo can't be read at scrape time, so the count-cookies task sets it
-const cookiesHeld = new client.Gauge({
-  name: PREFIX + "cookies_held",
-  help: "Cookies held by all users",
-  registers: [register],
-});
+// mongo can't be read at scrape time, so the count-cookies task sets it.
+// created on the first count: a new gauge reads 0, which would show as a drop on every restart
+let cookiesHeld = null;
+function setCookiesHeld(value) {
+  cookiesHeld ??= new client.Gauge({
+    name: PREFIX + "cookies_held",
+    help: "Cookies held by all users",
+    registers: [register],
+  });
+  cookiesHeld.set(value);
+}
 
 gauge("irc_channels_joined", "Channels the anon client is in", [], (g) => {
   const anon = global.fb?.twitch?.anonClient;
@@ -511,5 +516,5 @@ module.exports = {
   eventsubNotifications,
   eventsubRevocations,
   eventsubSubscriptionFailures,
-  cookiesHeld,
+  setCookiesHeld,
 };

@@ -7,7 +7,7 @@ async function countCookies() {
   if (!result) {
     throw new Error("cookie aggregation returned nothing");
   }
-  fb.metrics.cookiesHeld.set(result.cookies);
+  fb.metrics.setCookiesHeld(result.cookies);
 }
 
 module.exports = countCookies;
