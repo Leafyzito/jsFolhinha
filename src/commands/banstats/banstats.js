@@ -1,6 +1,14 @@
 const path = require("path");
 
-async function getBanStats(userid) {
+// range is optional, { from, to } in unix seconds
+async function getBanStats(userid, range = null) {
+  const rangeFilter = range
+    ? "AND timestamp >= {from:UInt32} AND timestamp < {to:UInt32}"
+    : "";
+  const params = range
+    ? { userId: userid, from: range.from, to: range.to }
+    : { userId: userid };
+
   // Query for total timeout duration (sum of all extra_tags['ban-duration']) for the user
   const timeoutsSumRes = await fb.clickhouse.query(
     `
@@ -11,8 +19,9 @@ async function getBanStats(userid) {
       WHERE user_id = {userId:String}
         AND has(extra_tags, 'target-user-id')
         AND has(extra_tags, 'ban-duration')
+        ${rangeFilter}
     `,
-    { userId: userid }
+    params
   );
 
   // Query for number of bans for the user (without ban-duration)
@@ -22,8 +31,9 @@ async function getBanStats(userid) {
       WHERE user_id = {userId:String}
       AND has(extra_tags, 'target-user-id')
       AND NOT has(extra_tags, 'ban-duration')
+      ${rangeFilter}
     `,
-    { userId: userid }
+    params
   );
 
   const bans = parseInt(
