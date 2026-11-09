@@ -1,4 +1,4 @@
-const { exec } = require("child_process");
+const { gitPull } = require("../../utils/git-pull");
 
 function formatGitPullReply(stdout, stderr) {
   const output = [stdout, stderr].filter(Boolean).join("\n").trim();
@@ -35,22 +35,18 @@ function formatGitPullReply(stdout, stderr) {
 }
 
 const gitPullCommand = async () => {
-  return new Promise((resolve) => {
-    exec("git pull", { cwd: process.cwd() }, (error, stdout, stderr) => {
-      if (error) {
-        resolve({
-          reply: "Deu não, check logs",
-          notes: `Git pull failed: ${error}`,
-        });
-        return;
-      }
-      const fullOutput = [stdout, stderr].filter(Boolean).join("\n");
-      resolve({
-        reply: formatGitPullReply(stdout, stderr),
-        notes: `Git pull success:\n${fullOutput}`,
-      });
-    });
-  });
+  const { error, stdout, stderr } = await gitPull();
+  if (error) {
+    return {
+      reply: "Deu não, check logs",
+      notes: `Git pull failed: ${error}`,
+    };
+  }
+  const fullOutput = [stdout, stderr].filter(Boolean).join("\n");
+  return {
+    reply: formatGitPullReply(stdout, stderr),
+    notes: `Git pull success:\n${fullOutput}`,
+  };
 };
 
 // Command metadata

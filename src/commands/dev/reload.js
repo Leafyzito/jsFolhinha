@@ -1,26 +1,21 @@
-const { exec } = require("child_process");
+const { gitPull } = require("../../utils/git-pull");
 const { loadCommands } = require("../commandsList");
 
 // Helper function to pull git changes
-const pullGitChanges = () => {
-  return new Promise((resolve, reject) => {
-    exec("git pull", { cwd: process.cwd() }, (err, stdout, stderr) => {
-      if (err) {
-        console.error(`* Erro ao puxar mudanças do Git: ${err}`);
-        reject(new Error(`Git pull failed: ${err}`));
-        return;
-      }
+const pullGitChanges = async () => {
+  const { error, stdout, stderr } = await gitPull();
+  if (error) {
+    console.error(`* Erro ao puxar mudanças do Git: ${error}`);
+    throw new Error(`Git pull failed: ${error}`);
+  }
 
-      if (stderr && !stderr.includes("Already up to date")) {
-        console.warn(`* Git stderr: ${stderr}`);
-        resolve({ stdout, stderr, warning: true });
-        return;
-      }
+  if (stderr && !stderr.includes("Already up to date")) {
+    console.warn(`* Git stderr: ${stderr}`);
+    return { stdout, stderr, warning: true };
+  }
 
-      console.info(`* Mudanças puxadas do Git: ${stdout}`);
-      resolve({ stdout, stderr: null, warning: false });
-    });
-  });
+  console.info(`* Mudanças puxadas do Git: ${stdout}`);
+  return { stdout, stderr: null, warning: false };
 };
 
 // Helper function to clear require cache and reload commands
