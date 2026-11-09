@@ -1,10 +1,70 @@
 const { getBanStats, humanizedTime } = require("../commands/banstats/banstats");
+const { yearRange, wrappedCollection } = require("./wrapped-compute");
 
-const START_DATE = new Date("2025-01-01");
-const END_DATE = new Date("2026-01-01");
+// stats come from the wrapped<year> collection, filled by scripts/compute-wrapped.js
+// only chat messages and bans are queried live since they're in clickhouse
+const YEAR = 2026;
+const { start: START_DATE, end: END_DATE } = yearRange(YEAR);
 
 const CACHE_DURATION_MS = 30 * 60 * 1000; // 30 minutes
 const wrappedCache = new Map();
+
+async function getWrappedDoc(id) {
+  const doc = await fb.db.get(wrappedCollection(YEAR), { _id: id }, true);
+  if (!doc) return null;
+  delete doc._id;
+  return doc;
+}
+
+async function getMessageStats(userId) {
+  if (!fb.clickhouse || fb.clickhouse.isConnected != true) {
+    return { count: 0, top: [] };
+  }
+
+  const params = {
+    userId,
+    startTimestamp: Math.floor(START_DATE.getTime() / 1000),
+    endTimestamp: Math.floor(END_DATE.getTime() / 1000),
+  };
+
+  const [msgCount, top5Channels] = await Promise.all([
+    fb.clickhouse.query(
+      `
+        SELECT COUNT(*) AS message_count
+        FROM message_structured
+        WHERE
+          user_id = {userId:String}
+          AND message_type = 1
+          AND timestamp >= {startTimestamp:UInt32}
+          AND timestamp < {endTimestamp:UInt32}
+     `,
+      params
+    ),
+    fb.clickhouse.query(
+      `
+        SELECT
+          channel_login,
+          COUNT(*) AS message_count
+        FROM message_structured
+        WHERE
+          user_id = {userId:String}
+          AND message_type = 1
+          AND timestamp >= {startTimestamp:UInt32}
+          AND timestamp < {endTimestamp:UInt32}
+        GROUP BY channel_login
+        ORDER BY message_count DESC
+        LIMIT 5
+     `,
+      params
+    ),
+  ]);
+
+  const msgCountData = msgCount.data || msgCount;
+  return {
+    count: Number(msgCountData[0]?.message_count || 0),
+    top: top5Channels.data || top5Channels,
+  };
+}
 
 async function getWrapped(username) {
   const now = Date.now();
@@ -23,189 +83,34 @@ async function getWrapped(username) {
   const userColor = await fb.api.helix.getColor(userInfo.id);
   userInfo.color = userColor.color || null;
 
-  // commands count since 1-1-2025
-  const commandsCount = await fb.db.count(
-    "commandlog",
-    {
-      userId: userInfo.id,
-      sentDate: { $gte: START_DATE, $lte: END_DATE },
-    },
-    true
-  );
-
-  // top 5 most used commands
-  const mostUsedCommands = await fb.db.aggregate("commandlog", [
-    {
-      $match: {
-        userId: userInfo.id,
-        sentDate: { $gte: START_DATE, $lte: END_DATE },
-      },
-    },
-    {
-      $group: {
-        _id: "$command",
-        count: { $sum: 1 },
-      },
-    },
-    {
-      $sort: { count: -1 },
-    },
-    {
-      $limit: 5,
-    },
+  const [stats, global, messages, banStats] = await Promise.all([
+    getWrappedDoc(userInfo.id),
+    getWrappedDoc("global"),
+    getMessageStats(userInfo.id),
+    fb.clickhouse?.isConnected == true
+      ? getBanStats(userInfo.id, {
+          from: Math.floor(START_DATE.getTime() / 1000),
+          to: Math.floor(END_DATE.getTime() / 1000),
+        })
+      : { bans: 0, timeouts: 0, timeoutsDuration: 0 },
   ]);
-
-  // days where user sent at least 1 command
-  const activeDays = await fb.db.aggregate("commandlog", [
-    {
-      $match: {
-        userId: userInfo.id,
-        sentDate: { $gte: START_DATE, $lte: END_DATE },
-      },
-    },
-    {
-      $group: {
-        _id: {
-          $dateToString: { format: "%Y-%m-%d", date: "$sentDate" },
-        },
-        count: { $sum: 1 },
-      },
-    },
-    {
-      $count: "activeDays",
-    },
-  ]);
-
-  // reminders sent/received
-  const sentReminders = await fb.db.count(
-    "remind",
-    {
-      senderId: userInfo.id,
-      remindTime: {
-        $gte: fb.utils.unix(START_DATE),
-        $lte: fb.utils.unix(END_DATE),
-      },
-    },
-    true
-  );
-
-  const receivedReminders = await fb.db.count(
-    "remind",
-    {
-      receiverId: userInfo.id,
-      remindTime: {
-        $gte: fb.utils.unix(START_DATE),
-        $lte: fb.utils.unix(END_DATE),
-      },
-    },
-    true
-  );
-
-  // pet interactions
-  const carinhoPetCount = await fb.db.count(
-    "commandlog",
-    {
-      userId: userInfo.id,
-      sentDate: { $gte: START_DATE, $lte: END_DATE },
-      command: "carinho",
-    },
-    true
-  );
-
-  const brincarPetCount = await fb.db.count(
-    "commandlog",
-    {
-      userId: userInfo.id,
-      sentDate: { $gte: START_DATE, $lte: END_DATE },
-      command: "brincar",
-    },
-    true
-  );
-
-  const mostUsedCommandsObject = mostUsedCommands.map((command) => ({
-    command: command._id,
-    count: command.count,
-  }));
-
-  let msgCountData = [{ message_count: 0 }];
-  let top5ChannelsData = [];
-
-  if (fb.clickhouse && fb.clickhouse.isConnected == true) {
-    const startTimestamp = Math.floor(START_DATE.getTime() / 1000);
-    const endTimestamp = Math.floor(END_DATE.getTime() / 1000);
-
-    const msgCount = await fb.clickhouse.query(
-      `
-        SELECT
-          user_id,
-          COUNT(*) AS message_count
-        FROM message_structured
-        WHERE
-          user_id = {userId:String}
-          AND message_type = 1
-          AND timestamp >= {startTimestamp:UInt32}
-          AND timestamp <= {endTimestamp:UInt32}
-        GROUP BY user_id
-     `,
-      { userId: userInfo.id, startTimestamp, endTimestamp }
-    );
-
-    const top5Channels = await fb.clickhouse.query(
-      `
-        SELECT
-          channel_login,
-          COUNT(*) AS message_count
-        FROM message_structured
-        WHERE
-          user_id = {userId:String}
-          AND message_type = 1
-          AND timestamp >= {startTimestamp:UInt32}
-          AND timestamp <= {endTimestamp:UInt32}
-        GROUP BY channel_login
-        ORDER BY message_count DESC
-        LIMIT 5
-     `,
-      { userId: userInfo.id, startTimestamp, endTimestamp }
-    );
-
-    msgCountData = msgCount.data || msgCount;
-    top5ChannelsData = top5Channels.data || top5Channels;
-  }
-
-  const banStats = await getBanStats(userInfo.id);
 
   const result = {
     statusCode: 200,
+    year: YEAR,
     userId: userInfo.id,
     username: userInfo.login,
     displayName: userInfo.displayName,
     profilePicture: userInfo.profileImageUrl,
     color: userInfo.color,
-    data: {
-      activeDays: activeDays?.[0]?.activeDays || 0,
-      reminders: {
-        sent: sentReminders,
-        received: receivedReminders,
-      },
-      pets: {
-        carinho: carinhoPetCount,
-        brincar: brincarPetCount,
-      },
-      bans: {
-        bans: banStats.bans,
-        timeouts: banStats.timeouts,
-        timeoutsDuration: banStats.timeoutsDuration,
-        humanizedTime: humanizedTime(banStats.timeoutsDuration),
-      },
-      msgCount: {
-        count: msgCountData[0]?.message_count || 0,
-        top: top5ChannelsData,
-      },
-      cmdCount: {
-        count: commandsCount,
-        top: mostUsedCommandsObject,
-      },
+    // null when the user didn't use any command this year
+    stats,
+    messages,
+    bans: {
+      ...banStats,
+      humanizedTime: humanizedTime(banStats.timeoutsDuration),
     },
+    global,
   };
 
   wrappedCache.set(username.toLowerCase(), {
@@ -216,4 +121,4 @@ async function getWrapped(username) {
   return result;
 }
 
-module.exports = { getWrapped };
+module.exports = { getWrapped, getWrappedDoc, YEAR };
