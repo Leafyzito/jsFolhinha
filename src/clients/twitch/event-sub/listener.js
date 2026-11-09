@@ -9,7 +9,6 @@ const {
 const LiveStatus = require("./live-status");
 const { getBroadcasterToken, hasScope } = require("./utils");
 const { getChannelsToJoin } = require("../../../utils/init");
-const metrics = require("../../../metrics");
 
 const HOST_NAME = "eventsub.folhinhabot.com";
 const PATH_PREFIX = "/eventsub";
@@ -54,13 +53,13 @@ class EventSubListener {
     this.revocationLogTimer = null;
 
     this.listener.onVerify((success, subscription) =>
-      this.handleVerification(success, subscription)
+      this.handleVerification(success, subscription),
     );
     this.listener.onSubscriptionCreateFailure((subscription, error) =>
-      this.handleSubscriptionFailure(subscription, error.message)
+      this.handleSubscriptionFailure(subscription, error.message),
     );
     this.listener.onRevoke((subscription, status) =>
-      this.handleRevocation(subscription, status)
+      this.handleRevocation(subscription, status),
     );
   }
 
@@ -89,10 +88,10 @@ class EventSubListener {
           } catch (error) {
             console.error(
               `Error setting up EventSub for channel ${channel.login} (${broadcasterId}):`,
-              error
+              error,
             );
           }
-        })
+        }),
       );
 
       // Subscriptions only reach Twitch from here on, existing ones get resumed
@@ -101,7 +100,9 @@ class EventSubListener {
 
       await this.removeStaleSubscriptions();
 
-      await this.liveStatus.refresh(channelsToJoin.map((channel) => channel.id));
+      await this.liveStatus.refresh(
+        channelsToJoin.map((channel) => channel.id),
+      );
     } catch (error) {
       // Commands keep working without events, live status falls back to Helix
       console.error("Error starting EventSub:", error);
@@ -117,7 +118,7 @@ class EventSubListener {
       this.listener,
       this.liveStatus,
       channelId,
-      this.revokedAuth.has(channelId)
+      this.revokedAuth.has(channelId),
     );
 
     const current = this.channels.get(channelId) ?? new Map();
@@ -151,7 +152,9 @@ class EventSubListener {
     this.channels.delete(channelId);
     this.revokedAuth.delete(channelId);
     this.liveStatus.delete(channelId);
-    console.info(`* Unsubscribed from EventSub events for channel ${channelId}`);
+    console.info(
+      `* Unsubscribed from EventSub events for channel ${channelId}`,
+    );
   }
 
   // Called when a user's token or scopes change, users whose channel we didn't join have nothing to update
@@ -168,7 +171,7 @@ class EventSubListener {
   getLiveStatus(channelId) {
     const subscriptions = this.channels.get(channelId);
     const isTracked = STREAM_KEYS.every(
-      (key) => subscriptions?.get(key)?.verified
+      (key) => subscriptions?.get(key)?.verified,
     );
     return isTracked ? this.liveStatus.get(channelId) : null;
   }
@@ -188,14 +191,16 @@ class EventSubListener {
 
   // Dropped so a later sync (new token, rejoin, restart) can create it again
   handleSubscriptionFailure(subscription, reason) {
-    metrics.eventsubSubscriptionFailures.inc();
+    fb.metrics.eventsubSubscriptionFailures.inc();
     this.forgetSubscription(subscription);
     subscription.stop();
 
-    console.error(`* EventSub subscription ${subscription.id} failed: ${reason}`);
+    console.error(
+      `* EventSub subscription ${subscription.id} failed: ${reason}`,
+    );
     if (this.summaryLogged) {
       fb.discord.logError(
-        `EventSub subscription ${subscription.id} failed: ${reason}`
+        `EventSub subscription ${subscription.id} failed: ${reason}`,
       );
     } else {
       this.failedSubscriptions.push(`${subscription.id}: ${reason}`);
@@ -203,10 +208,10 @@ class EventSubListener {
   }
 
   handleRevocation(subscription, status) {
-    metrics.eventsubRevocations.inc({ status });
+    fb.metrics.eventsubRevocations.inc({ status });
     const channelId = this.forgetSubscription(subscription);
     console.warn(
-      `* EventSub subscription ${subscription.id} revoked: ${status}`
+      `* EventSub subscription ${subscription.id} revoked: ${status}`,
     );
     this.reportRevocation(status);
 
@@ -231,7 +236,7 @@ class EventSubListener {
   reportRevocation(status) {
     this.pendingRevocations.set(
       status,
-      (this.pendingRevocations.get(status) ?? 0) + 1
+      (this.pendingRevocations.get(status) ?? 0) + 1,
     );
     if (this.revocationLogTimer) {
       return;
@@ -368,7 +373,7 @@ class EventSubListener {
         !(await hasScope(botUserId, "user:read:moderated_channels"))
       ) {
         console.warn(
-          "* Bot can't read its moderated channels (missing BOT_USERID or user:read:moderated_channels), skipping mod status checks"
+          "* Bot can't read its moderated channels (missing BOT_USERID or user:read:moderated_channels), skipping mod status checks",
         );
         this.moderatedChannels = null;
         return null;
@@ -380,7 +385,7 @@ class EventSubListener {
         .getAll();
       this.moderatedChannels = new Set(channels.map((channel) => channel.id));
       console.info(
-        `* Fetched and cached ${this.moderatedChannels.size} moderated channels`
+        `* Fetched and cached ${this.moderatedChannels.size} moderated channels`,
       );
 
       return this.moderatedChannels;

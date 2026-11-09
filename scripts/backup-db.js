@@ -1,4 +1,7 @@
 require("dotenv").config();
+
+// db uses fb.metrics, normally set up by main.js
+global.fb = { metrics: require("../src/metrics") };
 const fs = require("fs");
 const path = require("path");
 
@@ -37,7 +40,7 @@ async function backupDb() {
     const filePath = path.join(backupDir, `${colName}.json`);
     fs.writeFileSync(filePath, JSON.stringify(docs, null, 2), "utf8");
     console.log(
-      `Backed up collection "${colName}" (${docs.length} docs) to ${filePath}`
+      `Backed up collection "${colName}" (${docs.length} docs) to ${filePath}`,
     );
   }
 

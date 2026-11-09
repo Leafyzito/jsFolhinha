@@ -1,6 +1,5 @@
 const { commandHandler, listenerHandler } = require("../../../handlers");
 const { sanitizeText } = require("../../../utils/sanitize-text");
-const { chatMessages } = require("../../../metrics");
 
 // const duplicateMessages = [];
 // function handleDuplicateMessages(message) {
@@ -28,7 +27,7 @@ const { chatMessages } = require("../../../metrics");
 // }
 
 module.exports = async function onMessage(channel, username, text, message) {
-  chatMessages.inc({ channel: channel.toLowerCase() });
+  fb.metrics.chatMessages.inc({ channel: channel.toLowerCase() });
   message.messageText = text;
   // Check if this message matches any waiting criteria first
 
@@ -94,7 +93,7 @@ module.exports = async function onMessage(channel, username, text, message) {
     : ["!!"];
 
   const sortedPrefixes = [...configuredPrefixes].sort(
-    (a, b) => b.length - a.length
+    (a, b) => b.length - a.length,
   );
   const matchedPrefix =
     sortedPrefixes.find((p) => message.messageText.startsWith(p)) ??

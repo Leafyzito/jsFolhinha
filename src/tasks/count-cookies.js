@@ -1,5 +1,3 @@
-const { cookiesHeld } = require("../metrics");
-
 // the cookie cache only holds the users seen lately, so the total comes from mongo
 async function countCookies() {
   const [result] = await fb.db.aggregate("cookie", [
@@ -9,7 +7,7 @@ async function countCookies() {
   if (!result) {
     throw new Error("cookie aggregation returned nothing");
   }
-  cookiesHeld.set(result.cookies);
+  fb.metrics.cookiesHeld.set(result.cookies);
 }
 
 module.exports = countCookies;

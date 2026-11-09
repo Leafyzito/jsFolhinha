@@ -9,12 +9,11 @@ const handleChannelFollow = require("./events/channel-follow");
 const handleUserUpdate = require("./events/user-update");
 
 const { hasBroadcasterAuth, hasScope } = require("./utils");
-const { eventsubNotifications } = require("../../../metrics");
 
 // counts each notification by its eventsub type before handling it
 function counted(type, handler) {
   return (event) => {
-    eventsubNotifications.inc({ type });
+    fb.metrics.eventsubNotifications.inc({ type });
     return handler(event);
   };
 }
@@ -34,7 +33,7 @@ async function getDesiredSubscriptions(
   listener,
   liveStatus,
   broadcasterId,
-  authRevoked
+  authRevoked,
 ) {
   // Stream events require no authorization, every channel gets them
   const desired = new Map([
@@ -44,8 +43,8 @@ async function getDesiredSubscriptions(
         listener.onStreamOnline(
           broadcasterId,
           counted("stream.online", (event) =>
-            handleStreamOnline(event, liveStatus)
-          )
+            handleStreamOnline(event, liveStatus),
+          ),
         ),
     ],
     [
@@ -54,8 +53,8 @@ async function getDesiredSubscriptions(
         listener.onStreamOffline(
           broadcasterId,
           counted("stream.offline", (event) =>
-            handleStreamOffline(event, liveStatus)
-          )
+            handleStreamOffline(event, liveStatus),
+          ),
         ),
     ],
   ]);
@@ -67,8 +66,8 @@ async function getDesiredSubscriptions(
   desired.set("user", () =>
     listener.onUserUpdate(
       broadcasterId,
-      counted("user.update", handleUserUpdate)
-    )
+      counted("user.update", handleUserUpdate),
+    ),
   );
 
   // Moderator events (requires moderation:read scope)
@@ -76,14 +75,14 @@ async function getDesiredSubscriptions(
     desired.set("modAdd", () =>
       listener.onChannelModeratorAdd(
         broadcasterId,
-        counted("channel.moderator.add", handleModeratorAdd)
-      )
+        counted("channel.moderator.add", handleModeratorAdd),
+      ),
     );
     desired.set("modRemove", () =>
       listener.onChannelModeratorRemove(
         broadcasterId,
-        counted("channel.moderator.remove", handleModeratorRemove)
-      )
+        counted("channel.moderator.remove", handleModeratorRemove),
+      ),
     );
   }
 
@@ -92,14 +91,14 @@ async function getDesiredSubscriptions(
     desired.set("vipAdd", () =>
       listener.onChannelVipAdd(
         broadcasterId,
-        counted("channel.vip.add", handleVipAdd)
-      )
+        counted("channel.vip.add", handleVipAdd),
+      ),
     );
     desired.set("vipRemove", () =>
       listener.onChannelVipRemove(
         broadcasterId,
-        counted("channel.vip.remove", handleVipRemove)
-      )
+        counted("channel.vip.remove", handleVipRemove),
+      ),
     );
   }
 
@@ -111,8 +110,8 @@ async function getDesiredSubscriptions(
       listener.onChannelFollow(
         broadcasterId,
         moderatorId,
-        counted("channel.follow", handleChannelFollow)
-      )
+        counted("channel.follow", handleChannelFollow),
+      ),
     );
   }
 

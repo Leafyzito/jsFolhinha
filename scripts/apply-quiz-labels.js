@@ -1,5 +1,8 @@
 require("dotenv").config();
 
+// db uses fb.metrics, normally set up by main.js
+global.fb = { metrics: require("../src/metrics") };
+
 const MongoUtils = require("../src/db/index.js");
 
 async function runTest() {
@@ -29,7 +32,7 @@ async function runTest() {
       await db.update(
         "sugestoes",
         { _id: sugg._id },
-        { $set: { labels: ["Quiz"] } }
+        { $set: { labels: ["Quiz"] } },
       );
     }
   }

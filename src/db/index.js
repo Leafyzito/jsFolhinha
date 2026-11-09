@@ -2,7 +2,6 @@ const { MongoClient } = require("mongodb");
 const { getInsertTemplate } = require("./insert-templates");
 const { FullCollection, KeyedCollection } = require("./memory-cache");
 const ChangeSync = require("./change-sync");
-const { timeDbOp, dbCacheHits, dbCacheMisses } = require("../metrics");
 
 const mongoUri = process.env.MONGO_URI;
 const clientMongo = new MongoClient(mongoUri);
@@ -50,10 +49,10 @@ class MongoUtils {
     const syncedCollections = Object.fromEntries(
       Object.entries(CACHE_POLICIES)
         .filter(([, policy]) => policy.synced)
-        .map(([name]) => [name, this.caches[name]])
+        .map(([name]) => [name, this.caches[name]]),
     );
     this.changeSync = new ChangeSync(db, syncedCollections, () =>
-      this.loadFullCollections(Object.keys(syncedCollections))
+      this.loadFullCollections(Object.keys(syncedCollections)),
     );
 
     // await this before any db.get, full collections aren't loaded until then
@@ -94,7 +93,7 @@ class MongoUtils {
         const docs = await this.db.collection(name).find({}).toArray();
         this.caches[name].load(docs);
         console.info(`* Loaded ${docs.length} docs from ${name} into memory`);
-      })
+      }),
     );
 
     return hello.operationTime ?? null;
@@ -103,8 +102,8 @@ class MongoUtils {
   async insert(collectionName, data) {
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
-    const result = await timeDbOp(collectionName, "insert", () =>
-      collection.insertOne(data)
+    const result = await fb.metrics.timeDbOp(collectionName, "insert", () =>
+      collection.insertOne(data),
     );
 
     this.caches[collectionName]?.upsert({ ...data, _id: result.insertedId });
@@ -131,7 +130,7 @@ class MongoUtils {
       const cached = cache.find(query);
       if (cached !== undefined) {
         cache.counters.hits++;
-        dbCacheHits.inc({ collection: collectionName });
+        fb.metrics.dbCacheHits.inc({ collection: collectionName });
         return toResult(cached);
       }
 
@@ -139,7 +138,7 @@ class MongoUtils {
         const key = cache.lookupKey(query);
         if (key !== null) {
           cache.counters.misses++;
-          dbCacheMisses.inc({ collection: collectionName });
+          fb.metrics.dbCacheMisses.inc({ collection: collectionName });
           return toResult(await this.fetchKeyed(cache, key, query));
         }
       }
@@ -149,14 +148,14 @@ class MongoUtils {
       await this.ensureConnection();
       const collection = this.db.collection(collectionName);
       return toResult(
-        await timeDbOp(collectionName, "find", () =>
-          collection.find(query).toArray()
-        )
+        await fb.metrics.timeDbOp(collectionName, "find", () =>
+          collection.find(query).toArray(),
+        ),
       );
     } catch (err) {
       console.error(
         `Failed to fetch from DB for collection ${collectionName}:`,
-        err
+        err,
       );
       return null;
     }
@@ -167,14 +166,17 @@ class MongoUtils {
     const token = cache.beginFetch(key);
     try {
       await this.ensureConnection();
-      const docs = await timeDbOp(cache.name, "fetchKeyed", () =>
-        this.db.collection(cache.name).find(cache.keyQuery(query)).toArray()
+      const docs = await fb.metrics.timeDbOp(cache.name, "fetchKeyed", () =>
+        this.db.collection(cache.name).find(cache.keyQuery(query)).toArray(),
       );
       cache.endFetch(token, docs);
       return cache.find(query) ?? [];
     } catch (err) {
       cache.abortFetch(token);
-      console.error(`Failed to fetch from DB for collection ${cache.name}:`, err);
+      console.error(
+        `Failed to fetch from DB for collection ${cache.name}:`,
+        err,
+      );
       return [];
     }
   }
@@ -184,10 +186,10 @@ class MongoUtils {
     const collection = this.db.collection(collectionName);
 
     // re-reading by query misses the doc if the update changed a queried field
-    const updatedDoc = await timeDbOp(collectionName, "update", () =>
+    const updatedDoc = await fb.metrics.timeDbOp(collectionName, "update", () =>
       collection.findOneAndUpdate(query, update, {
         returnDocument: "after",
-      })
+      }),
     );
 
     if (updatedDoc) {
@@ -203,7 +205,7 @@ class MongoUtils {
     const collection = this.db.collection(collectionName);
 
     // three round trips, timed as one op
-    const updatedDocs = await timeDbOp(
+    const updatedDocs = await fb.metrics.timeDbOp(
       collectionName,
       "updateMany",
       async () => {
@@ -215,7 +217,7 @@ class MongoUtils {
         return collection
           .find({ $or: [{ _id: { $in: matchedIds } }, query] })
           .toArray();
-      }
+      },
     );
 
     const cache = this.caches[collectionName];
@@ -231,8 +233,8 @@ class MongoUtils {
   async delete(collectionName, query) {
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
-    const deletedDoc = await timeDbOp(collectionName, "delete", () =>
-      collection.findOneAndDelete(query)
+    const deletedDoc = await fb.metrics.timeDbOp(collectionName, "delete", () =>
+      collection.findOneAndDelete(query),
     );
     if (!deletedDoc) {
       return;
@@ -251,8 +253,8 @@ class MongoUtils {
     try {
       await this.ensureConnection();
       const collection = this.db.collection(collectionName);
-      return await timeDbOp(collectionName, "count", () =>
-        collection.countDocuments(query)
+      return await fb.metrics.timeDbOp(collectionName, "count", () =>
+        collection.countDocuments(query),
       );
     } catch (err) {
       console.error(`Failed to count documents in ${collectionName}:`, err);
@@ -264,8 +266,10 @@ class MongoUtils {
     await this.ensureConnection();
     const collection = this.db.collection(collectionName);
     try {
-      const results = await timeDbOp(collectionName, "aggregate", () =>
-        collection.aggregate(pipeline).toArray()
+      const results = await fb.metrics.timeDbOp(
+        collectionName,
+        "aggregate",
+        () => collection.aggregate(pipeline).toArray(),
       );
       return results;
     } catch (err) {
@@ -284,7 +288,7 @@ class MongoUtils {
           hits: cache.counters.hits,
           misses: cache.counters.misses,
         },
-      ])
+      ]),
     );
   }
 

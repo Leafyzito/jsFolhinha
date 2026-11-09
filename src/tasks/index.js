@@ -1,6 +1,5 @@
 // scheduled in main.js
 const dailyCookieResetTask = require("./daily-cookie-reset");
-const { runTask } = require("../metrics");
 
 // recurring tasks
 const {
@@ -20,14 +19,14 @@ const startAllTasks = () => {
     console.info("* Starting production tasks");
     const cron = require("node-cron");
     cron.schedule("0 9 * * *", async () => {
-      await runTask("cookie_reset", dailyCookieResetTask);
+      await fb.metrics.runTask("cookie_reset", dailyCookieResetTask);
     });
     startPetTask();
     startFetchPendingJoinsTask();
     startRejoinDisconnectedChannelsTask();
     startCountCookiesTask();
   }
-    startSyncPlusUsersTask();
+  startSyncPlusUsersTask();
   startDiscordPresenceTask();
   startCheckNewAuthUsersTask();
 };

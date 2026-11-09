@@ -3,7 +3,6 @@ require("./utils/logger");
 require("dotenv").config();
 
 // IMPORTS
-const { startMetricsServer } = require("./src/metrics");
 const { fetchData } = require("./src/utils/got-wrapper");
 const { loadCommands } = require("./src/commands/commandsList");
 const { loadReminders } = require("./src/handlers/listener/reminder");
@@ -19,6 +18,9 @@ global.fb = fb;
 
 // Add custom got function to fb
 fb.got = fetchData;
+
+// prometheus metrics, use fb.metrics.* instead of requiring src/metrics
+fb.metrics = require("./src/metrics");
 
 // FB PROPERTIES INITIALIZATION
 // Add initialization status tracking
@@ -53,7 +55,7 @@ async function initializeApp() {
     console.info("* Starting application initialization...");
 
     // only when METRICS_PORT is set, so prometheus also sees a slow or stuck startup
-    startMetricsServer();
+    fb.metrics.startMetricsServer();
 
     // Initialize all utility instances first
     const { utils, emotes, db, log } =

@@ -12,7 +12,6 @@ const onMessageHandler = require("./events/message.js");
 const onTimeout = require("./events/timeout.js");
 const onWhisperHandler = require("./events/whisper.js");
 const { registerSubNoticeHandlers } = require("./events/sub-notice.js");
-const metrics = require("../../metrics");
 
 class TwitchClient {
   constructor() {
@@ -59,7 +58,7 @@ class TwitchClient {
       channelName,
       channelId = null,
       content,
-      replyToMessageId = null
+      replyToMessageId = null,
     ) => {
       const helixParams = {};
       const ircParams = {};
@@ -90,11 +89,11 @@ class TwitchClient {
             process.env.BOT_USERID,
             channelId,
             content,
-            helixParams
+            helixParams,
           )
           .catch(async (err) => {
             console.warn(
-              `Twitch API message send failed, falling back to IRC: ${err}`
+              `Twitch API message send failed, falling back to IRC: ${err}`,
             );
             // await this.client.IrcSay(channelName, content, ircParams);
             useApi = false;
@@ -120,15 +119,15 @@ class TwitchClient {
     this.whisperClient.connect();
 
     this.anonClient.channelsToJoin = (await getChannelsToJoin()).map(
-      (channel) => channel.login
+      (channel) => channel.login,
     );
   }
 
   registerEvents() {
     // anon client events (read-only)
     this.anonClient.onConnect(onReadyHandler);
-    this.anonClient.onConnect(() => metrics.ircConnects.inc());
-    this.anonClient.onDisconnect(() => metrics.ircDisconnects.inc());
+    this.anonClient.onConnect(() => fb.metrics.ircConnects.inc());
+    this.anonClient.onDisconnect(() => fb.metrics.ircDisconnects.inc());
     this.anonClient.onJoin(onJoinHandler);
     this.anonClient.onTimeout(onTimeout);
     this.anonClient.onBan((channel, user) => onTimeout(channel, user, null));
@@ -150,7 +149,7 @@ class TwitchClient {
 
     // update channelsToJoin
     const existing = new Set(
-      this.anonClient.channelsToJoin.map((c) => c.toLowerCase())
+      this.anonClient.channelsToJoin.map((c) => c.toLowerCase()),
     );
     const toAdd = channels.filter((c) => !existing.has(c.toLowerCase()));
     if (toAdd.length > 0) {
@@ -175,7 +174,7 @@ class TwitchClient {
         } catch (error) {
           console.error(
             `Error subscribing to EventSub for channel ${channelLogin}:`,
-            error
+            error,
           );
         }
       }
@@ -201,7 +200,7 @@ class TwitchClient {
   async part(channel) {
     // remove from channelsToJoin
     this.anonClient.channelsToJoin = this.anonClient.channelsToJoin.filter(
-      (c) => c.toLowerCase() !== channel.toLowerCase()
+      (c) => c.toLowerCase() !== channel.toLowerCase(),
     );
 
     // Unsubscribe from EventSub events for this channel
@@ -214,7 +213,7 @@ class TwitchClient {
       } catch (error) {
         console.error(
           `Error unsubscribing from EventSub for channel ${channel}:`,
-          error
+          error,
         );
       }
     }

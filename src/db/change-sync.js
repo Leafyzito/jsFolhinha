@@ -1,7 +1,5 @@
 // keeps the synced in-memory collections up to date with writes from anywhere (website, scripts, atlas ui)
 
-const { changeStreamRestarts } = require("../metrics");
-
 const MAX_RETRY_DELAY = 30_000;
 // errors where resuming from our token can't work, reload instead
 const UNRESUMABLE_CODES = new Set([
@@ -50,7 +48,7 @@ class ChangeSync {
           },
         },
       ],
-      { fullDocument: "updateLookup", ...options }
+      { fullDocument: "updateLookup", ...options },
     );
     this.stream = stream;
     this.consume(stream);
@@ -100,12 +98,14 @@ class ChangeSync {
     const delay = Math.min(1000 * 2 ** (this.failures - 1), MAX_RETRY_DELAY);
     const canResume =
       resumeToken && !UNRESUMABLE_CODES.has(err.code) && this.failures < 3;
-    changeStreamRestarts.inc({ kind: canResume ? "resume" : "reload" });
+    fb.metrics.changeStreamRestarts.inc({
+      kind: canResume ? "resume" : "reload",
+    });
 
     importantLog(
       `* db change stream failed (${err.code ?? "?"}: ${err.message}), ${
         canResume ? "resuming" : "reloading cache"
-      } in ${delay / 1000}s`
+      } in ${delay / 1000}s`,
     );
 
     this.retryTimer = setTimeout(async () => {

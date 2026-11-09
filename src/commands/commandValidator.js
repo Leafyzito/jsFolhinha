@@ -1,8 +1,6 @@
-const metrics = require("../metrics");
-
 // stops a command, counting why
 function blocked(reason) {
-  metrics.commandsBlocked.inc({ reason });
+  fb.metrics.commandsBlocked.inc({ reason });
   return false;
 }
 
@@ -56,7 +54,7 @@ function manageCooldown(cooldownDuration, type, message) {
   console.debug(
     `CD: #${message.channelName}/${message.senderUsername} - ${
       message.command.commandName
-    } (${Math.ceil((cooldownDuration - timeElapsed) / 1000)}s)`
+    } (${Math.ceil((cooldownDuration - timeElapsed) / 1000)}s)`,
   );
   return false;
 }
@@ -102,12 +100,12 @@ async function validateCommandExecution(cooldownDuration, type, message) {
   if (command && command.permissions && command.permissions.length > 0) {
     const hasPermission = await checkUserPermissions(
       message,
-      command.permissions
+      command.permissions,
     );
     if (!hasPermission) {
       fb.log.logAndReply(
         message,
-        `⚠️ Este comando é reservado para ${command.permissions.join(", ")}`
+        `⚠️ Este comando é reservado para ${command.permissions.join(", ")}`,
       );
       return blocked("permission");
     }
@@ -121,19 +119,19 @@ async function validateCommandExecution(cooldownDuration, type, message) {
   if (command.flags && command.flags.includes("modBot")) {
     const isBotMod = await fb.utils.isBotMod(
       message.channelID,
-      message.channelConfig
+      message.channelConfig,
     );
     if (isBotMod === null) {
       fb.log.logAndReply(
         message,
-        `⚠️ Este comando requer que o streamer logue no site https://folhinhabot.com`
+        `⚠️ Este comando requer que o streamer logue no site https://folhinhabot.com`,
       );
       return blocked("streamer_not_logged_in");
     }
     if (isBotMod === false) {
       fb.log.logAndReply(
         message,
-        `⚠️ Eu preciso ter cargo de moderador para executar este comando`
+        `⚠️ Eu preciso ter cargo de moderador para executar este comando`,
       );
       return blocked("bot_not_mod");
     }
@@ -143,19 +141,19 @@ async function validateCommandExecution(cooldownDuration, type, message) {
   if (command.flags && command.flags.includes("vipBot")) {
     const isBotVip = await fb.utils.isBotVip(
       message.channelID,
-      message.channelConfig
+      message.channelConfig,
     );
     if (isBotVip === null) {
       fb.log.logAndReply(
         message,
-        `⚠️ Este comando requer que o streamer logue no site https://folhinhabot.com`
+        `⚠️ Este comando requer que o streamer logue no site https://folhinhabot.com`,
       );
       return blocked("streamer_not_logged_in");
     }
     if (isBotVip === false) {
       fb.log.logAndReply(
         message,
-        `⚠️ Eu preciso ter cargo de VIP para executar este comando`
+        `⚠️ Eu preciso ter cargo de VIP para executar este comando`,
       );
       return blocked("bot_not_vip");
     }
@@ -208,7 +206,7 @@ async function validateCommandExecution(cooldownDuration, type, message) {
   if (currChannelConfigs && currChannelConfigs.offlineOnly) {
     const isLive = await fb.utils.isChannelLive(
       currChannelConfigs.channelId,
-      message.channelName
+      message.channelName,
     );
     if (isLive) {
       return blocked("offline_only");
@@ -227,7 +225,7 @@ async function validateCommandExecution(cooldownDuration, type, message) {
   ) {
     fb.log.logAndReply(
       message,
-      `⚠️ Esse comando foi desativado neste chat pelo dev`
+      `⚠️ Esse comando foi desativado neste chat pelo dev`,
     );
     return blocked("dev_disabled");
   }
