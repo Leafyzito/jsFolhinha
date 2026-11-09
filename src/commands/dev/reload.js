@@ -1,9 +1,8 @@
-const { gitPull } = require("../../utils/git-pull");
 const { loadCommands } = require("../commandsList");
 
 // Helper function to pull git changes
 const pullGitChanges = async () => {
-  const { error, stdout, stderr } = await gitPull();
+  const { error, stdout, stderr } = await fb.utils.gitPull();
   if (error) {
     console.error(`* Erro ao puxar mudanças do Git: ${error}`);
     throw new Error(`Git pull failed: ${error}`);

@@ -1,5 +1,3 @@
-const { gitPull } = require("../../utils/git-pull");
-
 function formatGitPullReply(stdout, stderr) {
   const output = [stdout, stderr].filter(Boolean).join("\n").trim();
   if (!output) return "Atualizado 👍";
@@ -35,7 +33,7 @@ function formatGitPullReply(stdout, stderr) {
 }
 
 const gitPullCommand = async () => {
-  const { error, stdout, stderr } = await gitPull();
+  const { error, stdout, stderr } = await fb.utils.gitPull();
   if (error) {
     return {
       reply: "Deu não, check logs",
