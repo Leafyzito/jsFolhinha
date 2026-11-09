@@ -10,6 +10,7 @@ const {
   startDiscordPresenceTask,
   startCheckNewAuthUsersTask,
   startSyncPlusUsersTask,
+  startCountCookiesTask,
 } = require("./task-scheduler");
 
 // Function to start all recurring tasks
@@ -24,6 +25,7 @@ const startAllTasks = () => {
     startPetTask();
     startFetchPendingJoinsTask();
     startRejoinDisconnectedChannelsTask();
+    startCountCookiesTask();
   }
     startSyncPlusUsersTask();
   startDiscordPresenceTask();
@@ -38,5 +40,6 @@ module.exports = {
   startDiscordPresenceTask,
   startCheckNewAuthUsersTask,
   startSyncPlusUsersTask,
+  startCountCookiesTask,
   startAllTasks,
 };

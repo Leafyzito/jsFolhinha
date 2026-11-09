@@ -295,6 +295,12 @@ const taskLastSuccess = new client.Gauge({
   labelNames: ["task"],
   registers: [register],
 });
+// mongo can't be read at scrape time, so the count-cookies task sets it
+const cookiesHeld = new client.Gauge({
+  name: PREFIX + "cookies_held",
+  help: "Cookies held by all users",
+  registers: [register],
+});
 
 gauge("irc_channels_joined", "Channels the anon client is in", [], (g) => {
   const anon = global.fb?.twitch?.anonClient;
@@ -505,4 +511,5 @@ module.exports = {
   eventsubNotifications,
   eventsubRevocations,
   eventsubSubscriptionFailures,
+  cookiesHeld,
 };

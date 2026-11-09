@@ -4,6 +4,7 @@ const rejoinDisconnectedChannels = require("./rejoin-disconnected-channels");
 const updateDiscordPresence = require("./update-discord-presence");
 const checkNewAuthUsers = require("./check-new-auth-users");
 const syncPlusUsers = require("./sync-plus-users");
+const countCookies = require("./count-cookies");
 const { runTask } = require("../metrics");
 
 function startPetTask() {
@@ -36,7 +37,12 @@ function startSyncPlusUsersTask() {
   setInterval(() => runTask("plus_sync", syncPlusUsers), 60_000);
 }
 
+function startCountCookiesTask() {
+  setInterval(() => runTask("count_cookies", countCookies), 60_000);
+}
+
 module.exports = {
+  startCountCookiesTask,
   startPetTask,
   startFetchPendingJoinsTask,
   startRejoinDisconnectedChannelsTask,
