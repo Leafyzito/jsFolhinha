@@ -9,6 +9,7 @@ const TwitchClipperApi = require("./clipper");
 const CobaltApi = require("./cobalt");
 const LinearApi = require("./linear");
 const GoogleApi = require("./google");
+const EdgeTtsApi = require("./edgetts");
 
 const allApis = {
   helix: HelixApi,
@@ -22,6 +23,7 @@ const allApis = {
   cobalt: CobaltApi,
   linear: LinearApi,
   google: GoogleApi,
+  edgetts: EdgeTtsApi,
 };
 
 module.exports = allApis;

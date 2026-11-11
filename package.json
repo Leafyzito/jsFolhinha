@@ -31,6 +31,7 @@
     "got": "^11.8.6",
     "lru-cache": "^11.0.2",
     "mongodb": "6.8",
+    "msedge-tts": "^2.1.1",
     "node-cron": "^3.0.3",
     "node-schedule": "^2.1.1",
     "node-shazam": "^1.2.7",
