@@ -26,7 +26,7 @@ const liveCommand = async (message) => {
         liveTarget.toLowerCase() === message.channelName
           ? "aqui"
           : "de " + liveTarget
-      } foi há ${timeSinceLastStream} - título: ${live.lastStreamTitle}`,
+      } foi há ${timeSinceLastStream} ● Título: ${live.lastStreamTitle}`,
     };
   }
 
@@ -36,7 +36,7 @@ const liveCommand = async (message) => {
         ? ` ● https://twitch.tv/${liveTarget}`
         : "";
     return {
-      reply: `${liveTarget} está agora fazendo live de ${live.game} para ${live.viewers} viewers - ${live.title}${liveUrl}`,
+      reply: `${liveTarget} está agora fazendo live de ${live.game} para ${live.viewers} viewers ● ${live.title}${liveUrl}`,
     };
   }
 };

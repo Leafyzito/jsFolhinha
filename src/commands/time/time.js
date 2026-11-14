@@ -140,7 +140,7 @@ const timeCommand = async (message) => {
 
   const formattedInfo = formatTimeResponse(timeInfo);
   return {
-    reply: `${formattedInfo.displayName}: ${formattedInfo.time} de ${formattedInfo.date} lá agora - observando ${formattedInfo.timezone}, que é ${formattedInfo.utcOffset}`,
+    reply: `${formattedInfo.displayName}: ${formattedInfo.time} de ${formattedInfo.date} lá agora ● Observando ${formattedInfo.timezone}, que é ${formattedInfo.utcOffset}`,
   };
 };
 

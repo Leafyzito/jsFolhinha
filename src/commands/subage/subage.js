@@ -37,7 +37,7 @@ async function getSubAge(user, channel) {
 
     let endsAtPart = "";
     if (data.endsAt !== null) {
-      endsAtPart = ` - Termina em ${fb.utils.relativeTime(
+      endsAtPart = `● Termina em ${fb.utils.relativeTime(
         data.endsAt,
         true
       )} (${new Date(data.endsAt)

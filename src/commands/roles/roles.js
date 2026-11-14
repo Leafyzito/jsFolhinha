@@ -60,7 +60,7 @@ const rolesCommand = async (message) => {
   if (userRoles.subscribers > 0)
     response += ` ● 🎤 Sub em ${formatNumber(userRoles.subscribers)}`;
 
-  response += ` - https://roles.tv/u/${targetUser.toLowerCase()}`;
+  response += ` ● https://roles.tv/u/${targetUser.toLowerCase()}`;
 
   return {
     reply: response,

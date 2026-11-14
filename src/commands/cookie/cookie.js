@@ -385,7 +385,7 @@ const cookieCommand = async (message) => {
     const totalStolen = userCookieStats.totalStolen || 0;
     const totalGotStolen = userCookieStats.totalGotStolen || 0;
     return {
-      reply: `${targetUser} tem ${total} cookies, 🥠 abriu ${opened}, 🍽️ comeu ${eaten}, 🎁 ofereceu ${gifted}, 🎁 foi presenteado com ${beenGifted}, 🎰 apostou ${sloted}, 💰 roubou ${totalStolen} e 🏚️ foi roubado ${totalGotStolen} vezes`,
+      reply: `${targetUser} tem ${total} cookies ● 🥠 abriu ${opened} ● 🍽️ comeu ${eaten} ● 🎁 ofereceu ${gifted} ● 🎁 foi presenteado com ${beenGifted} ● 🎰 apostou ${sloted} ● 💰 roubou ${totalStolen} ● 🏚️ foi roubado ${totalGotStolen} vezes`,
     };
   }
 

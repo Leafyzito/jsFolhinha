@@ -258,7 +258,7 @@ const howLongToBeatCommand = async (message) => {
     };
 
     return {
-      reply: `Tempo médio para completar ${gameName} (${releaseDate}): História principal: ${hours.main} hrs ● Conteúdo secundário: ${hours.plus} hrs ● Complecionista: ${hours.full} hrs ● Todos os estilos: ${hours.all} hrs. ${url}`,
+      reply: `Tempo médio para completar ${gameName} (${releaseDate}): História principal: ${hours.main} hrs ● Conteúdo secundário: ${hours.plus} hrs ● Complecionista: ${hours.full} hrs ● Todos os estilos: ${hours.all} hrs ● ${url}`,
     };
   } catch (error) {
     fb.discord.logError("Error in howlongtobeat:", error);

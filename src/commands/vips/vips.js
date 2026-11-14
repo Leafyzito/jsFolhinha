@@ -30,7 +30,7 @@ const vipsCommand = async (message) => {
   }
 
   return {
-    reply: `Existem ${vips} VIPs em #${targetChannel} - https://roles.tv/c/${targetChannel.toLowerCase()}`,
+    reply: `Existem ${vips} VIPs em #${targetChannel} ● https://roles.tv/c/${targetChannel.toLowerCase()}`,
   };
 };
 

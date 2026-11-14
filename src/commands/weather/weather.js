@@ -195,13 +195,13 @@ const weatherCommand = async (message) => {
   }
 
   return {
-    reply: `${weatherInfo.displayName}: ${weatherInfo.weatherDescription}, ${
+    reply: `${weatherInfo.displayName}: ${weatherInfo.weatherDescription} ● ${
       weatherInfo.temperature
-    }°C (aparente: ${weatherInfo.feelsLike}°C), ${
+    }°C (aparente: ${weatherInfo.feelsLike}°C) ● ${
       weatherInfo.humidity
-    }% humidade, ${
+    }% humidade ● ${
       weatherInfo.precipitation !== 0
-        ? `precipitação: ${weatherInfo.precipitation}mm, `
+        ? `precipitação: ${weatherInfo.precipitation}mm ● `
         : ""
     }${weatherInfo.windSpeed}km/h ${weatherInfo.windDirection}`,
   };

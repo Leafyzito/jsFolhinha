@@ -99,13 +99,13 @@ const dungeonCommand = async (message) => {
       return {
         reply: `${targetUser} tem ${Math.round(
           userDungeonStats.xp
-        ).toLocaleString("fr-FR")} XP 🌟 está no nível ${
+        ).toLocaleString("fr-FR")} XP 🌟 ● Nível ${
           userDungeonStats.level
-        } com ${userDungeonStats.wins + userDungeonStats.losses} dungeons ⚔️ (${
+        } ● ${userDungeonStats.wins + userDungeonStats.losses} dungeons ⚔️ ● ${
           userDungeonStats.wins
-        } vitórias e ${userDungeonStats.losses} derrotas - ${winrate.toFixed(
+        } vitórias e ${userDungeonStats.losses} derrotas ● ${winrate.toFixed(
           2
-        )}% winrate)`,
+        )}% winrate`,
       };
     }
 

@@ -72,8 +72,8 @@ const youtubeSearchCommand = async (message) => {
   }
 
   const durationPart =
-    ytVideo.duration === "" ? "" : `, duração: ${ytVideo.duration}`;
-  const reply = `"${ytVideo.title}" de ${ytVideo.author}, ${ytVideo.views} views, publicado em ${ytVideo.publishedAt}${durationPart} ${ytVideo.link}`;
+    ytVideo.duration === "" ? "" : ` ● duração: ${ytVideo.duration}`;
+  const reply = `"${ytVideo.title}" de ${ytVideo.author} ● ${ytVideo.views} views ● publicado em ${ytVideo.publishedAt}${durationPart} ● ${ytVideo.link}`;
 
   return {
     reply: reply,

@@ -29,7 +29,7 @@ const modsCommand = async (message) => {
   }
 
   return {
-    reply: `Existem ${mods} moderadores em #${targetChannel} - https://roles.tv/c/${targetChannel.toLowerCase()}`,
+    reply: `Existem ${mods} moderadores em #${targetChannel} ● https://roles.tv/c/${targetChannel.toLowerCase()}`,
   };
 };
 

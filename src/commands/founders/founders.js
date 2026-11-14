@@ -30,7 +30,7 @@ const foundersCommand = async (message) => {
   }
 
   return {
-    reply: `Existem ${founders} fundadores em ${targetChannel} - https://roles.tv/c/${targetChannel.toLowerCase()}`,
+    reply: `Existem ${founders} fundadores em ${targetChannel} ● https://roles.tv/c/${targetChannel.toLowerCase()}`,
   };
 };
 
