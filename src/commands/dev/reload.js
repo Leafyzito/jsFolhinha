@@ -1,3 +1,4 @@
+const path = require("path");
 const { loadCommands } = require("../commandsList");
 
 // Helper function to pull git changes
@@ -21,8 +22,12 @@ const pullGitChanges = async () => {
 const reloadCommands = () => {
   try {
     // Clear require cache for all command files
+    // Keep commandsList cached, the command handler holds its commandsList object
     Object.keys(require.cache).forEach((key) => {
-      if (key.includes("\\commands\\") || key.includes("/commands/")) {
+      if (
+        (key.includes("\\commands\\") || key.includes("/commands/")) &&
+        path.basename(key) !== "commandsList.js"
+      ) {
         console.debug(`deleting ${key} `);
         delete require.cache[key];
       }
