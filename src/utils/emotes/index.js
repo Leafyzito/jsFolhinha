@@ -156,7 +156,14 @@ class Emotes {
     if (channelName === "whisper") {
       return defaultResponse;
     }
-    const channelEmotes = await this.getChannelEmotes(channelName);
+    const channelEmotes = this.cachedEmotes[channelName];
+    // don't hold the reply on a cold cache, fetch in the background
+    if (!channelEmotes) {
+      this.getChannelEmotes(channelName).catch((err) =>
+        console.error(`* Error fetching emotes for ${channelName}: ${err}`)
+      );
+      return defaultResponse;
+    }
     const possibleEmotes = [];
     emoteList.forEach((emote) => {
       const lowercaseEmote = emote.toLowerCase();
