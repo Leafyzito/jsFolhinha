@@ -55,7 +55,7 @@ class DiscordClient {
   }
 
   registerEvents() {
-    this.client.on("ready", () => onReadyHandler(this));
+    this.client.on("clientReady", () => onReadyHandler(this));
   }
 
   // intentionally empty: tasks are started in main.js
