@@ -1,6 +1,7 @@
 class Emotes {
   constructor() {
     this.cachedEmotes = {};
+    this.pendingFetches = {};
     this.globalEmotes = [];
     this.sadEmotes = ["sadge", "sadgecry", "sadcat", "sadchamp", "saj"];
     this.happyEmotes = [
@@ -29,7 +30,7 @@ class Emotes {
     try {
       const sevenTvEmotes = [];
       const url = `https://7tv.io/v3/users/twitch/${channelId}`;
-      const response = await fb.got(url, { timeout: 5000 });
+      const response = await fb.got(url, { timeout: 5000, retry: 0 });
 
       if (!response) {
         return sevenTvEmotes;
@@ -57,7 +58,7 @@ class Emotes {
     try {
       const bttvEmotes = [];
       const url = `https://api.betterttv.net/3/cached/users/twitch/${channelId}`;
-      const response = await fb.got(url, { timeout: 5000 });
+      const response = await fb.got(url, { timeout: 5000, retry: 0 });
 
       if (!response) {
         return bttvEmotes;
@@ -81,7 +82,7 @@ class Emotes {
     try {
       const ffzEmotes = [];
       const url = `https://api.frankerfacez.com/v1/room/id/${channelId}`;
-      const response = await fb.got(url, { timeout: 5000 });
+      const response = await fb.got(url, { timeout: 5000, retry: 0 });
 
       if (!response) {
         return ffzEmotes;
@@ -136,16 +137,19 @@ class Emotes {
   }
 
   async getChannelEmotes(channelName) {
-    if (!this.cachedEmotes[channelName]) {
-      fb.discord.log(`* Fetching emotes for ${channelName}`);
-      // const channelId = (await fb.api.helix.getUserByUsername(channelName))?.id;
-      // if (!channelId) {
-      //   return [];
-      // }
-      return this.getEmotes(channelName);
+    if (this.cachedEmotes[channelName]) {
+      return this.cachedEmotes[channelName];
     }
 
-    return this.cachedEmotes[channelName];
+    // share the in-flight fetch so concurrent cache misses don't refetch
+    if (!this.pendingFetches[channelName]) {
+      fb.discord.log(`* Fetching emotes for ${channelName}`);
+      this.pendingFetches[channelName] = this.getEmotes(channelName).finally(
+        () => delete this.pendingFetches[channelName]
+      );
+    }
+
+    return this.pendingFetches[channelName];
   }
 
   async getEmoteFromList(channelName, emoteList, defaultResponse = "") {
