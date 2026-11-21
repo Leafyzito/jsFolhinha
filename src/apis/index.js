@@ -10,6 +10,7 @@ const CobaltApi = require("./cobalt");
 const LinearApi = require("./linear");
 const GoogleApi = require("./google");
 const EdgeTtsApi = require("./edgetts");
+const LurkrApi = require("./lurkr");
 
 const allApis = {
   helix: HelixApi,
@@ -24,6 +25,7 @@ const allApis = {
   linear: LinearApi,
   google: GoogleApi,
   edgetts: EdgeTtsApi,
+  lurkr: LurkrApi,
 };
 
 module.exports = allApis;

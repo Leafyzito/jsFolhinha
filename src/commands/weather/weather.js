@@ -213,7 +213,7 @@ const weatherCommand = async (message) => {
 };
 
 weatherCommand.commandName = "weather";
-weatherCommand.aliases = ["weather", "wt", "clima"];
+weatherCommand.aliases = ["weather", "w", "clima"];
 weatherCommand.shortDescription =
   "Comando para verificar o clima de uma localização";
 weatherCommand.cooldown = 5000;
